@@ -272,8 +272,7 @@ Special credit to the Home Assistant Anthbot Genie projects, which made the Anth
 This ioBroker adapter is an independent project, but it builds on public API research and implementation ideas from that Home Assistant integration.
 
 ## Changelog
-
-### **WORK IN PROGRESS**
+### 0.1.3 (2026-05-08)
 
 - Fix AWS IoT shadow access by using temporary Anthbot IoT credentials instead of the expired bundled AWS credentials.
 
@@ -301,20 +300,6 @@ This ioBroker adapter is an independent project, but it builds on public API res
 ### 0.0.8
 
 - Add consumable channels and values ​​to the adapter definition.
-
-### 0.0.7
-
-- Add Dependabot automerge configuration.
-- Update repository metadata for ioBroker checks.
-
-### 0.0.6
-
-- Fix ioBroker repository checker issues.
-- Move admin configuration translations to i18n files.
-
-### 0.0.5
-
-- Prepare adapter metadata for ioBroker repository checks.
 
 ## License
 
