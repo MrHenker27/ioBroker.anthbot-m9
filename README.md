@@ -275,6 +275,8 @@ This ioBroker adapter is an independent project, but it builds on public API res
 
 ### **WORK IN PROGRESS**
 
+- Fix AWS IoT shadow access by using temporary Anthbot IoT credentials instead of the expired bundled AWS credentials.
+
 ### 0.1.2
 
 - Limit `io-package.json` news entries for the ioBroker repository builder.

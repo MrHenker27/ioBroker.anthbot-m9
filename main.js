@@ -402,7 +402,9 @@ class AnthbotGenieAdapter extends utils.Adapter {
                     serialNumber: device.serialNumber,
                     regionName: region.regionName,
                     iotEndpoint: region.iotEndpoint,
+                    iotCredentials: region.iotCredentials,
                 }),
+                iotCredentials: region.iotCredentials,
                 areaDefinition: existing?.areaDefinition || {},
                 lastAreaTime: existing?.lastAreaTime || null,
                 lastReported: existing?.lastReported || {},
@@ -416,6 +418,7 @@ class AnthbotGenieAdapter extends utils.Adapter {
     async resolveDeviceRegion(device) {
         let regionName = null;
         let iotEndpoint = null;
+        let iotCredentials = null;
 
         try {
             const deviceRegion = await this.cloudClient.getDeviceRegion(device.serialNumber);
@@ -446,10 +449,19 @@ class AnthbotGenieAdapter extends utils.Adapter {
             this.log.debug(`Presigned region fallback failed for ${device.serialNumber}: ${error.message}`);
         }
 
+        try {
+            iotCredentials = await this.cloudClient.getDeviceIotCredentials(device.serialNumber);
+            regionName = iotCredentials.regionName || regionName;
+            iotEndpoint = iotCredentials.endpoint || iotEndpoint;
+        } catch (error) {
+            this.log.warn(`Failed to fetch temporary IoT credentials for ${device.serialNumber}, using bundled fallback credentials: ${error.message}`);
+        }
+
         return {
             serialNumber: device.serialNumber,
             regionName: regionName || AnthbotShadowApiClient.guessRegionFromEndpoint(iotEndpoint) || "unknown",
             iotEndpoint,
+            iotCredentials,
         };
     }
 
@@ -500,6 +512,7 @@ class AnthbotGenieAdapter extends utils.Adapter {
     }
 
     async refreshDevice(context) {
+        await this.ensureDeviceIotCredentials(context);
         const propertyState = await context.shadowClient.getShadowReportedState();
         let serviceState = {};
         try {
@@ -534,6 +547,27 @@ class AnthbotGenieAdapter extends utils.Adapter {
             _area_definition: context.areaDefinition || {},
         };
         await this.updateStates(context, merged);
+    }
+
+    async ensureDeviceIotCredentials(context) {
+        if (context.iotCredentials && (!context.iotCredentials.expiresAt || context.iotCredentials.expiresAt - Date.now() > 60000)) {
+            return;
+        }
+        const iotCredentials = await this.cloudClient.getDeviceIotCredentials(context.device.serialNumber);
+        context.iotCredentials = iotCredentials;
+        context.region = {
+            ...context.region,
+            regionName: iotCredentials.regionName || context.region.regionName,
+            iotEndpoint: iotCredentials.endpoint || context.region.iotEndpoint,
+            iotCredentials,
+        };
+        context.shadowClient = new AnthbotShadowApiClient({
+            http: this.http,
+            serialNumber: context.device.serialNumber,
+            regionName: context.region.regionName,
+            iotEndpoint: context.region.iotEndpoint,
+            iotCredentials,
+        });
     }
 
     async updateStates(context, data) {
@@ -797,6 +831,7 @@ class AnthbotGenieAdapter extends utils.Adapter {
             return;
         }
 
+        await this.ensureDeviceIotCredentials(context);
         const shouldRequestProperties = await this.executeCommand(context, command, value);
         if (shouldRequestProperties) {
             await context.shadowClient.requestAllProperties();
@@ -809,6 +844,7 @@ class AnthbotGenieAdapter extends utils.Adapter {
             return;
         }
 
+        await this.ensureDeviceIotCredentials(context);
         await this.executeControl(context, control, value);
         await context.shadowClient.requestAllProperties();
         await this.delay(1000);
@@ -820,6 +856,7 @@ class AnthbotGenieAdapter extends utils.Adapter {
             return;
         }
 
+        await this.ensureDeviceIotCredentials(context);
         await this.executeConsumableCommand(context, command);
         await this.delay(1000);
     }

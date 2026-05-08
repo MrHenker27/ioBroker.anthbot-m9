@@ -4,6 +4,7 @@ const assert = require("node:assert/strict");
 
 const {
     AnthbotCloudApiClient,
+    AnthbotShadowApiClient,
     activeManualZoneIds,
     asInteger,
     asIsoTimestamp,
@@ -154,6 +155,78 @@ describe("lib/anthbot helpers", () => {
                 AnthbotCloudApiClient.buildVerificationToken("SERIAL123", 1711974896),
                 "e74a008a1c0019cfa518153efcd4d2c61711974896",
             );
+        });
+
+        it("parses temporary IoT credentials from the Anthbot STS endpoint", async () => {
+            const client = new AnthbotCloudApiClient({
+                http: {
+                    post: async (url, body, options) => {
+                        assert.equal(url, "https://api.anthbot.com/api/v1/device/v2/iot/sts/arn");
+                        assert.equal(body.sn, "SERIAL123");
+                        assert.equal(typeof body.verification_token, "string");
+                        assert.equal(options.headers.Authorization, "Bearer token");
+                        return {
+                            status: 200,
+                            data: {
+                                code: 0,
+                                data: {
+                                    access_key_id: "ASIA123",
+                                    secret_access_key: "secret",
+                                    session_token: "session",
+                                    region_name: "eu-central-1",
+                                    endpoint: "a.example.iot.eu-central-1.amazonaws.com",
+                                    expiration: 3600,
+                                },
+                            },
+                        };
+                    },
+                },
+                host: "api.anthbot.com",
+                bearerToken: "Bearer token",
+            });
+
+            const credentials = await client.getDeviceIotCredentials("SERIAL123");
+
+            assert.equal(credentials.accessKeyId, "ASIA123");
+            assert.equal(credentials.secretAccessKey, "secret");
+            assert.equal(credentials.sessionToken, "session");
+            assert.equal(credentials.regionName, "eu-central-1");
+            assert.equal(credentials.endpoint, "a.example.iot.eu-central-1.amazonaws.com");
+            assert.equal(credentials.expiresAt > Date.now(), true);
+        });
+
+        it("signs shadow requests with temporary AWS session tokens", async () => {
+            const requests = [];
+            const client = new AnthbotShadowApiClient({
+                http: {
+                    get: async (url, options) => {
+                        requests.push({ url, options });
+                        return {
+                            status: 200,
+                            data: {
+                                state: {
+                                    reported: { ok: true },
+                                },
+                            },
+                        };
+                    },
+                },
+                serialNumber: "SERIAL123",
+                regionName: "eu-central-1",
+                iotEndpoint: "a.example.iot.eu-central-1.amazonaws.com",
+                iotCredentials: {
+                    accessKeyId: "ASIA123",
+                    secretAccessKey: "secret",
+                    sessionToken: "session",
+                },
+            });
+
+            await client.getNamedShadowReportedState("property");
+
+            assert.equal(requests.length, 1);
+            assert.equal(requests[0].options.headers["x-amz-security-token"], "session");
+            assert.match(requests[0].options.headers.Authorization, /Credential=ASIA123\//);
+            assert.match(requests[0].options.headers.Authorization, /SignedHeaders=.*x-amz-security-token/);
         });
     });
 });
