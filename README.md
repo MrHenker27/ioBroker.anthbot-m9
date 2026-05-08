@@ -274,7 +274,7 @@ Special credit to the Home Assistant Anthbot Genie projects, which made the Anth
 This ioBroker adapter is an independent project, but it builds on public API research and implementation ideas from that Home Assistant integration.
 
 ## Changelog
-### WORK IN PROGRESS
+### 0.1.4 (2026-05-08)
 
 - Use Anthbot cloud event-code translations for mower error descriptions and add a configurable description language.
 - Store the fetched event-code translation cache in `raw.shadow.event-code` for troubleshooting.
