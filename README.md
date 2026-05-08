@@ -3,7 +3,6 @@
 ![Logo](admin/anthbot-genie.png)
 
 ![Test and Release](https://github.com/reloxx13/ioBroker.anthbot-genie/workflows/Test%20and%20Release/badge.svg)
-![Automerge Dependabot](https://github.com/reloxx13/ioBroker.anthbot-genie/workflows/Automerge%20Dependabot/badge.svg)
 [![NPM version](https://img.shields.io/npm/v/iobroker.anthbot-genie.svg)](https://www.npmjs.com/package/iobroker.anthbot-genie)
 [![Downloads](https://img.shields.io/npm/dm/iobroker.anthbot-genie.svg)](https://www.npmjs.com/package/iobroker.anthbot-genie)
 ![GitHub release](https://img.shields.io/github/v/release/reloxx13/ioBroker.anthbot-genie)
