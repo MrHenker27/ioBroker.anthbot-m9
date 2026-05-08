@@ -50,6 +50,70 @@
       "md": 4,
       "lg": 4,
       "xl": 4
+    },
+    "errorDescriptionLanguage": {
+      "type": "select",
+      "label": "Error description language",
+      "help": "Language used for Anthbot cloud error descriptions",
+      "options": [
+        {
+          "label": "English",
+          "value": "English"
+        },
+        {
+          "label": "German",
+          "value": "German"
+        },
+        {
+          "label": "French",
+          "value": "French"
+        },
+        {
+          "label": "Spain",
+          "value": "Spain"
+        },
+        {
+          "label": "Italy",
+          "value": "Italy"
+        },
+        {
+          "label": "Polish",
+          "value": "Polish"
+        },
+        {
+          "label": "Russian",
+          "value": "Russian"
+        },
+        {
+          "label": "Czech",
+          "value": "Czech"
+        },
+        {
+          "label": "Estonian",
+          "value": "Estonian"
+        },
+        {
+          "label": "Latvian",
+          "value": "Latvian"
+        },
+        {
+          "label": "Lithuanian",
+          "value": "Lithuanian"
+        },
+        {
+          "label": "Romanian",
+          "value": "Romanian"
+        },
+        {
+          "label": "Slovakia",
+          "value": "Slovakia"
+        }
+      ],
+      "xs": 12,
+      "sm": 12,
+      "md": 4,
+      "lg": 4,
+      "xl": 4
     }
   }
 }

@@ -198,6 +198,7 @@ const DEVICE_STATE_DEFINITIONS = {
     "zones.autoList": { type: "string", role: "json", read: true, write: false, name: t("Auto zones", "Automatische Zonen") },
     "raw.shadow.property": { type: "string", role: "json", read: true, write: false, name: t("Raw property shadow", "Rohdaten Property Shadow") },
     "raw.shadow.service": { type: "string", role: "json", read: true, write: false, name: t("Raw service shadow", "Rohdaten Service Shadow") },
+    "raw.shadow.event-code": { type: "string", role: "json", read: true, write: false, name: t("Raw event code translations", "Rohdaten Ereigniscode-Übersetzungen") },
     "raw.areaDefinition": { type: "string", role: "json", read: true, write: false, name: t("Raw area definition", "Rohdaten Flächendefinition") },
 };
 
@@ -246,6 +247,8 @@ class AnthbotGenieAdapter extends utils.Adapter {
         this.cloudClient = null;
         this.authToken = null;
         this.deviceContexts = new Map();
+        this.eventCodeCache = null;
+        this.eventCodeCacheInitialized = false;
         this.pollTimer = null;
         this.refreshInFlight = null;
         this.unloaded = false;
@@ -309,7 +312,7 @@ class AnthbotGenieAdapter extends utils.Adapter {
         if (this.pollTimer) {
             this.clearTimeout(this.pollTimer);
         }
-        const intervalSeconds = Math.max(10, Number(this.config.pollInterval) || 30);
+        const intervalSeconds = Math.max(10, Number(this.config.pollInterval) || 60);
         this.pollTimer = this.setTimeout(async () => {
             this.pollTimer = null;
             try {
@@ -342,6 +345,7 @@ class AnthbotGenieAdapter extends utils.Adapter {
         try {
             await this.ensureSession(forceLogin);
             await this.discoverDevices(forceLogin);
+            await this.ensureEventCodeCache();
             for (const context of this.deviceContexts.values()) {
                 try {
                     await this.refreshDevice(context);
@@ -359,6 +363,92 @@ class AnthbotGenieAdapter extends utils.Adapter {
         }
 
         await this.setStateAsync("info.connection", successful > 0, true);
+    }
+
+    async ensureEventCodeCache() {
+        if (this.eventCodeCacheInitialized) {
+            return;
+        }
+        this.eventCodeCacheInitialized = true;
+
+        const cached = await this.readStoredEventCodeCache();
+        this.eventCodeCache = cached;
+
+        let cloudVersion = null;
+        try {
+            cloudVersion = await this.cloudClient.getEventCodeVersion();
+        } catch (error) {
+            if (cached) {
+                this.log.warn(`Failed to fetch event code version, using cached translations: ${error.message}`);
+                await this.writeEventCodeCacheToDevices(cached);
+            } else {
+                this.log.warn(`Failed to fetch event code version and no cached translations are available: ${error.message}`);
+            }
+            return;
+        }
+
+        if (cached && asInteger(cached.version) === cloudVersion) {
+            this.eventCodeCache = cached;
+            await this.writeEventCodeCacheToDevices(cached);
+            return;
+        }
+
+        try {
+            const payload = await this.cloudClient.getEventCodeTranslations(cloudVersion);
+            this.eventCodeCache = {
+                version: cloudVersion,
+                fetchedAt: new Date().toISOString(),
+                payload,
+            };
+            await this.writeEventCodeCacheToDevices(this.eventCodeCache);
+        } catch (error) {
+            if (cached) {
+                this.log.warn(`Failed to fetch event code translations, using cached translations: ${error.message}`);
+                this.eventCodeCache = cached;
+                await this.writeEventCodeCacheToDevices(cached);
+            } else {
+                this.log.warn(`Failed to fetch event code translations and no cached translations are available: ${error.message}`);
+            }
+        }
+    }
+
+    async readStoredEventCodeCache() {
+        for (const context of this.deviceContexts.values()) {
+            const serial = context.device.serialNumber;
+            try {
+                const state = await this.getStateAsync(`${serial}.raw.shadow.event-code`);
+                const raw = typeof state?.val === "string" ? state.val : "";
+                if (!raw) {
+                    continue;
+                }
+                const parsed = JSON.parse(raw);
+                if (this.isValidEventCodeCache(parsed)) {
+                    return parsed;
+                }
+            } catch (error) {
+                this.log.debug(`Stored event code cache could not be read for ${serial}: ${error.message}`);
+            }
+        }
+        return null;
+    }
+
+    isValidEventCodeCache(cache) {
+        return Boolean(cache
+            && typeof cache === "object"
+            && asInteger(cache.version) != null
+            && cache.payload
+            && typeof cache.payload === "object"
+            && !Array.isArray(cache.payload));
+    }
+
+    async writeEventCodeCacheToDevices(cache) {
+        if (!cache) {
+            return;
+        }
+        const value = JSON.stringify(cache);
+        for (const context of this.deviceContexts.values()) {
+            await this.setStateAsync(`${context.device.serialNumber}.raw.shadow.event-code`, { val: value, ack: true });
+        }
     }
 
     async ensureSession(force = false) {
@@ -623,7 +713,7 @@ class AnthbotGenieAdapter extends utils.Adapter {
             "metrics.map.totalArea": typeof data.map_area === "number" ? data.map_area : null,
             "metrics.map.status": asText(safeGet(data, "map_sta", "value")),
             "metrics.error.code": asInteger(data.err_code),
-            "metrics.error.description": asText(errorDescription(data)),
+            "metrics.error.description": asText(errorDescription(data, this.eventCodeCache, this.config.errorDescriptionLanguage || "English")),
             "metrics.error.active": isNonZero(data.err_code),
 
             "location.gps.latitude": typeof safeGet(data, "anti_loss_pose", "posegps", "lat") === "number" ? safeGet(data, "anti_loss_pose", "posegps", "lat") : null,
@@ -701,6 +791,7 @@ class AnthbotGenieAdapter extends utils.Adapter {
 
             "raw.shadow.property": JSON.stringify(context.lastReported || {}),
             "raw.shadow.service": JSON.stringify(context.lastService || {}),
+            "raw.shadow.event-code": JSON.stringify(this.eventCodeCache || {}),
             "raw.areaDefinition": JSON.stringify(context.areaDefinition || {}),
         };
 

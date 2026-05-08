@@ -4,5 +4,7 @@
   "Area code": "Código do país",
   "Examples: 49 for Germany, 32 for Belgium, 1 for US/Canada": "Exemplos: 49 para Alemanha, 32 para Bélgica, 1 para EUA/Canadá",
   "API host": "Host da API",
-  "Poll interval in seconds": "Intervalo de consulta em segundos"
+  "Poll interval in seconds": "Intervalo de consulta em segundos",
+  "Error description language": "Idioma da descrição do erro",
+  "Language used for Anthbot cloud error descriptions": "Idioma usado para descrições de erro da nuvem Anthbot"
 }

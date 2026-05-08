@@ -70,10 +70,60 @@ describe("lib/anthbot helpers", () => {
         });
 
         it("maps diagnostic codes", () => {
-            assert.equal(errorDescription({ err_code: 1 }), "Battery low");
             assert.equal(errorDescription({ err_code: 999 }), "Unknown error (999)");
             assert.equal(rtkStateLabel({ rtk_state: 3 }), "fixed");
             assert.equal(rtkBaseStateLabel({ ctl_rtk_base: { rtk_base_state: 3 } }), "online");
+        });
+
+        it("resolves error descriptions from the cloud event code payload", () => {
+            const cache = {
+                version: 336,
+                payload: {
+                    code: 0,
+                    data: {
+                        "2012": {
+                            English: { event_message: "The machine is stuck" },
+                            German: { event_message: "Die Maschine ist blockiert." },
+                        },
+                    },
+                    msg: "success",
+                },
+            };
+
+            assert.equal(errorDescription({ err_code: 2012 }, cache, "English"), "The machine is stuck");
+        });
+
+        it("uses the configured event code language when available", () => {
+            const cache = {
+                payload: {
+                    data: {
+                        "2012": {
+                            English: { event_message: "The machine is stuck" },
+                            German: { event_message: "Die Maschine ist blockiert." },
+                        },
+                    },
+                },
+            };
+
+            assert.equal(errorDescription({ err_code: 2012 }, cache, "German"), "Die Maschine ist blockiert.");
+        });
+
+        it("falls back to English when the configured event code language is missing", () => {
+            const cache = {
+                payload: {
+                    data: {
+                        "2012": {
+                            English: { event_message: "The machine is stuck" },
+                        },
+                    },
+                },
+            };
+
+            assert.equal(errorDescription({ err_code: 2012 }, cache, "French"), "The machine is stuck");
+        });
+
+        it("falls back to unknown when no event code payload entry exists", () => {
+            assert.equal(errorDescription({ err_code: 2012 }, { payload: { data: {} } }, "English"), "Unknown error (2012)");
         });
     });
 
@@ -193,6 +243,57 @@ describe("lib/anthbot helpers", () => {
             assert.equal(credentials.regionName, "eu-central-1");
             assert.equal(credentials.endpoint, "a.example.iot.eu-central-1.amazonaws.com");
             assert.equal(credentials.expiresAt > Date.now(), true);
+        });
+
+        it("fetches the Anthbot event code version", async () => {
+            const client = new AnthbotCloudApiClient({
+                http: {
+                    get: async (url, options) => {
+                        assert.equal(url, "https://api.anthbot.com/api/v1/message/code/version");
+                        assert.equal(options.headers.Authorization, "Bearer token");
+                        return {
+                            status: 200,
+                            data: {
+                                code: 0,
+                                data: { version: 336 },
+                            },
+                        };
+                    },
+                },
+                host: "api.anthbot.com",
+                bearerToken: "Bearer token",
+            });
+
+            assert.equal(await client.getEventCodeVersion(), 336);
+        });
+
+        it("fetches Anthbot event code translations for a version", async () => {
+            const payload = {
+                code: 0,
+                data: {
+                    "2012": {
+                        English: { event_message: "The machine is stuck" },
+                    },
+                },
+                msg: "success",
+            };
+            const client = new AnthbotCloudApiClient({
+                http: {
+                    post: async (url, body, options) => {
+                        assert.equal(url, "https://api.anthbot.com/api/v1/message/code/translate");
+                        assert.deepEqual(body, { version: 336 });
+                        assert.equal(options.headers.Authorization, "Bearer token");
+                        return {
+                            status: 200,
+                            data: payload,
+                        };
+                    },
+                },
+                host: "api.anthbot.com",
+                bearerToken: "Bearer token",
+            });
+
+            assert.deepEqual(await client.getEventCodeTranslations(336), payload);
         });
 
         it("signs shadow requests with temporary AWS session tokens", async () => {

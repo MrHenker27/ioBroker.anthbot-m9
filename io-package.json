@@ -119,7 +119,7 @@
     "platform": "Javascript/Node.js",
     "mode": "daemon",
     "tier": 2,
-    "type": "household",
+    "type": "garden",
     "compact": true,
     "connectionType": "cloud",
     "dataSource": "poll",
@@ -150,7 +150,8 @@
     "password": "",
     "areaCode": "49",
     "apiHost": "api.anthbot.com",
-    "pollInterval": 30
+    "pollInterval": 60,
+    "errorDescriptionLanguage": "English"
   },
   "objects": [
     {

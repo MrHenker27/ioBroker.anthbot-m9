@@ -4,5 +4,7 @@
   "Area code": "国家/地区代码",
   "Examples: 49 for Germany, 32 for Belgium, 1 for US/Canada": "示例：德国为 49，比利时为 32，美国/加拿大为 1",
   "API host": "API 主机",
-  "Poll interval in seconds": "轮询间隔（秒）"
+  "Poll interval in seconds": "轮询间隔（秒）",
+  "Error description language": "错误说明语言",
+  "Language used for Anthbot cloud error descriptions": "用于 Anthbot 云端错误说明的语言"
 }

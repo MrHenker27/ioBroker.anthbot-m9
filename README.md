@@ -30,13 +30,13 @@ An example ioBroker Blockly with conditions for mower automation is available in
 - Region and IoT endpoint lookup per mower
 - Polling of property and service shadows
 - Detailed status states for connection, online state, battery, mower status, charging state, mowing time, mowing area, map status, errors, active mowing mode, point mowing, and zone counts
-- Diagnostic states for RTK fix, RTK base station, moved antenna warnings, firmware versions, OTA progress, WiFi, cellular, SIM, Bluetooth, camera/map flags, obstacle avoidance, security flags, system timestamps, and mower error data
+- Diagnostic states for RTK fix, RTK base station, moved antenna warnings, firmware versions, OTA progress, WiFi, cellular, SIM, Bluetooth, camera/map flags, obstacle avoidance, security flags, system timestamps, and cloud-backed mower error data
 - Location states for anti-loss GPS coordinates and local mower pose
 - Consumable lifetime states and reset buttons for charging port, cameras, and blades
 - Writable control states for full-map mowing, zone mowing, cutting height, voice volume, custom mowing direction, obstacle avoidance, rain settings, and mowing near the charging pile
 - Command states for full mowing, stop, return to dock, pause return to dock, grass dump, disk maintenance mode, edge mowing, mowing near the charging pile, point mowing, refresh, manual zone mowing, and automatic zone mowing
 - Manual and automatic zone metadata as JSON states, including active manual zone IDs
-- Raw property shadow, service shadow, and area definition payloads for troubleshooting and automation debugging
+- Raw property shadow, service shadow, Anthbot event-code translations, and area definition payloads for troubleshooting and automation debugging
 
 ## Requirements
 
@@ -56,7 +56,8 @@ Open the adapter instance configuration in ioBroker Admin and set:
 | Anthbot account password | Anthbot account password, stored encrypted by ioBroker | empty |
 | Area code | Phone or account area code, for example `49` for Germany | `49` |
 | API host | Anthbot cloud API host | `api.anthbot.com` |
-| Poll interval in seconds | Polling interval for mower data. The adapter enforces at least 10 seconds. | `30` |
+| Poll interval in seconds | Polling interval for mower data. The adapter enforces at least 10 seconds. | `60` |
+| Error description language | Language used for Anthbot cloud error descriptions | `English` |
 
 After saving the configuration, start or restart the adapter instance.
 
@@ -102,7 +103,7 @@ anthbot-genie.<instance>.<serial>.*
 | `<serial>.metrics.map.totalArea` | number | `m2` | Total mapped area |
 | `<serial>.metrics.map.status` | string | | Raw map status |
 | `<serial>.metrics.error.code` | number | | Last mower error code |
-| `<serial>.metrics.error.description` | string | | Human-readable error description when known |
+| `<serial>.metrics.error.description` | string | | Human-readable error description from the cached Anthbot event-code list when known |
 | `<serial>.metrics.error.active` | boolean | | Whether a non-zero mower error is active |
 
 ### Location
@@ -198,6 +199,7 @@ Availability of `commands.maintenance.startDiskMaintenance`, `commands.maintenan
 | --- | --- | --- |
 | `<serial>.raw.shadow.property` | JSON string | Raw property shadow payload |
 | `<serial>.raw.shadow.service` | JSON string | Raw service shadow payload |
+| `<serial>.raw.shadow.event-code` | JSON string | Cached Anthbot event-code translation payload used for error descriptions |
 | `<serial>.raw.areaDefinition` | JSON string | Raw area definition payload |
 
 ## Zone Mowing
@@ -272,6 +274,11 @@ Special credit to the Home Assistant Anthbot Genie projects, which made the Anth
 This ioBroker adapter is an independent project, but it builds on public API research and implementation ideas from that Home Assistant integration.
 
 ## Changelog
+### WORK IN PROGRESS
+
+- Use Anthbot cloud event-code translations for mower error descriptions and add a configurable description language.
+- Store the fetched event-code translation cache in `raw.shadow.event-code` for troubleshooting.
+
 ### 0.1.3 (2026-05-08)
 
 - Fix AWS IoT shadow access by using temporary Anthbot IoT credentials instead of the expired bundled AWS credentials.
