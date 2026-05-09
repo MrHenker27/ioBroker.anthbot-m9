@@ -67,19 +67,6 @@
         "pl": "Dodano rozszerzoną diagnostykę, pogrupowaną strukturę stanów, reset materiałów eksploatacyjnych, polecenia kosiarki i zapisywalne sterowanie koszeniem.\nDodano sterowanie koszeniem krawędzi dla pełnego koszenia mapy i poprawiono sterowanie przy stacji.\nUsunięto nieobsługiwane sterowanie kamerą i wznawianiem powrotu do stacji.",
         "uk": "Додано розширену діагностику, згруповану структуру станів, скидання витратних матеріалів, команди дій косарки та записувані елементи керування косінням.\nДодано керування обрізанням країв для повного косіння карти та виправлено керування біля зарядної станції.\nВилучено непідтримувані елементи керування камерою та продовженням повернення до бази.",
         "zh-cn": "添加扩展诊断、分组状态结构、耗材重置、割草机动作命令和可写割草控制。\n添加全地图割草的边缘修剪控制，并修正充电站附近割草启用控制。\n移除不支持的摄像头和继续回充控制。"
-      },
-      "0.0.8": {
-        "en": "Add consumable channels and values to the adapter definition.",
-        "de": "Verbrauchskanäle und Werte zur Adapterdefinition hinzugefügt.",
-        "ru": "Добавлены каналы потребляемых материалов и значения в определение адаптера.",
-        "pt": "Adicionar canais de consumíveis e valores à definição do adaptador.",
-        "nl": "Consumable-kanalen en waarden toegevoegd aan de adapterdefinitie.",
-        "fr": "Ajouter des canaux de consommables et des valeurs à la définition de l'adaptateur.",
-        "it": "Aggiungi canali di consumo e valori alla definizione dell'adattatore.",
-        "es": "Agregar canales de consumibles y valores a la definición del adaptador.",
-        "pl": "Dodaj kanały materiałów eksploatacyjnych i wartości do definicji adaptera.",
-        "uk": "Додайте канали расходных материалов и значения в определение адаптера.",
-        "zh-cn": "将消耗品通道和值添加到适配器定义中。"
       }
     },
     "titleLang": {
