@@ -1,19 +1,6 @@
 # Changelog Archive
 
 Older changelog entries can be moved here after future releases.
-## 0.0.7
-
-- Add Dependabot automerge configuration.
-- Update repository metadata for ioBroker checks.
-
-## 0.0.6
-
-- Fix ioBroker repository checker issues.
-- Move admin configuration translations to i18n files.
-
-## 0.0.5
-
-- Prepare adapter metadata for ioBroker repository checks.
 
 ## 0.1.0-beta.2
 
@@ -43,6 +30,10 @@ Older changelog entries can be moved here after future releases.
 ## 0.0.9-beta.0
 
 - Add mower service commands and controls.
+
+## 0.0.8
+
+Add consumable channels and values to the adapter definition.
 
 ## 0.0.7
 
