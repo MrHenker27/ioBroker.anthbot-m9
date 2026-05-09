@@ -6,5 +6,6 @@
   "API host": "Хост API",
   "Poll interval in seconds": "Интервал опроса в секундах",
   "Error description language": "Язык описания ошибок",
-  "Language used for Anthbot cloud error descriptions": "Язык для описаний ошибок облака Anthbot"
+  "Language used for Anthbot cloud error descriptions": "Язык для описаний ошибок облака Anthbot",
+  "The email address associated with your Anthbot account": "Адрес электронной почты, связанный с вашей учетной записью Anthbot"
 }

@@ -6,5 +6,6 @@
   "API host": "API-Host",
   "Poll interval in seconds": "Abfrageintervall in Sekunden",
   "Error description language": "Sprache der Fehlerbeschreibung",
-  "Language used for Anthbot cloud error descriptions": "Sprache für Anthbot-Cloud-Fehlerbeschreibungen"
+  "Language used for Anthbot cloud error descriptions": "Sprache für Anthbot-Cloud-Fehlerbeschreibungen",
+  "The email address associated with your Anthbot account": "Die E-Mail-Adresse, die mit Ihrem Anthbot-Konto verknüpft ist"
 }

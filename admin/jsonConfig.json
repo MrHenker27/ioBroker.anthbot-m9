@@ -5,6 +5,7 @@
     "username": {
       "type": "text",
       "label": "Anthbot account username",
+      "help": "The email address associated with your Anthbot account",
       "xs": 12,
       "sm": 12,
       "md": 6,
@@ -23,33 +24,13 @@
     "areaCode": {
       "type": "text",
       "label": "Area code",
+      "newLine": true,
       "help": "Examples: 49 for Germany, 32 for Belgium, 1 for US/Canada",
       "xs": 12,
       "sm": 12,
-      "md": 4,
-      "lg": 4,
-      "xl": 4
-    },
-    "apiHost": {
-      "type": "text",
-      "label": "API host",
-      "xs": 12,
-      "sm": 12,
-      "md": 4,
-      "lg": 4,
-      "xl": 4
-    },
-    "pollInterval": {
-      "type": "number",
-      "label": "Poll interval in seconds",
-      "min": 10,
-      "max": 3600,
-      "step": 1,
-      "xs": 12,
-      "sm": 12,
-      "md": 4,
-      "lg": 4,
-      "xl": 4
+      "md": 6,
+      "lg": 6,
+      "xl": 6
     },
     "errorDescriptionLanguage": {
       "type": "select",
@@ -111,9 +92,31 @@
       ],
       "xs": 12,
       "sm": 12,
-      "md": 4,
-      "lg": 4,
-      "xl": 4
+      "md": 6,
+      "lg": 6,
+      "xl": 6
+    },
+    "pollInterval": {
+      "type": "number",
+      "label": "Poll interval in seconds",
+      "min": 10,
+      "max": 3600,
+      "step": 1,
+      "xs": 12,
+      "sm": 12,
+      "md": 6,
+      "lg": 6,
+      "xl": 6
+    },
+    "apiHost": {
+      "type": "text",
+      "label": "API host",
+      "hidden": "true",
+      "xs": 12,
+      "sm": 12,
+      "md": 6,
+      "lg": 6,
+      "xl": 6
     }
   }
 }

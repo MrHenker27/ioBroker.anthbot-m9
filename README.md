@@ -157,6 +157,7 @@ Writable control states update mower settings through the Anthbot IoT service sh
 | `<serial>.controls.nearChargerMowing.mowCount` | number | `1..3` | Set mowing passes near the charging pile |
 | `<serial>.controls.nearChargerMowing.obstacleAvoidanceEnabled` | boolean | `true`/`false` | Enable or disable obstacle avoidance near the charging pile |
 | `<serial>.controls.nearChargerMowing.obstacleAvoidanceLevel` | number | `0..2` | Set obstacle avoidance level near the charging pile |
+
 ### Commands
 
 Command states are writable. Button states are reset to `false` after execution. Zone command states are reset to an empty string after execution. Consumable reset buttons are exposed under `consumable`.
@@ -257,22 +258,18 @@ For automatic zones, the adapter resolves the selected zone IDs or names to the 
 - For zone commands, compare the written value with the IDs and names in `zones.manual.list` or `zones.autoList`.
 - Check `raw.shadow.service` and the adapter log for command errors.
 
-## Legal Notice
-
-This project is unofficial and is not affiliated with, endorsed by, sponsored by, or approved by Anthbot.
-
-Anthbot and Genie names, marks, and logos belong to their respective owners. See [NOTICE.md](NOTICE.md) for details.
-
-## Credits
-
-Special credit to the Home Assistant Anthbot Genie projects, which made the Anthbot cloud flow and command mapping much easier to understand:
-
-- [vincentjanv](https://github.com/vincentjanv/anthbot_genie_ha)
-- [AdrianTIonut](https://github.com/AdrianTIonut/anthbot_genie_ha)
-
-This ioBroker adapter is an independent project, but it builds on public API research and implementation ideas from that Home Assistant integration.
-
 ## Changelog
+
+### WORK IN PROGRESS
+
+- Updated JSON config to include help text for Anthbot account username.
+- Update translations and JSON config for Anthbot account email address
+- Adjusted layout for area code and added poll interval and API host configurations with proper visibility settings.
+- Bump admin dependency version in io-package.json
+- Updated admin dependency version from >=7.6.20 to >=7.7.22.
+- Add GitHub Copilot instructions for ioBroker adapter development
+- Add automated version check for Copilot instructions template
+
 ### 0.1.4 (2026-05-08)
 
 - Use Anthbot cloud event-code translations for mower error descriptions and add a configurable description language.
@@ -306,6 +303,21 @@ This ioBroker adapter is an independent project, but it builds on public API res
 ### 0.0.8
 
 - Add consumable channels and values ​​to the adapter definition.
+
+## Credits
+
+Special credit to the Home Assistant Anthbot Genie projects, which made the Anthbot cloud flow and command mapping much easier to understand:
+
+- [vincentjanv](https://github.com/vincentjanv/anthbot_genie_ha)
+- [AdrianTIonut](https://github.com/AdrianTIonut/anthbot_genie_ha)
+
+This ioBroker adapter is an independent project, but it builds on public API research and implementation ideas from that Home Assistant integration.
+
+## Legal Notice
+
+This project is unofficial and is not affiliated with, endorsed by, sponsored by, or approved by Anthbot.
+
+Anthbot and Genie names, marks, and logos belong to their respective owners. See [NOTICE.md](NOTICE.md) for details.
 
 ## License
 
