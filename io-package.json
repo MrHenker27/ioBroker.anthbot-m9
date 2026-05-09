@@ -156,6 +156,7 @@
     "password"
   ],
   "protectedNative": [
+    "username",
     "password"
   ],
   "native": {
