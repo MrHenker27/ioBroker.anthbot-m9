@@ -273,7 +273,7 @@ For automatic zones, the adapter resolves the selected zone IDs or names to the 
 
 ## Changelog
 
-### WORK IN PROGRESS
+### **WORK IN PROGRESS**
 
 - Updated JSON config to include help text for Anthbot account username.
 - Update translations and JSON config for Anthbot account email address
@@ -282,6 +282,11 @@ For automatic zones, the adapter resolves the selected zone IDs or names to the 
 - Updated admin dependency version from >=7.6.20 to >=7.7.22.
 - Add GitHub Copilot instructions for ioBroker adapter development
 - Add automated version check for Copilot instructions template
+- add ESLint and Prettier configuration files with linting scripts
+- Refactor code structure for improved readability and maintainability
+- Bump protobufjs in the npm_and_yarn group across 1 directory
+- downgrade @iobroker/testing to version 5.0.4 for compatibility
+
 
 ### 0.1.4 (2026-05-08)
 
