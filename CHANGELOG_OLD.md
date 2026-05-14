@@ -1,6 +1,19 @@
 # Changelog Archive
 
 Older changelog entries can be moved here after future releases.
+## 0.1.0
+
+- Add expanded diagnostics for model names, region fallback, errors, RTK, map, firmware, OTA, network, and GPS/location data.
+- Add consumable reset buttons and correct the maintenance mapping for charging port, cameras, and blades.
+- Add grouped command states for device, docking, maintenance, and mowing actions.
+- Add writable mowing controls grouped by full-map, zone, near-charger, rain, and voice settings.
+- Add full-map mowing control to include edge trimming.
+- Fix near-charger mowing enable control to use the mower shadow setting.
+- Remove unsupported camera-enabled and docking resume-return controls.
+
+## 0.0.8
+
+- Add consumable channels and values ​​to the adapter definition.
 
 ## 0.1.0-beta.2
 

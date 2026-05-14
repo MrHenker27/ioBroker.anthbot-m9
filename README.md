@@ -273,7 +273,7 @@ For automatic zones, the adapter resolves the selected zone IDs or names to the 
 
 ## Changelog
 
-### **WORK IN PROGRESS**
+### 0.1.5 (2026-05-14)
 
 - Updated JSON config to include help text for Anthbot account username.
 - Update translations and JSON config for Anthbot account email address
@@ -286,7 +286,6 @@ For automatic zones, the adapter resolves the selected zone IDs or names to the 
 - Refactor code structure for improved readability and maintainability
 - Bump protobufjs in the npm_and_yarn group across 1 directory
 - downgrade @iobroker/testing to version 5.0.4 for compatibility
-
 
 ### 0.1.4 (2026-05-08)
 
@@ -307,20 +306,6 @@ For automatic zones, the adapter resolves the selected zone IDs or names to the 
 - Highlight the extended telemetry, diagnostics, controls, and raw payload coverage in the README.
 - Clean up repository readiness metadata and poll timer handling for ioBroker best practices.
 - Align consumable lifetime and network diagnostic state roles with the documented ioBroker state role list.
-
-### 0.1.0
-
-- Add expanded diagnostics for model names, region fallback, errors, RTK, map, firmware, OTA, network, and GPS/location data.
-- Add consumable reset buttons and correct the maintenance mapping for charging port, cameras, and blades.
-- Add grouped command states for device, docking, maintenance, and mowing actions.
-- Add writable mowing controls grouped by full-map, zone, near-charger, rain, and voice settings.
-- Add full-map mowing control to include edge trimming.
-- Fix near-charger mowing enable control to use the mower shadow setting.
-- Remove unsupported camera-enabled and docking resume-return controls.
-
-### 0.0.8
-
-- Add consumable channels and values ​​to the adapter definition.
 
 ## Credits
 
