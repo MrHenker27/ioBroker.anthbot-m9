@@ -15,7 +15,9 @@ There is currently no dedicated `test/` directory or generated build output.
 ## Build, Test, and Development Commands
 
 - `npm install` installs runtime dependencies.
-- `npm run check` runs `node --check` against `main.js` and `lib/anthbot.js`; use it before every commit.
+- `npm run lint` runs ESLint using the repository's `eslint.config.mjs` configuration.
+- `npm run lint:fix` runs ESLint and applies auto-fixable changes.
+- `npm run check` runs `node --check` against `main.js` and `lib/anthbot.js`.
 - `npm run check:repo` runs the ioBroker repository checker against the GitHub repository.
 - `npm run release` invokes the ioBroker release script; use it for preparing new adapter versions.
 - `npm pack` can be used to inspect the package contents listed in `package.json`.
@@ -60,7 +62,7 @@ Preserve the daemon/cloud-poll adapter shape in `io-package.json`: `mode: "daemo
 
 ## Testing Guidelines
 
-`@iobroker/testing` is available for package-file and integration tests, but no test files are configured yet. For now, run `npm run check` after changes and manually verify behavior in an ioBroker instance when touching login, polling, object creation, or mower commands.
+`@iobroker/testing` is available for package-file and integration tests, but no test files are configured yet. For now, run `npm run lint` and `npm run check` after changes and manually verify behavior in an ioBroker instance when touching login, polling, object creation, or mower commands.
 
 If adding tests, use file names like `*.test.js` and place them under `test/` or beside the module they cover. Focus first on pure helpers in `lib/anthbot.js`.
 

@@ -45,6 +45,19 @@ An example ioBroker Blockly with conditions for mower automation is available in
 - Anthbot account with at least one bound Genie mower
 - Internet access from the ioBroker host to the Anthbot cloud and AWS IoT endpoint
 
+## Development
+
+- `npm install` installs runtime and development dependencies.
+- `npm run lint` checks code style using ESLint.
+- `npm run lint:fix` applies automatically fixable ESLint changes.
+- `npm run check` runs Node.js syntax checks for `main.js`, `lib/anthbot.js`, and test files.
+- `npm run test:js` runs unit tests.
+- `npm run test:package` runs package validation tests.
+- `npm run test:integration` runs integration tests.
+- `npm run test` runs `check`, unit tests, and package validation.
+- `npm run check:repo` runs the ioBroker repository checker.
+- `npm run release` creates a new ioBroker package release.
+
 ## Configuration
 
 Open the adapter instance configuration in ioBroker Admin and set:
