@@ -1,8 +1,8 @@
 'use strict';
 
-/** @type {typeof import("@iobroker/adapter-core")} */
-const utils = require("@iobroker/adapter-core");
-const axios = /** @type {import("axios").AxiosStatic} */ (/** @type {unknown} */ (require("axios")));
+/** @type {typeof import('@iobroker/adapter-core')} */
+const utils = require('@iobroker/adapter-core');
+const axios = /** @type {import('axios').AxiosStatic} */ (/** @type {unknown} */ (require('axios')));
 const {
     AnthbotCloudApiClient,
     AnthbotShadowApiClient,

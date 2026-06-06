@@ -29,9 +29,8 @@ jobs:
       - uses: ioBroker/testing-action-check@v1
         with:
           node-version: '24.x'
-          install-command: 'npm install --legacy-peer-deps'
           type-checking: true
-          lint: false
+          lint: true
 
   # Runs adapter tests on all supported node versions and OSes
   adapter-tests:
@@ -49,7 +48,6 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           os: ${{ matrix.os }}
-          install-command: 'npm install --legacy-peer-deps'
 
 # TODO: To enable automatic npm releases, set up trusted publishing in your npm account
 # See https://docs.npmjs.com/trusted-publishers for more details
@@ -76,7 +74,6 @@ jobs:
       - uses: ioBroker/testing-action-deploy@v1
         with:
           node-version: '24.x'
-          install-command: 'npm install --legacy-peer-deps'
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
 #          # When using Sentry for error reporting, Sentry can be informed about new releases

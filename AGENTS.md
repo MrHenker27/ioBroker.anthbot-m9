@@ -17,8 +17,9 @@ There is currently no dedicated `test/` directory or generated build output.
 - `npm install` installs runtime dependencies.
 - `npm run lint` runs ESLint using the repository's `eslint.config.mjs` configuration.
 - `npm run lint:fix` runs ESLint and applies auto-fixable changes.
-- `npm run check` runs `node --check` against `main.js` and `lib/anthbot.js`.
-- `npm run check:repo` runs the ioBroker repository checker against the GitHub repository.
+- `npm run check` runs the TypeScript JSDoc check plus `node --check` for the adapter and test files.
+- `npm run check:repo` runs the ioBroker repository checker against the GitHub repository URL.
+- `npx @iobroker/repochecker https://github.com/reloxx13/ioBroker.anthbot-genie --local --noinfo` runs repochecker against the local working tree and is the preferred validation command when fixing repository-checker findings.
 - `npm run release` invokes the ioBroker release script; use it for preparing new adapter versions.
 - `npm pack` can be used to inspect the package contents listed in `package.json`.
 
@@ -40,7 +41,7 @@ Commit only files related to the task. Use non-interactive git commands and neve
 
 Before asking where code or behavior lives, search the repository first. Prefer `rg`, `fd`, and `jq` for inspection when available.
 
-After code changes, run the relevant npm checks and report the exact validation performed. For runtime issues, prefer ioBroker/manual adapter verification over treating `node main.js` as sufficient.
+After code changes, run the relevant npm checks and report the exact validation performed. When touching repository metadata, workflows, changelog/news entries, or anything prompted by ioBroker repository checker feedback, also run local `repochecker` and report its remaining warnings. For runtime issues, prefer ioBroker/manual adapter verification over treating `node main.js` as sufficient.
 
 ## ioBroker Adapter Rules
 
@@ -62,7 +63,7 @@ Preserve the daemon/cloud-poll adapter shape in `io-package.json`: `mode: "daemo
 
 ## Testing Guidelines
 
-`@iobroker/testing` is available for package-file and integration tests, but no test files are configured yet. For now, run `npm run lint` and `npm run check` after changes and manually verify behavior in an ioBroker instance when touching login, polling, object creation, or mower commands.
+`@iobroker/testing` is available for package-file and integration tests. Run `npm run lint`, `npm run check`, and `npm test` after changes. When the task is about repository readiness or PR checker feedback, also run local `repochecker`. Manually verify behavior in an ioBroker instance when touching login, polling, object creation, or mower commands.
 
 If adding tests, use file names like `*.test.js` and place them under `test/` or beside the module they cover. Focus first on pure helpers in `lib/anthbot.js`.
 
@@ -76,7 +77,7 @@ When state objects, command behavior, config fields, or user-visible adapter beh
 
 When preparing a release, use `npm run release` and keep `README.md` changelog entries, `io-package.json` news, `package.json`, and `package-lock.json` versions consistent with the release script output.
 
-Pull requests should include a clear description, validation performed (`npm run check`, manual ioBroker checks), linked issues when applicable, and screenshots only for admin UI changes.
+Pull requests should include a clear description, validation performed (`npm run lint`, `npm run check`, `npm test`, and local `repochecker` when relevant), linked issues when applicable, and screenshots only for admin UI changes.
 
 ## Security & Configuration Tips
 
