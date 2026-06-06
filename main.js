@@ -1,7 +1,8 @@
 "use strict";
 
+/** @type {typeof import("@iobroker/adapter-core")} */
 const utils = require("@iobroker/adapter-core");
-const axios = require("axios");
+const axios = /** @type {import("axios").AxiosStatic} */ (/** @type {unknown} */ (require("axios")));
 const {
     AnthbotCloudApiClient,
     AnthbotShadowApiClient,
@@ -27,6 +28,25 @@ const {
     safeGet,
 } = require("./lib/anthbot");
 
+/**
+ * @typedef {object} AnthbotAdapterConfig
+ * @property {string} username
+ * @property {string} password
+ * @property {string} areaCode
+ * @property {string} apiHost
+ * @property {number} pollInterval
+ * @property {string} errorDescriptionLanguage
+ */
+
+/** @typedef {ioBroker.StringOrTranslated} StringOrTranslated */
+/** @typedef {ioBroker.StateCommon} StateCommon */
+/** @typedef {ioBroker.Adapter} IoBrokerAdapter */
+/** @typedef {new (options: ioBroker.AdapterOptions | string) => IoBrokerAdapter} AdapterCtor */
+/** @typedef {[id: string, type: "channel", name: StringOrTranslated]} DeviceChannelDefinition */
+/** @typedef {StateCommon & { name: StringOrTranslated }} DeviceStateDefinition */
+
+const AdapterBase = /** @type {AdapterCtor} */ (utils.Adapter);
+
 function t(en, de) {
     return { en, de };
 }
@@ -35,6 +55,7 @@ function asText(value) {
     return value == null ? "" : String(value);
 }
 
+/** @type {DeviceChannelDefinition[]} */
 const DEVICE_CHANNEL_DEFINITIONS = [
     ["info", "channel", t("Info", "Informationen")],
     ["metrics", "channel", t("Metrics", "Messwerte")],
@@ -75,6 +96,7 @@ const DEVICE_CHANNEL_DEFINITIONS = [
     ["raw.shadow", "channel", t("Raw shadows", "Rohdaten Shadows")],
 ];
 
+/** @type {Record<string, DeviceStateDefinition>} */
 const DEVICE_STATE_DEFINITIONS = {
     "info.alias": { type: "string", role: "text", read: true, write: false, name: t("Alias", "Alias") },
     "info.model": { type: "string", role: "text", read: true, write: false, name: t("Model", "Modell") },
@@ -232,7 +254,7 @@ const MAINTENANCE_RESET_TYPES = {
     "chargingPort.reset": 2,
 };
 
-class AnthbotGenieAdapter extends utils.Adapter {
+class AnthbotGenieAdapter extends AdapterBase {
     constructor(options = {}) {
         super({
             ...options,
@@ -254,8 +276,16 @@ class AnthbotGenieAdapter extends utils.Adapter {
         this.unloaded = false;
     }
 
+    /**
+     * @returns {AnthbotAdapterConfig}
+     */
+    get anthbotConfig() {
+        return /** @type {AnthbotAdapterConfig} */ (this.config);
+    }
+
     async onReady() {
         this.unloaded = false;
+        const config = this.anthbotConfig;
         this.http = axios.create({
             timeout: 15000,
             validateStatus: () => true,
@@ -264,7 +294,7 @@ class AnthbotGenieAdapter extends utils.Adapter {
         await this.ensureBaseObjects();
         await this.setStateAsync("info.connection", false, true);
 
-        if (!this.config.username || !this.config.password) {
+        if (!config.username || !config.password) {
             this.log.error("Username and password must be configured.");
             return;
         }
@@ -312,7 +342,7 @@ class AnthbotGenieAdapter extends utils.Adapter {
         if (this.pollTimer) {
             this.clearTimeout(this.pollTimer);
         }
-        const intervalSeconds = Math.max(10, Number(this.config.pollInterval) || 60);
+        const intervalSeconds = Math.max(10, Number(this.anthbotConfig.pollInterval) || 60);
         this.pollTimer = this.setTimeout(async () => {
             this.pollTimer = null;
             try {
@@ -452,18 +482,19 @@ class AnthbotGenieAdapter extends utils.Adapter {
     }
 
     async ensureSession(force = false) {
+        const config = this.anthbotConfig;
         if (!this.cloudClient || force) {
             this.cloudClient = new AnthbotCloudApiClient({
                 http: this.http,
-                host: this.config.apiHost || "api.anthbot.com",
+                host: config.apiHost || "api.anthbot.com",
                 bearerToken: force ? null : this.authToken,
             });
         }
         if (!this.authToken || force) {
             this.authToken = await this.cloudClient.login({
-                username: this.config.username,
-                password: this.config.password,
-                areaCode: String(this.config.areaCode || "49"),
+                username: config.username,
+                password: config.password,
+                areaCode: String(config.areaCode || "49"),
             });
         }
     }
@@ -662,6 +693,7 @@ class AnthbotGenieAdapter extends utils.Adapter {
 
     async updateStates(context, data) {
         const serial = context.device.serialNumber;
+        const config = this.anthbotConfig;
         const manualZoneList = manualZones(data);
         const autoZoneList = autoZones(data);
         const cutterHeight = typeof data?.param_set?.cutter_height === "number"
@@ -713,7 +745,7 @@ class AnthbotGenieAdapter extends utils.Adapter {
             "metrics.map.totalArea": typeof data.map_area === "number" ? data.map_area : null,
             "metrics.map.status": asText(safeGet(data, "map_sta", "value")),
             "metrics.error.code": asInteger(data.err_code),
-            "metrics.error.description": asText(errorDescription(data, this.eventCodeCache, this.config.errorDescriptionLanguage || "English")),
+            "metrics.error.description": asText(errorDescription(data, this.eventCodeCache, config.errorDescriptionLanguage || "English")),
             "metrics.error.active": isNonZero(data.err_code),
 
             "location.gps.latitude": typeof safeGet(data, "anti_loss_pose", "posegps", "lat") === "number" ? safeGet(data, "anti_loss_pose", "posegps", "lat") : null,
@@ -1362,7 +1394,7 @@ class AnthbotGenieAdapter extends utils.Adapter {
     }
 }
 
-if (module.parent) {
+if (require.main !== module) {
     module.exports = options => new AnthbotGenieAdapter(options);
 } else {
     new AnthbotGenieAdapter();

@@ -1,6 +1,6 @@
 {
   "name": "iobroker.anthbot-genie",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Unofficial ioBroker adapter for Anthbot Genie robotic lawn mowers with cloud telemetry, diagnostics, consumables, zones, and controls.",
   "author": "reloxx13",
   "license": "MIT",
@@ -37,7 +37,10 @@
     "README.md"
   ],
   "scripts": {
-    "check": "node --check main.js && node --check lib/anthbot.js && node --check test/package/testPackageFiles.js && node --check test/integration/testStartup.js && node --check test/unit/anthbot.test.js",
+    "check": "npm run check:types && node --check main.js && node --check lib/anthbot.js && node --check test/package/testPackageFiles.js && node --check test/integration/testStartup.js && node --check test/unit/anthbot.test.js",
+    "check:types": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint -c eslint.config.mjs .",
+    "lint:fix": "eslint -c eslint.config.mjs . --fix",
     "test:js": "mocha \"test/unit/**/*.test.js\"",
     "test:package": "mocha test/package --exit",
     "test:integration": "mocha test/integration --exit",
@@ -46,19 +49,23 @@
     "release": "release-script"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "dependencies": {
     "@iobroker/adapter-core": "^3.3.2",
     "axios": "^1.8.4"
   },
   "devDependencies": {
-    "@alcalzone/release-script": "^5.1.1",
-    "@alcalzone/release-script-plugin-iobroker": "^5.1.2",
-    "@alcalzone/release-script-plugin-license": "^5.1.1",
-    "@alcalzone/release-script-plugin-manual-review": "^5.1.1",
+    "@alcalzone/release-script": "^5.2.1",
+    "@alcalzone/release-script-plugin-iobroker": "^5.2.0",
+    "@alcalzone/release-script-plugin-license": "^5.2.0",
+    "@alcalzone/release-script-plugin-manual-review": "^5.2.0",
     "@iobroker/adapter-dev": "^1.5.0",
-    "@iobroker/eslint-config": "^2.2.0",
-    "@iobroker/testing": "^5.2.2"
+    "@iobroker/eslint-config": "^2.3.4",
+    "@iobroker/testing": "^5.2.2",
+    "@iobroker/types": "^6.0.11",
+    "@tsconfig/node22": "^22.0.5",
+    "@types/node": "^22.19.20",
+    "typescript": "~5.9.3"
   }
 }
