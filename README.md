@@ -56,7 +56,14 @@ An example ioBroker Blockly with conditions for mower automation is available in
 - `npm run test:integration` runs integration tests.
 - `npm run test` runs `check`, unit tests, and package validation.
 - `npm run check:repo` runs the ioBroker repository checker.
+- `npm run translate` runs the ioBroker adapter-dev translation workflow.
 - `npm run release` creates a new ioBroker package release.
+
+## Translations
+
+- Admin/JSON Config translations live in `admin/i18n/<lang>/translations.json`.
+- Backend/runtime object-name translations live in `i18n/<lang>.json`.
+- After adding or removing translatable strings, update the English source files and run `npm run translate` so future Weblate and adapter-dev syncs stay aligned.
 
 ## Configuration
 
@@ -273,6 +280,9 @@ For automatic zones, the adapter resolves the selected zone IDs or names to the 
 
 ## Changelog
 ### **WORK IN PROGRESS**
+
+- Align ioBroker object metadata with the repository object-structure checker by creating the global `info` channel, correcting the mower status role, and emitting full recommended i18n keys for object names.
+- Move admin translations back to the Weblate-friendly `admin/i18n/<lang>/translations.json` layout and load backend/runtime object-name translations from root `i18n/<lang>.json` files via adapter-core `I18n`.
 
 ### 0.1.9 (2026-06-06)
 

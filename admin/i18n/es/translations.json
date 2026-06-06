@@ -1,11 +1,11 @@
 {
-  "Anthbot account username": "Nombre de usuario de la cuenta Anthbot",
-  "Anthbot account password": "Contraseña de la cuenta Anthbot",
-  "Area code": "Código de país",
-  "Examples: 49 for Germany, 32 for Belgium, 1 for US/Canada": "Ejemplos: 49 para Alemania, 32 para Bélgica, 1 para EE. UU./Canadá",
   "API host": "Host de la API",
-  "Poll interval in seconds": "Intervalo de consulta en segundos",
+  "Anthbot account password": "Contraseña de la cuenta Anthbot",
+  "Anthbot account username": "Nombre de usuario de la cuenta Anthbot",
+  "Area code": "Código de país",
   "Error description language": "Idioma de la descripción del error",
+  "Examples: 49 for Germany, 32 for Belgium, 1 for US/Canada": "Ejemplos: 49 para Alemania, 32 para Bélgica, 1 para EE. UU./Canadá",
   "Language used for Anthbot cloud error descriptions": "Idioma utilizado para las descripciones de errores de la nube Anthbot",
+  "Poll interval in seconds": "Intervalo de consulta en segundos",
   "The email address associated with your Anthbot account": "La dirección de correo electrónico asociada con su cuenta Anthbot"
 }
