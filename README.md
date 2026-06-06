@@ -45,6 +45,19 @@ An example ioBroker Blockly with conditions for mower automation is available in
 - Anthbot account with at least one bound Genie mower
 - Internet access from the ioBroker host to the Anthbot cloud and AWS IoT endpoint
 
+## Development
+
+- `npm install` installs runtime and development dependencies.
+- `npm run lint` checks code style using ESLint.
+- `npm run lint:fix` applies automatically fixable ESLint changes.
+- `npm run check` runs Node.js syntax checks for `main.js`, `lib/anthbot.js`, and test files.
+- `npm run test:js` runs unit tests.
+- `npm run test:package` runs package validation tests.
+- `npm run test:integration` runs integration tests.
+- `npm run test` runs `check`, unit tests, and package validation.
+- `npm run check:repo` runs the ioBroker repository checker.
+- `npm run release` creates a new ioBroker package release.
+
 ## Configuration
 
 Open the adapter instance configuration in ioBroker Admin and set:
@@ -157,6 +170,7 @@ Writable control states update mower settings through the Anthbot IoT service sh
 | `<serial>.controls.nearChargerMowing.mowCount` | number | `1..3` | Set mowing passes near the charging pile |
 | `<serial>.controls.nearChargerMowing.obstacleAvoidanceEnabled` | boolean | `true`/`false` | Enable or disable obstacle avoidance near the charging pile |
 | `<serial>.controls.nearChargerMowing.obstacleAvoidanceLevel` | number | `0..2` | Set obstacle avoidance level near the charging pile |
+
 ### Commands
 
 Command states are writable. Button states are reset to `false` after execution. Zone command states are reset to an empty string after execution. Consumable reset buttons are exposed under `consumable`.
@@ -257,21 +271,6 @@ For automatic zones, the adapter resolves the selected zone IDs or names to the 
 - For zone commands, compare the written value with the IDs and names in `zones.manual.list` or `zones.autoList`.
 - Check `raw.shadow.service` and the adapter log for command errors.
 
-## Legal Notice
-
-This project is unofficial and is not affiliated with, endorsed by, sponsored by, or approved by Anthbot.
-
-Anthbot and Genie names, marks, and logos belong to their respective owners. See [NOTICE.md](NOTICE.md) for details.
-
-## Credits
-
-Special credit to the Home Assistant Anthbot Genie projects, which made the Anthbot cloud flow and command mapping much easier to understand:
-
-- [vincentjanv](https://github.com/vincentjanv/anthbot_genie_ha)
-- [AdrianTIonut](https://github.com/AdrianTIonut/anthbot_genie_ha)
-
-This ioBroker adapter is an independent project, but it builds on public API research and implementation ideas from that Home Assistant integration.
-
 ## Changelog
 ### WORK IN PROGRESS
 
@@ -319,19 +318,20 @@ This ioBroker adapter is an independent project, but it builds on public API res
 - Clean up repository readiness metadata and poll timer handling for ioBroker best practices.
 - Align consumable lifetime and network diagnostic state roles with the documented ioBroker state role list.
 
-### 0.1.0
+## Credits
 
-- Add expanded diagnostics for model names, region fallback, errors, RTK, map, firmware, OTA, network, and GPS/location data.
-- Add consumable reset buttons and correct the maintenance mapping for charging port, cameras, and blades.
-- Add grouped command states for device, docking, maintenance, and mowing actions.
-- Add writable mowing controls grouped by full-map, zone, near-charger, rain, and voice settings.
-- Add full-map mowing control to include edge trimming.
-- Fix near-charger mowing enable control to use the mower shadow setting.
-- Remove unsupported camera-enabled and docking resume-return controls.
+Special credit to the Home Assistant Anthbot Genie projects, which made the Anthbot cloud flow and command mapping much easier to understand:
 
-### 0.0.8
+- [vincentjanv](https://github.com/vincentjanv/anthbot_genie_ha)
+- [AdrianTIonut](https://github.com/AdrianTIonut/anthbot_genie_ha)
 
-- Add consumable channels and values ​​to the adapter definition.
+This ioBroker adapter is an independent project, but it builds on public API research and implementation ideas from that Home Assistant integration.
+
+## Legal Notice
+
+This project is unofficial and is not affiliated with, endorsed by, sponsored by, or approved by Anthbot.
+
+Anthbot and Genie names, marks, and logos belong to their respective owners. See [NOTICE.md](NOTICE.md) for details.
 
 Older changelog entries are archived in [CHANGELOG_OLD.md](CHANGELOG_OLD.md).
 

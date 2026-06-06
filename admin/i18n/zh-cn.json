@@ -6,5 +6,6 @@
   "API host": "API 主机",
   "Poll interval in seconds": "轮询间隔（秒）",
   "Error description language": "错误说明语言",
-  "Language used for Anthbot cloud error descriptions": "用于 Anthbot 云端错误说明的语言"
+  "Language used for Anthbot cloud error descriptions": "用于 Anthbot 云端错误说明的语言",
+  "The email address associated with your Anthbot account": "与您的 Anthbot 账户关联的电子邮件地址"
 }
