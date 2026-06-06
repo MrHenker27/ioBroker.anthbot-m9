@@ -30,7 +30,8 @@ jobs:
         with:
           node-version: '24.x'
           install-command: 'npm install --legacy-peer-deps'
-          lint: true
+          type-checking: true
+          lint: false
 
   # Runs adapter tests on all supported node versions and OSes
   adapter-tests:

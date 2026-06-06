@@ -272,7 +272,9 @@ For automatic zones, the adapter resolves the selected zone IDs or names to the 
 - Check `raw.shadow.service` and the adapter log for command errors.
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 0.1.8 (2026-06-06)
+
+- Run `npm run check` instead of mandatory ESLint in the GitHub Actions quick-check job until the repository has a fully passing lint baseline.
 
 ### 0.1.7 (2026-06-06)
 
@@ -305,10 +307,6 @@ For automatic zones, the adapter resolves the selected zone IDs or names to the 
 
 - Use Anthbot cloud event-code translations for mower error descriptions and add a configurable description language.
 - Store the fetched event-code translation cache in `raw.shadow.event-code` for troubleshooting.
-
-### 0.1.3 (2026-05-08)
-
-- Fix AWS IoT shadow access by using temporary Anthbot IoT credentials instead of the expired bundled AWS credentials.
 
 ## Credits
 

@@ -1,6 +1,10 @@
 # Changelog Archive
 
 Older changelog entries can be moved here after future releases.
+## 0.1.3 (2026-05-08)
+
+- Fix AWS IoT shadow access by using temporary Anthbot IoT credentials instead of the expired bundled AWS credentials.
+
 ## 0.1.2
 
 - Limit `io-package.json` news entries for the ioBroker repository builder.

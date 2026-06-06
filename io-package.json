@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "anthbot-genie",
-    "version": "0.1.7",
+    "version": "0.1.8",
     "news": {
+      "0.1.8": {
+        "en": "Run `npm run check` instead of mandatory ESLint in the GitHub Actions quick-check job until the repository has a fully passing lint baseline.",
+        "de": "Starten Sie `npm Run Check` anstelle der obligatorischen ESLint in der GitHub Actions Schnell-Check-Job, bis das Repository eine vollständig durchlaufende schlanke Basislinie hat.",
+        "ru": "Запустите «npm run check» вместо обязательного ESLint в GitHub Actions, быстро проверяя работу, пока репозиторий не получит полностью проходящую исходную линию.",
+        "pt": "Execute `npm run check` em vez de ESLint obrigatório na tarefa de verificação rápida do GitHub Actions até que o repositório tenha uma linha de base totalmente passageira.",
+        "nl": "Voer de controle uit in plaats van de verplichte ESLint in de snelcontroletaak van GitHub Acties totdat de repository een volledig passerende pluisbasis heeft.",
+        "fr": "Exécutez `npm run check` au lieu d'ESLint obligatoire dans la tâche de vérification rapide GitHub Actions jusqu'à ce que le dépôt ait une ligne de base de lint passant complètement.",
+        "it": "Eseguire `npm run check` invece di ESLint obbligatorio nel GitHub Actions lavoro di controllo rapido fino a quando il repository ha una linea di base lint completamente passare.",
+        "es": "Ejecutar `npm run check` en lugar de ESLint obligatorio en el trabajo de control rápido GitHub Actions hasta que el repositorio tenga una línea de referencia totalmente pasada.",
+        "pl": "Uruchom 'npm run check' zamiast obowiązkowego ESLint w GitHub Actions quick- check zadanie do momentu, gdy repozytorium będzie miało w pełni przechodzącą linię bazową.",
+        "uk": "Запуск `npm запустіть перевірку` замість обов’язкового ESLint в GitHub Дії швидкого пошуку роботи, доки репозиторій має повну прохідну базову лінію.",
+        "zh-cn": "运行“ npm 运行检查” , 而不是在 GitHub 动作中进行强制的 ESLint 快速检查, 直到存储器有一个完全经过线程的基线 ."
+      },
       "0.1.7": {
         "en": "Use `npm install --legacy-peer-deps` in GitHub Actions so the shared ESLint config peer dependencies install correctly during CI.",
         "de": "Verwenden Sie `npm install --legacy-peer-deps` in GitHub Aktionen, so dass die geteilten ESLint Config Peer Abhängigkeiten während der CI richtig installieren.",
@@ -80,19 +93,6 @@
         "pl": "Ograniczono liczbę wpisów news w io-package dla buildera repozytorium ioBroker.",
         "uk": "Обмежено кількість записів news в io-package для збирача репозиторію ioBroker.",
         "zh-cn": "限制 io-package news 条目数量以适配 ioBroker 仓库构建器。"
-      },
-      "0.1.1": {
-        "en": "Fix consumable lifetime mapping so blades, cameras, and charging port match the Anthbot app.\nHighlight extended telemetry, diagnostics, controls, and raw payload coverage in the README.\nClean up repository readiness metadata and poll timer handling.",
-        "de": "Zuordnung der Verbrauchsmaterial-Lebensdauer korrigiert, sodass Klingen, Kameras und Ladeport mit der Anthbot-App übereinstimmen.\nErweiterte Telemetrie, Diagnose, Steuerungen und Rohdatenabdeckung in der README hervorgehoben.\nRepository-Metadaten und Poll-Timer-Verhalten bereinigt.",
-        "ru": "Исправлено сопоставление срока службы расходников, чтобы лезвия, камеры и зарядный порт соответствовали приложению Anthbot.\nВ README выделены расширенная телеметрия, диагностика, элементы управления и необработанные данные.\nОчищены метаданные готовности репозитория и обработка таймера опроса.",
-        "pt": "Corrigido o mapeamento da vida útil dos consumíveis para que lâminas, câmeras e porta de carregamento correspondam ao app Anthbot.\nDestacada no README a cobertura ampliada de telemetria, diagnóstico, controles e dados brutos.\nMetadados de prontidão do repositório e temporizador de polling ajustados.",
-        "nl": "Mapping van verbruiksl levensduur gecorrigeerd zodat messen, camera's en laadpoort overeenkomen met de Anthbot-app.\nUitgebreide telemetrie, diagnostiek, bediening en ruwe payloads duidelijker in de README gezet.\nRepository-readinessmetadata en polltimer-afhandeling opgeschoond.",
-        "fr": "Correction du mappage de la durée de vie des consommables afin que les lames, caméras et port de charge correspondent à l'application Anthbot.\nMise en avant dans le README de la télémétrie, des diagnostics, des contrôles et des données brutes étendus.\nNettoyage des métadonnées de dépôt et de la gestion du minuteur de polling.",
-        "it": "Corretto il mapping della vita utile dei consumabili in modo che lame, fotocamere e porta di ricarica corrispondano all'app Anthbot.\nEvidenziata nel README la copertura estesa di telemetria, diagnostica, controlli e payload grezzi.\nRipuliti i metadati di repository readiness e la gestione del timer di polling.",
-        "es": "Corregido el mapeo de vida útil de consumibles para que cuchillas, cámaras y puerto de carga coincidan con la app Anthbot.\nDestacada en el README la cobertura ampliada de telemetría, diagnóstico, controles y datos sin procesar.\nLimpiados los metadatos de preparación del repositorio y el manejo del temporizador de sondeo.",
-        "pl": "Poprawiono mapowanie żywotności materiałów eksploatacyjnych, aby ostrza, kamery i port ładowania odpowiadały aplikacji Anthbot.\nW README podkreślono rozszerzoną telemetrię, diagnostykę, sterowanie i surowe dane.\nUporządkowano metadane gotowości repozytorium i obsługę timera odpytywania.",
-        "uk": "Виправлено зіставлення ресурсу витратних матеріалів, щоб леза, камери й зарядний порт відповідали застосунку Anthbot.\nУ README підкреслено розширену телеметрію, діагностику, керування та сирі дані.\nОчищено метадані готовності репозиторію та обробку таймера опитування.",
-        "zh-cn": "修正耗材寿命映射，使刀片、摄像头和充电端口与 Anthbot 应用一致。\n在 README 中突出扩展的遥测、诊断、控制和原始数据覆盖。\n清理仓库就绪元数据和轮询计时器处理。"
       }
     },
     "titleLang": {
