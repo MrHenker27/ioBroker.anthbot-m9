@@ -274,9 +274,6 @@ For automatic zones, the adapter resolves the selected zone IDs or names to the 
 ## Changelog
 ### **WORK IN PROGRESS**
 
-
-### 0.1.6 (2026-06-06)
-
 - Raise the supported Node.js version to 22 and align the GitHub Actions workflow with current repository checker expectations.
 - Add a TypeScript-powered `npm run check:types` lane for the CommonJS codebase and fix the reported JSDoc typing issues in the adapter entrypoint and Anthbot client helpers.
 - Refresh release and repository tooling dependencies and add the required ESLint/Prettier config files for current ioBroker repository checks.
