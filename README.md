@@ -279,6 +279,10 @@ For automatic zones, the adapter resolves the selected zone IDs or names to the 
 - Check `raw.shadow.service` and the adapter log for command errors.
 
 ## Changelog
+### **WORK IN PROGRESS**
+
+- Refresh existing mower device/channel/state objects with `extendObjectAsync` so updated runtime i18n names are applied to already-created objects, not only new ones.
+
 ### 0.1.10 (2026-06-06)
 
 - Align ioBroker object metadata with the repository object-structure checker by creating the global `info` channel, correcting the mower status role, and emitting full recommended i18n keys for object names.

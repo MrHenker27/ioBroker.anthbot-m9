@@ -1383,7 +1383,7 @@ class AnthbotGenieAdapter extends AdapterBase {
         const serial = context.device.serialNumber;
         const root = serial;
 
-        await this.setObjectNotExistsAsync(root, {
+        await this.extendObjectAsync(root, {
             type: 'device',
             common: {
                 name: context.device.alias,
@@ -1394,7 +1394,7 @@ class AnthbotGenieAdapter extends AdapterBase {
         });
 
         for (const [id, type, name] of getDeviceChannelDefinitions()) {
-            await this.setObjectNotExistsAsync(`${root}.${id}`, {
+            await this.extendObjectAsync(`${root}.${id}`, {
                 type,
                 common: { name },
                 native: {},
@@ -1402,7 +1402,7 @@ class AnthbotGenieAdapter extends AdapterBase {
         }
 
         for (const [suffix, common] of Object.entries(getDeviceStateDefinitions())) {
-            await this.setObjectNotExistsAsync(`${root}.${suffix}`, {
+            await this.extendObjectAsync(`${root}.${suffix}`, {
                 type: 'state',
                 common,
                 native: {},
