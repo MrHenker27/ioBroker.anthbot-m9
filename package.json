@@ -1,6 +1,6 @@
 {
   "name": "iobroker.anthbot-genie",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Unofficial ioBroker adapter for Anthbot Genie robotic lawn mowers with cloud telemetry, diagnostics, consumables, zones, and controls.",
   "author": "reloxx13",
   "license": "MIT",

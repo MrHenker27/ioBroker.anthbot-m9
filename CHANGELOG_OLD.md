@@ -1,6 +1,10 @@
 # Changelog Archive
 
 Older changelog entries can be moved here after future releases.
+## 0.1.2
+
+- Limit `io-package.json` news entries for the ioBroker repository builder.
+
 ## 0.1.1
 
 - Fix consumable lifetime mapping to match the Anthbot app labels: blades, cameras, and charging port.
