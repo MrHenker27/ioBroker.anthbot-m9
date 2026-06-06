@@ -279,7 +279,7 @@ For automatic zones, the adapter resolves the selected zone IDs or names to the 
 - Check `raw.shadow.service` and the adapter log for command errors.
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 0.1.10 (2026-06-06)
 
 - Align ioBroker object metadata with the repository object-structure checker by creating the global `info` channel, correcting the mower status role, and emitting full recommended i18n keys for object names.
 - Keep admin translations in the repository-checker-friendly `admin/i18n/<lang>.json` layout and load backend/runtime object-name translations from root `i18n/<lang>.json` files via adapter-core `I18n`.
@@ -306,20 +306,6 @@ For automatic zones, the adapter resolves the selected zone IDs or names to the 
 - Migrate admin translations from `admin/i18n/<lang>/translations.json` to the short `admin/i18n/<lang>.json` layout.
 - Sync package metadata, README changelog entries, and `io-package.json` news with the existing `0.1.5` release state so repository checks no longer report an npm version mismatch.
 - Update Dependabot and repository-check-related config so only the expected `W4001` remains while the adapter is still pending inclusion in `latest`.
-
-### 0.1.5 (2026-05-14)
-
-- Updated JSON config to include help text for Anthbot account username.
-- Update translations and JSON config for Anthbot account email address.
-- Adjusted layout for area code and added poll interval and API host configurations with proper visibility settings.
-- Bump admin dependency version in `io-package.json`.
-- Updated admin dependency version from `>=7.6.20` to `>=7.7.22`.
-- Add GitHub Copilot instructions for ioBroker adapter development.
-- Add automated version check for Copilot instructions template.
-- Add ESLint and Prettier configuration files with linting scripts.
-- Refactor code structure for improved readability and maintainability.
-- Bump `protobufjs` in the `npm_and_yarn` group across 1 directory.
-- Downgrade `@iobroker/testing` to version `5.0.4` for compatibility.
 
 ## Credits
 

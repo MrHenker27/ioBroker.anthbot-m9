@@ -1,6 +1,20 @@
 # Changelog Archive
 
 Older changelog entries can be moved here after future releases.
+## 0.1.5 (2026-05-14)
+
+- Updated JSON config to include help text for Anthbot account username.
+- Update translations and JSON config for Anthbot account email address.
+- Adjusted layout for area code and added poll interval and API host configurations with proper visibility settings.
+- Bump admin dependency version in `io-package.json`.
+- Updated admin dependency version from `>=7.6.20` to `>=7.7.22`.
+- Add GitHub Copilot instructions for ioBroker adapter development.
+- Add automated version check for Copilot instructions template.
+- Add ESLint and Prettier configuration files with linting scripts.
+- Refactor code structure for improved readability and maintainability.
+- Bump `protobufjs` in the `npm_and_yarn` group across 1 directory.
+- Downgrade `@iobroker/testing` to version `5.0.4` for compatibility.
+
 ## 0.1.4 (2026-05-08)
 
 - Use Anthbot cloud event-code translations for mower error descriptions and add a configurable description language.
