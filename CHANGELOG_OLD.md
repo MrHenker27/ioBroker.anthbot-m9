@@ -1,6 +1,15 @@
 # Changelog Archive
 
 Older changelog entries can be moved here after future releases.
+## 0.1.6 (2026-06-06)
+
+- Raise the supported Node.js version to 22 and align the GitHub Actions workflow with current repository checker expectations.
+- Add a TypeScript-powered `npm run check:types` lane for the CommonJS codebase and fix the reported JSDoc typing issues in the adapter entrypoint and Anthbot client helpers.
+- Refresh release and repository tooling dependencies and add the required ESLint/Prettier config files for current ioBroker repository checks.
+- Migrate admin translations from `admin/i18n/<lang>/translations.json` to the short `admin/i18n/<lang>.json` layout.
+- Sync package metadata, README changelog entries, and `io-package.json` news with the existing `0.1.5` release state so repository checks no longer report an npm version mismatch.
+- Update Dependabot and repository-check-related config so only the expected `W4001` remains while the adapter is still pending inclusion in `latest`.
+
 ## 0.1.5 (2026-05-14)
 
 - Updated JSON config to include help text for Anthbot account username.

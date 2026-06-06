@@ -279,7 +279,7 @@ For automatic zones, the adapter resolves the selected zone IDs or names to the 
 - Check `raw.shadow.service` and the adapter log for command errors.
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 0.1.11 (2026-06-06)
 
 - Refresh existing mower device/channel/state objects with `extendObjectAsync` so updated runtime i18n names are applied to already-created objects, not only new ones.
 
@@ -301,15 +301,6 @@ For automatic zones, the adapter resolves the selected zone IDs or names to the 
 ### 0.1.7 (2026-06-06)
 
 - Use `npm install --legacy-peer-deps` in GitHub Actions so the shared ESLint config peer dependencies install correctly during CI.
-
-### 0.1.6 (2026-06-06)
-
-- Raise the supported Node.js version to 22 and align the GitHub Actions workflow with current repository checker expectations.
-- Add a TypeScript-powered `npm run check:types` lane for the CommonJS codebase and fix the reported JSDoc typing issues in the adapter entrypoint and Anthbot client helpers.
-- Refresh release and repository tooling dependencies and add the required ESLint/Prettier config files for current ioBroker repository checks.
-- Migrate admin translations from `admin/i18n/<lang>/translations.json` to the short `admin/i18n/<lang>.json` layout.
-- Sync package metadata, README changelog entries, and `io-package.json` news with the existing `0.1.5` release state so repository checks no longer report an npm version mismatch.
-- Update Dependabot and repository-check-related config so only the expected `W4001` remains while the adapter is still pending inclusion in `latest`.
 
 ## Credits
 

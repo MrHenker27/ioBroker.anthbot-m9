@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "anthbot-genie",
-    "version": "0.1.10",
+    "version": "0.1.11",
     "news": {
+      "0.1.11": {
+        "en": "Refresh existing mower device, channel, and state objects with extendObjectAsync so updated runtime i18n names are applied to already-created objects too.",
+        "de": "Refresh existing mower device, channel, and state objects with extendObjectAsync so updated runtime i18n names are applied to already-created objects too.",
+        "ru": "Refresh existing mower device, channel, and state objects with extendObjectAsync so updated runtime i18n names are applied to already-created objects too.",
+        "pt": "Refresh existing mower device, channel, and state objects with extendObjectAsync so updated runtime i18n names are applied to already-created objects too.",
+        "nl": "Refresh existing mower device, channel, and state objects with extendObjectAsync so updated runtime i18n names are applied to already-created objects too.",
+        "fr": "Refresh existing mower device, channel, and state objects with extendObjectAsync so updated runtime i18n names are applied to already-created objects too.",
+        "it": "Refresh existing mower device, channel, and state objects with extendObjectAsync so updated runtime i18n names are applied to already-created objects too.",
+        "es": "Refresh existing mower device, channel, and state objects with extendObjectAsync so updated runtime i18n names are applied to already-created objects too.",
+        "pl": "Refresh existing mower device, channel, and state objects with extendObjectAsync so updated runtime i18n names are applied to already-created objects too.",
+        "uk": "Refresh existing mower device, channel, and state objects with extendObjectAsync so updated runtime i18n names are applied to already-created objects too.",
+        "zh-cn": "Refresh existing mower device, channel, and state objects with extendObjectAsync so updated runtime i18n names are applied to already-created objects too."
+      },
       "0.1.10": {
         "en": "Align ioBroker object metadata with the repository object-structure checker by creating the global info channel, correcting the mower status role, and emitting full recommended i18n keys for object names.\nKeep admin translations in the repository-checker-friendly admin/i18n/<lang>.json layout and load backend/runtime object-name translations from root i18n/<lang>.json files via adapter-core I18n.",
         "de": "Align ioBroker object metadata with the repository object-structure checker by creating the global info channel, correcting the mower status role, and emitting full recommended i18n keys for object names.\nKeep admin translations in the repository-checker-friendly admin/i18n/<lang>.json layout and load backend/runtime object-name translations from root i18n/<lang>.json files via adapter-core I18n.",
@@ -80,19 +93,6 @@
         "pl": "Naprawiono dostęp do shadow AWS IoT.",
         "uk": "Виправлено доступ до AWS IoT shadow.",
         "zh-cn": "修复 AWS IoT shadow 访问。"
-      },
-      "0.1.2": {
-        "en": "Limit io-package news entries for the ioBroker repository builder.",
-        "de": "Anzahl der io-package-News-Einträge für den ioBroker-Repository-Builder begrenzt.",
-        "ru": "Ограничено количество записей io-package news для сборщика репозитория ioBroker.",
-        "pt": "Limitado o número de entradas de news do io-package para o construtor do repositório ioBroker.",
-        "nl": "Aantal io-package news-items beperkt voor de ioBroker repository builder.",
-        "fr": "Limitation du nombre d'entrées news dans io-package pour le générateur de dépôt ioBroker.",
-        "it": "Limitato il numero di voci news in io-package per il builder del repository ioBroker.",
-        "es": "Limitado el número de entradas news de io-package para el generador del repositorio ioBroker.",
-        "pl": "Ograniczono liczbę wpisów news w io-package dla buildera repozytorium ioBroker.",
-        "uk": "Обмежено кількість записів news в io-package для збирача репозиторію ioBroker.",
-        "zh-cn": "限制 io-package news 条目数量以适配 ioBroker 仓库构建器。"
       }
     },
     "titleLang": {
