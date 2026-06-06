@@ -1,6 +1,13 @@
 # Changelog Archive
 
 Older changelog entries can be moved here after future releases.
+## 0.1.1
+
+- Fix consumable lifetime mapping to match the Anthbot app labels: blades, cameras, and charging port.
+- Highlight the extended telemetry, diagnostics, controls, and raw payload coverage in the README.
+- Clean up repository readiness metadata and poll timer handling for ioBroker best practices.
+- Align consumable lifetime and network diagnostic state roles with the documented ioBroker state role list.
+
 ## 0.1.0
 
 - Add expanded diagnostics for model names, region fallback, errors, RTK, map, firmware, OTA, network, and GPS/location data.

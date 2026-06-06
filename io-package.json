@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "anthbot-genie",
-    "version": "0.1.5",
+    "version": "0.1.6",
     "news": {
       "0.1.6": {
         "en": "Raise the minimum Node.js version to 22.\nAdd a TypeScript-based check lane for the JavaScript codebase and fix the reported typing issues.\nMigrate admin translations to the short i18n file layout and refresh repository-check compatibility.",

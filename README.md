@@ -274,6 +274,8 @@ For automatic zones, the adapter resolves the selected zone IDs or names to the 
 ## Changelog
 ### **WORK IN PROGRESS**
 
+### 0.1.6 (2026-06-06)
+
 - Raise the supported Node.js version to 22 and align the GitHub Actions workflow with current repository checker expectations.
 - Add a TypeScript-powered `npm run check:types` lane for the CommonJS codebase and fix the reported JSDoc typing issues in the adapter entrypoint and Anthbot client helpers.
 - Refresh release and repository tooling dependencies and add the required ESLint/Prettier config files for current ioBroker repository checks.
@@ -307,13 +309,6 @@ For automatic zones, the adapter resolves the selected zone IDs or names to the 
 ### 0.1.2
 
 - Limit `io-package.json` news entries for the ioBroker repository builder.
-
-### 0.1.1
-
-- Fix consumable lifetime mapping to match the Anthbot app labels: blades, cameras, and charging port.
-- Highlight the extended telemetry, diagnostics, controls, and raw payload coverage in the README.
-- Clean up repository readiness metadata and poll timer handling for ioBroker best practices.
-- Align consumable lifetime and network diagnostic state roles with the documented ioBroker state role list.
 
 ## Credits
 
