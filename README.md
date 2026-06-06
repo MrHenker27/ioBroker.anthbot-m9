@@ -61,7 +61,7 @@ An example ioBroker Blockly with conditions for mower automation is available in
 
 ## Translations
 
-- Admin/JSON Config translations live in `admin/i18n/<lang>/translations.json`.
+- Admin/JSON Config translations live in `admin/i18n/<lang>.json`.
 - Backend/runtime object-name translations live in `i18n/<lang>.json`.
 - After adding or removing translatable strings, update the English source files and run `npm run translate` so future Weblate and adapter-dev syncs stay aligned.
 
@@ -282,7 +282,7 @@ For automatic zones, the adapter resolves the selected zone IDs or names to the 
 ### **WORK IN PROGRESS**
 
 - Align ioBroker object metadata with the repository object-structure checker by creating the global `info` channel, correcting the mower status role, and emitting full recommended i18n keys for object names.
-- Move admin translations back to the Weblate-friendly `admin/i18n/<lang>/translations.json` layout and load backend/runtime object-name translations from root `i18n/<lang>.json` files via adapter-core `I18n`.
+- Keep admin translations in the repository-checker-friendly `admin/i18n/<lang>.json` layout and load backend/runtime object-name translations from root `i18n/<lang>.json` files via adapter-core `I18n`.
 
 ### 0.1.9 (2026-06-06)
 

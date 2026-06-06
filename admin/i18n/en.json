@@ -1,0 +1,11 @@
+{
+    "API host": "API host",
+    "Anthbot account password": "Anthbot account password",
+    "Anthbot account username": "Anthbot account username",
+    "Area code": "Area code",
+    "Error description language": "Error description language",
+    "Examples: 49 for Germany, 32 for Belgium, 1 for US/Canada": "Examples: 49 for Germany, 32 for Belgium, 1 for US/Canada",
+    "Language used for Anthbot cloud error descriptions": "Language used for Anthbot cloud error descriptions",
+    "Poll interval in seconds": "Poll interval in seconds",
+    "The email address associated with your Anthbot account": "The email address associated with your Anthbot account"
+}
