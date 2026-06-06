@@ -272,6 +272,8 @@ For automatic zones, the adapter resolves the selected zone IDs or names to the 
 - Check `raw.shadow.service` and the adapter log for command errors.
 
 ## Changelog
+### **WORK IN PROGRESS**
+
 ### 0.1.8 (2026-06-06)
 
 - Run `npm run check` instead of mandatory ESLint in the GitHub Actions quick-check job until the repository has a fully passing lint baseline.
