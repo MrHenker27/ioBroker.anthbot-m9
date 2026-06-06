@@ -272,7 +272,7 @@ For automatic zones, the adapter resolves the selected zone IDs or names to the 
 - Check `raw.shadow.service` and the adapter log for command errors.
 
 ## Changelog
-### WORK IN PROGRESS
+### **WORK IN PROGRESS**
 
 
 ### 0.1.6 (2026-06-06)
