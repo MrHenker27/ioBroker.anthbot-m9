@@ -192,7 +192,7 @@ function getDeviceStateDefinitions() {
         },
         'metrics.status.mower': {
             type: 'string',
-            role: 'value',
+            role: 'text',
             read: true,
             write: false,
             name: t('Mower status'),
@@ -1075,6 +1075,14 @@ class AnthbotGenieAdapter extends AdapterBase {
     }
 
     async ensureBaseObjects() {
+        await this.extendObjectAsync('info', {
+            type: 'channel',
+            common: {
+                name: t('Info'),
+            },
+            native: {},
+        });
+
         await this.extendObjectAsync('info.connection', {
             type: 'state',
             common: {

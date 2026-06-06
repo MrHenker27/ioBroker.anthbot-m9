@@ -279,6 +279,15 @@ For automatic zones, the adapter resolves the selected zone IDs or names to the 
 - Check `raw.shadow.service` and the adapter log for command errors.
 
 ## Changelog
+
+<!--
+  Placeholder for the next version (at the beginning of the line):
+  ### **WORK IN PROGRESS**
+-->
+### 0.1.12 (2026-06-06)
+
+- (reloxx13) **FIXED**: Create the global `info` channel and correct the mower status role so the adapter object structure passes ioBroker review checks.
+
 ### 0.1.11 (2026-06-06)
 
 - Refresh existing mower device/channel/state objects with `extendObjectAsync` so updated runtime i18n names are applied to already-created objects, not only new ones.
@@ -297,10 +306,6 @@ For automatic zones, the adapter resolves the selected zone IDs or names to the 
 ### 0.1.8 (2026-06-06)
 
 - Run `npm run check` instead of mandatory ESLint in the GitHub Actions quick-check job until the repository has a fully passing lint baseline.
-
-### 0.1.7 (2026-06-06)
-
-- Use `npm install --legacy-peer-deps` in GitHub Actions so the shared ESLint config peer dependencies install correctly during CI.
 
 ## Credits
 

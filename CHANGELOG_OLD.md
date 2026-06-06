@@ -1,6 +1,10 @@
 # Changelog Archive
 
 Older changelog entries can be moved here after future releases.
+## 0.1.7 (2026-06-06)
+
+- Use `npm install --legacy-peer-deps` in GitHub Actions so the shared ESLint config peer dependencies install correctly during CI.
+
 ## 0.1.6 (2026-06-06)
 
 - Raise the supported Node.js version to 22 and align the GitHub Actions workflow with current repository checker expectations.
