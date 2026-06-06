@@ -272,6 +272,8 @@ For automatic zones, the adapter resolves the selected zone IDs or names to the 
 - Check `raw.shadow.service` and the adapter log for command errors.
 
 ## Changelog
+### **WORK IN PROGRESS**
+
 ### 0.1.7 (2026-06-06)
 
 - Use `npm install --legacy-peer-deps` in GitHub Actions so the shared ESLint config peer dependencies install correctly during CI.
