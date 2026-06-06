@@ -274,7 +274,11 @@ For automatic zones, the adapter resolves the selected zone IDs or names to the 
 ## Changelog
 ### **WORK IN PROGRESS**
 
+### 0.1.9 (2026-06-06)
+
 - Drop the temporary `--legacy-peer-deps` GitHub Actions install override now that the lockfile supports plain `npm ci` again.
+- Re-enable ESLint in the GitHub Actions quick-check job and align the local lint config with the checked JavaScript codebase.
+- Clean up repository metadata so local `repochecker` no longer reports actionable findings.
 
 ### 0.1.8 (2026-06-06)
 
@@ -306,11 +310,6 @@ For automatic zones, the adapter resolves the selected zone IDs or names to the 
 - Refactor code structure for improved readability and maintainability.
 - Bump `protobufjs` in the `npm_and_yarn` group across 1 directory.
 - Downgrade `@iobroker/testing` to version `5.0.4` for compatibility.
-
-### 0.1.4 (2026-05-08)
-
-- Use Anthbot cloud event-code translations for mower error descriptions and add a configurable description language.
-- Store the fetched event-code translation cache in `raw.shadow.event-code` for troubleshooting.
 
 ## Credits
 

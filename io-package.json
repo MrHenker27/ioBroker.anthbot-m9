@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "anthbot-genie",
-    "version": "0.1.8",
+    "version": "0.1.9",
     "news": {
+      "0.1.9": {
+        "en": "Drop the temporary --legacy-peer-deps CI install override.\nRe-enable ESLint in the GitHub Actions quick-check job.\nClean up repository metadata so repochecker has no actionable findings.",
+        "de": "Drop the temporary --legacy-peer-deps CI install override.\nRe-enable ESLint in the GitHub Actions quick-check job.\nClean up repository metadata so repochecker has no actionable findings.",
+        "ru": "Drop the temporary --legacy-peer-deps CI install override.\nRe-enable ESLint in the GitHub Actions quick-check job.\nClean up repository metadata so repochecker has no actionable findings.",
+        "pt": "Drop the temporary --legacy-peer-deps CI install override.\nRe-enable ESLint in the GitHub Actions quick-check job.\nClean up repository metadata so repochecker has no actionable findings.",
+        "nl": "Drop the temporary --legacy-peer-deps CI install override.\nRe-enable ESLint in the GitHub Actions quick-check job.\nClean up repository metadata so repochecker has no actionable findings.",
+        "fr": "Drop the temporary --legacy-peer-deps CI install override.\nRe-enable ESLint in the GitHub Actions quick-check job.\nClean up repository metadata so repochecker has no actionable findings.",
+        "it": "Drop the temporary --legacy-peer-deps CI install override.\nRe-enable ESLint in the GitHub Actions quick-check job.\nClean up repository metadata so repochecker has no actionable findings.",
+        "es": "Drop the temporary --legacy-peer-deps CI install override.\nRe-enable ESLint in the GitHub Actions quick-check job.\nClean up repository metadata so repochecker has no actionable findings.",
+        "pl": "Drop the temporary --legacy-peer-deps CI install override.\nRe-enable ESLint in the GitHub Actions quick-check job.\nClean up repository metadata so repochecker has no actionable findings.",
+        "uk": "Drop the temporary --legacy-peer-deps CI install override.\nRe-enable ESLint in the GitHub Actions quick-check job.\nClean up repository metadata so repochecker has no actionable findings.",
+        "zh-cn": "Drop the temporary --legacy-peer-deps CI install override.\nRe-enable ESLint in the GitHub Actions quick-check job.\nClean up repository metadata so repochecker has no actionable findings."
+      },
       "0.1.8": {
         "en": "Run `npm run check` instead of mandatory ESLint in the GitHub Actions quick-check job until the repository has a fully passing lint baseline.",
         "de": "Starten Sie `npm Run Check` anstelle der obligatorischen ESLint in der GitHub Actions Schnell-Check-Job, bis das Repository eine vollständig durchlaufende schlanke Basislinie hat.",
