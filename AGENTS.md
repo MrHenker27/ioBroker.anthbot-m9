@@ -7,6 +7,8 @@ This repository is a small Node.js ioBroker adapter for Anthbot Genie mowers.
 - `main.js` is the adapter entry point and owns ioBroker lifecycle handling, polling, object/state creation, and command handling.
 - `lib/anthbot.js` contains the Anthbot cloud/shadow API clients plus parsing and mapping helpers.
 - `admin/` contains adapter admin assets and `jsonConfig.json` for ioBroker configuration UI.
+- `admin/i18n/*.json` contains Admin/JSON Config translations in the short layout expected by the repository checker.
+- `i18n/*.json` contains backend/runtime translations for ioBroker object names loaded through adapter-core `I18n`.
 - `io-package.json` defines adapter metadata, encrypted native config, default settings, and ioBroker objects.
 - `README.md`, `NOTICE.md`, and `LICENSE` contain user documentation and legal notices.
 
@@ -20,6 +22,7 @@ There is currently no dedicated `test/` directory or generated build output.
 - `npm run check` runs the TypeScript JSDoc check plus `node --check` for the adapter and test files.
 - `npm run check:repo` runs the ioBroker repository checker against the GitHub repository URL.
 - `npx @iobroker/repochecker https://github.com/reloxx13/ioBroker.anthbot-genie --local --noinfo` runs repochecker against the local working tree and is the preferred validation command when fixing repository-checker findings.
+- `npm run translate` runs `translate-adapter` for admin and metadata translations.
 - `npm run release` invokes the ioBroker release script; use it for preparing new adapter versions.
 - `npm pack` can be used to inspect the package contents listed in `package.json`.
 
@@ -55,7 +58,9 @@ Command states under `commands.*` are user-triggered controls. Validate input, s
 
 Keep raw cloud/shadow payload states diagnostic-only and avoid storing credentials, tokens, serial-number samples from a real user, or other secrets in code, docs, logs, or fixtures.
 
-When changing `admin/jsonConfig.json`, keep `common.adminUI.config` in `io-package.json` aligned, preserve `i18n: true`, and add or update translations in `admin/i18n/*/translations.json`.
+When changing `admin/jsonConfig.json`, keep `common.adminUI.config` in `io-package.json` aligned, preserve `i18n: true`, and add or update translations in `admin/i18n/<lang>.json`.
+
+When changing runtime object names in `main.js`, keep the root `i18n/<lang>.json` files aligned. Runtime/backend translations are loaded via adapter-core `I18n`, not inline maps.
 
 When changing configuration fields, keep `io-package.json` `native`, `encryptedNative`, `protectedNative`, and the admin JSON config in sync. The `password` field must stay encrypted and protected.
 
@@ -76,6 +81,16 @@ When making user-visible or release-relevant changes, update the `README.md` cha
 When state objects, command behavior, config fields, or user-visible adapter behavior change, update the README sections that document those states, commands, or settings in the same change.
 
 When preparing a release, use `npm run release` and keep `README.md` changelog entries, `io-package.json` news, `package.json`, and `package-lock.json` versions consistent with the release script output.
+
+Release flow in this repository:
+
+- Add the upcoming release notes to `README.md` under `WORK IN PROGRESS`.
+- Run `npm run lint`, `npm run check`, `npm test`, and local `repochecker` first.
+- Start a normal patch release with `npm run release -- patch --yes`.
+- The release script updates `package.json`, `io-package.json`, `README.md`, and `CHANGELOG_OLD.md`, creates the release commit, and tags `vX.Y.Z`.
+- The configured `manual-review` plugin can pause the process with an `Are you done?` prompt. Review the edited files before continuing.
+- If the ioBroker translator service fails while generating `io-package.json` news, add `common.news.NEXT` manually in `io-package.json` and rerun with `npm run release -- patch --yes --all` so the script replaces `NEXT` instead of calling the translator.
+- If the release script stops after editing files but before commit/tag creation, finish manually: update the lockfile if needed, commit the release files as `chore: release vX.Y.Z`, create the annotated tag `vX.Y.Z`, and push both branch and tag.
 
 Pull requests should include a clear description, validation performed (`npm run lint`, `npm run check`, `npm test`, and local `repochecker` when relevant), linked issues when applicable, and screenshots only for admin UI changes.
 
