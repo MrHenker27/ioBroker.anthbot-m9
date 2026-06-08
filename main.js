@@ -11,21 +11,34 @@ const {
     asInteger,
     asIsoTimestamp,
     autoZones,
+    batteryLevel,
+    buildNestMowParamsPayload,
+    buildParamSetPayload,
     compactZonePayload,
     coerceEnabledValue,
     consumableLifetimes,
+    errorCode,
     errorDescription,
     generalMowerStatus,
+    ipAddress,
     isLikelyAuthenticationError,
     isCharging,
     isCustomDirectionEnabled,
     isNonZero,
+    mapArea,
     manualZones,
+    mappingTaskState,
     parseCommandSelection,
+    rawModeStatus,
     rawRobotStatus,
     rtkBaseStateLabel,
     rtkStateLabel,
     safeGet,
+    simCcid,
+    simPresent,
+    totalMowingArea,
+    totalMowingTime,
+    wifiSsid,
 } = require('./lib/anthbot');
 
 /**
@@ -204,6 +217,13 @@ function getDeviceStateDefinitions() {
             write: false,
             name: t('Raw robot status'),
         },
+        'metrics.status.modeRaw': {
+            type: 'string',
+            role: 'text',
+            read: true,
+            write: false,
+            name: t('Raw mode status'),
+        },
         'metrics.mowing.time': {
             type: 'number',
             role: 'value.interval',
@@ -219,6 +239,22 @@ function getDeviceStateDefinitions() {
             read: true,
             write: false,
             name: t('Mowing area'),
+        },
+        'metrics.mowing.totalTime': {
+            type: 'number',
+            role: 'value.interval',
+            unit: 's',
+            read: true,
+            write: false,
+            name: t('Total mowing time'),
+        },
+        'metrics.mowing.totalArea': {
+            type: 'number',
+            role: 'value',
+            unit: 'm²',
+            read: true,
+            write: false,
+            name: t('Total mowing area'),
         },
         'metrics.mowing.borderActive': {
             type: 'boolean',
@@ -290,6 +326,13 @@ function getDeviceStateDefinitions() {
             read: true,
             write: false,
             name: t('Map status'),
+        },
+        'metrics.map.mappingTaskState': {
+            type: 'string',
+            role: 'text',
+            read: true,
+            write: false,
+            name: t('Mapping task state'),
         },
         'metrics.error.code': {
             type: 'number',
@@ -1303,7 +1346,9 @@ class AnthbotGenieAdapter extends AdapterBase {
                     serialNumber: device.serialNumber,
                     regionName: region.regionName,
                     iotEndpoint: region.iotEndpoint,
+                    accountClient: this.cloudClient,
                     iotCredentials: region.iotCredentials,
+                    deviceModel: device.model,
                 }),
                 iotCredentials: region.iotCredentials,
                 areaDefinition: existing?.areaDefinition || {},
@@ -1483,7 +1528,9 @@ class AnthbotGenieAdapter extends AdapterBase {
             serialNumber: context.device.serialNumber,
             regionName: context.region.regionName,
             iotEndpoint: context.region.iotEndpoint,
+            accountClient: this.cloudClient,
             iotCredentials,
+            deviceModel: context.device.model,
         });
     }
 
@@ -1503,7 +1550,9 @@ class AnthbotGenieAdapter extends AdapterBase {
         const customDirection = typeof data?.param_set?.mow_head === 'number' ? data.param_set.mow_head : null;
         const rainContinueTime = typeof data.rain_continue_time === 'number' ? data.rain_continue_time : null;
         const rainPerceptionEnabled = coerceEnabledValue(data.rain_switch);
-        const nearChargerMowingEnabled = coerceEnabledValue(safeGet(data, 'param_set', 'nest_switch'));
+        const nearChargerMowingEnabled = coerceEnabledValue(
+            data?.nest_switch !== undefined ? data.nest_switch : safeGet(data, 'param_set', 'nest_switch'),
+        );
         const nearChargerSettings = this.nearChargerMowingSettings(data);
         const pointMow = data?.mow_point && typeof data.mow_point === 'object' ? data.mow_point : {};
         const rtkAntennaMoved = coerceEnabledValue(data?.rtk_move_sta?.value);
@@ -1526,11 +1575,14 @@ class AnthbotGenieAdapter extends AdapterBase {
             'consumable.cameras.life': consumables.cameras,
             'consumable.blades.life': consumables.blades,
 
-            'metrics.batteryLevel': typeof data.elec === 'number' ? data.elec : null,
+            'metrics.batteryLevel': batteryLevel(data),
             'metrics.status.mower': generalMowerStatus(data),
             'metrics.status.robotRaw': rawRobotStatus(data) || '',
+            'metrics.status.modeRaw': rawModeStatus(data) || '',
             'metrics.mowing.time': mowingTime,
             'metrics.mowing.area': mowingArea,
+            'metrics.mowing.totalTime': totalMowingTime(data),
+            'metrics.mowing.totalArea': totalMowingArea(data),
             'metrics.mowing.borderActive': isNonZero(safeGet(data, 'mow_border', 'value')),
             'metrics.mowing.nearChargerActive': isNonZero(safeGet(data, 'mow_nest', 'value')),
             'metrics.mowing.fullYardActive': coerceEnabledValue(data.mow_full),
@@ -1539,13 +1591,14 @@ class AnthbotGenieAdapter extends AdapterBase {
             'metrics.pointMowing.y': typeof pointMow.y === 'number' ? pointMow.y : null,
             'metrics.zones.manualCount': manualZoneList.length,
             'metrics.zones.autoCount': autoZoneList.length,
-            'metrics.map.totalArea': typeof data.map_area === 'number' ? data.map_area : null,
+            'metrics.map.totalArea': mapArea(data),
             'metrics.map.status': asText(safeGet(data, 'map_sta', 'value')),
-            'metrics.error.code': asInteger(data.err_code),
+            'metrics.map.mappingTaskState': mappingTaskState(data) || '',
+            'metrics.error.code': errorCode(data),
             'metrics.error.description': asText(
                 errorDescription(data, this.eventCodeCache, config.errorDescriptionLanguage || 'English'),
             ),
-            'metrics.error.active': isNonZero(data.err_code),
+            'metrics.error.active': isNonZero(errorCode(data)),
 
             'location.gps.latitude':
                 typeof safeGet(data, 'anti_loss_pose', 'posegps', 'lat') === 'number'
@@ -1569,10 +1622,10 @@ class AnthbotGenieAdapter extends AdapterBase {
             'diagnostics.network.cellularConnected': coerceEnabledValue(data['4g_state']),
             'diagnostics.network.cellularHeartbeat': coerceEnabledValue(data.heart_4g),
             'diagnostics.network.bluetoothActive': coerceEnabledValue(data.bt_state),
-            'diagnostics.network.simPresent': coerceEnabledValue(safeGet(data, 'sim_status', 'status')),
-            'diagnostics.network.wifiSsid': asText(data.sta_ssid),
-            'diagnostics.network.ipAddress': asText(data.sta_ip_addr),
-            'diagnostics.network.simCcid': asText(data['4g_ccid']),
+            'diagnostics.network.simPresent': simPresent(data),
+            'diagnostics.network.wifiSsid': asText(wifiSsid(data)),
+            'diagnostics.network.ipAddress': asText(ipAddress(data)),
+            'diagnostics.network.simCcid': asText(simCcid(data)),
             'diagnostics.mapAvailable': isNonZero(safeGet(data, 'has_map', 'value')),
             'diagnostics.accelerometerActive': coerceEnabledValue(safeGet(data, 'acc_sta', 'value')),
             'diagnostics.features.antiLossActive': coerceEnabledValue(data.anti_loss_switch),
@@ -1758,7 +1811,9 @@ class AnthbotGenieAdapter extends AdapterBase {
             return typeof data.rain_continue_time === 'number' ? Math.round(data.rain_continue_time / 3600) : null;
         }
         if (control === 'nearChargerMowing.enabled') {
-            return coerceEnabledValue(safeGet(data, 'param_set', 'nest_switch'));
+            return coerceEnabledValue(
+                data?.nest_switch !== undefined ? data.nest_switch : safeGet(data, 'param_set', 'nest_switch'),
+            );
         }
         if (control === 'nearChargerMowing.mowHeight') {
             return this.nearChargerMowingSettings(data).cutter_height;
@@ -1922,7 +1977,7 @@ class AnthbotGenieAdapter extends AdapterBase {
                 });
                 await context.shadowClient.publishServiceCommand({
                     cmd: 'param_set',
-                    data: { ...this.globalMowingSettings(data), cutter_height: intValue },
+                    data: buildParamSetPayload(context.device.model, data, { cutter_height: intValue }),
                 });
                 return;
             }
@@ -1930,7 +1985,7 @@ class AnthbotGenieAdapter extends AdapterBase {
                 const enabled = coerceEnabledValue(value);
                 await context.shadowClient.publishServiceCommand({
                     cmd: 'param_set',
-                    data: { ...this.globalMowingSettings(data), rid_switch: enabled ? 1 : 0 },
+                    data: buildParamSetPayload(context.device.model, data, { rid_switch: enabled ? 1 : 0 }),
                 });
                 return;
             }
@@ -1955,25 +2010,21 @@ class AnthbotGenieAdapter extends AdapterBase {
                 });
                 await context.shadowClient.publishServiceCommand({
                     cmd: 'param_set',
-                    data: {
-                        ...this.globalMowingSettings(data),
+                    data: buildParamSetPayload(context.device.model, data, {
                         mow_head: intValue,
                         enable_adaptive_head: 0,
-                    },
+                    }),
                 });
                 return;
             }
             case 'fullMapMowing.customMowingDirectionEnabled':
             case 'zoneMowing.customMowingDirectionEnabled': {
                 const enabled = coerceEnabledValue(value);
-                const mowHead = typeof data?.param_set?.mow_head === 'number' ? data.param_set.mow_head : 0;
                 await context.shadowClient.publishServiceCommand({
                     cmd: 'param_set',
-                    data: {
-                        ...this.globalMowingSettings(data),
-                        mow_head: mowHead,
+                    data: buildParamSetPayload(context.device.model, data, {
                         enable_adaptive_head: enabled ? 0 : 1,
-                    },
+                    }),
                 });
                 return;
             }
@@ -1985,7 +2036,7 @@ class AnthbotGenieAdapter extends AdapterBase {
                 });
                 await context.shadowClient.publishServiceCommand({
                     cmd: 'param_set',
-                    data: { ...this.globalMowingSettings(data), mow_count: intValue },
+                    data: buildParamSetPayload(context.device.model, data, { mow_count: intValue }),
                 });
                 return;
             }
@@ -2050,8 +2101,8 @@ class AnthbotGenieAdapter extends AdapterBase {
             case 'nearChargerMowing.enabled': {
                 const enabled = coerceEnabledValue(value);
                 await context.shadowClient.publishServiceCommand({
-                    cmd: 'param_set',
-                    data: { ...this.globalMowingSettings(data), nest_switch: enabled ? 1 : 0 },
+                    cmd: 'set_mow_params',
+                    data: buildNestMowParamsPayload(data, { nest_switch: enabled ? 1 : 0 }),
                 });
                 return;
             }
@@ -2064,8 +2115,8 @@ class AnthbotGenieAdapter extends AdapterBase {
                     suffix: 'in 5 mm steps',
                 });
                 await context.shadowClient.publishServiceCommand({
-                    cmd: 'nest_param_set',
-                    data: { ...this.nearChargerMowingSettings(data, true), cutter_height: intValue },
+                    cmd: 'set_mow_params',
+                    data: buildNestMowParamsPayload(data, { nest_cutter_height: intValue }),
                 });
                 return;
             }
@@ -2076,16 +2127,16 @@ class AnthbotGenieAdapter extends AdapterBase {
                     max: 3,
                 });
                 await context.shadowClient.publishServiceCommand({
-                    cmd: 'nest_param_set',
-                    data: { ...this.nearChargerMowingSettings(data, true), mow_count: intValue },
+                    cmd: 'set_mow_params',
+                    data: buildNestMowParamsPayload(data, { nest_mow_count: intValue }),
                 });
                 return;
             }
             case 'nearChargerMowing.obstacleAvoidanceEnabled': {
                 const enabled = coerceEnabledValue(value);
                 await context.shadowClient.publishServiceCommand({
-                    cmd: 'nest_param_set',
-                    data: { ...this.nearChargerMowingSettings(data, true), pobctl_switch: enabled ? 1 : 0 },
+                    cmd: 'set_mow_params',
+                    data: buildNestMowParamsPayload(data, { nest_pobctl_switch: enabled ? 1 : 0 }),
                 });
                 return;
             }
@@ -2096,8 +2147,8 @@ class AnthbotGenieAdapter extends AdapterBase {
                     max: 2,
                 });
                 await context.shadowClient.publishServiceCommand({
-                    cmd: 'nest_param_set',
-                    data: { ...this.nearChargerMowingSettings(data, true), pobctl_level: intValue },
+                    cmd: 'set_mow_params',
+                    data: buildNestMowParamsPayload(data, { nest_pobctl_level: intValue }),
                 });
                 return;
             }
@@ -2106,32 +2157,41 @@ class AnthbotGenieAdapter extends AdapterBase {
         }
     }
 
-    globalMowingSettings(data) {
-        const settings = data?.param_set && typeof data.param_set === 'object' ? data.param_set : {};
-        const result = {
-            cutter_height: typeof settings.cutter_height === 'number' ? settings.cutter_height : 30,
-            mow_count: typeof settings.mow_count === 'number' ? settings.mow_count : 1,
-            mow_head: typeof settings.mow_head === 'number' ? settings.mow_head : 0,
-            enable_adaptive_head: typeof settings.enable_adaptive_head === 'number' ? settings.enable_adaptive_head : 1,
-        };
-        if (typeof settings.rid_switch === 'number') {
-            result.rid_switch = settings.rid_switch;
-        }
-        if (typeof settings.nest_switch === 'number') {
-            result.nest_switch = settings.nest_switch;
-        }
-        return result;
-    }
-
     nearChargerMowingSettings(data, withDefaults = false) {
         const settings = data?.nest_param_set && typeof data.nest_param_set === 'object' ? data.nest_param_set : {};
         return {
             cutter_height:
-                typeof settings.cutter_height === 'number' ? settings.cutter_height : withDefaults ? 30 : null,
-            mow_count: typeof settings.mow_count === 'number' ? settings.mow_count : withDefaults ? 2 : null,
-            pobctl_level: typeof settings.pobctl_level === 'number' ? settings.pobctl_level : withDefaults ? 0 : null,
+                typeof data?.nest_cutter_height === 'number'
+                    ? data.nest_cutter_height
+                    : typeof settings.cutter_height === 'number'
+                      ? settings.cutter_height
+                      : withDefaults
+                        ? 30
+                        : null,
+            mow_count:
+                typeof data?.nest_mow_count === 'number'
+                    ? data.nest_mow_count
+                    : typeof settings.mow_count === 'number'
+                      ? settings.mow_count
+                      : withDefaults
+                        ? 2
+                        : null,
+            pobctl_level:
+                typeof data?.nest_pobctl_level === 'number'
+                    ? data.nest_pobctl_level
+                    : typeof settings.pobctl_level === 'number'
+                      ? settings.pobctl_level
+                      : withDefaults
+                        ? 0
+                        : null,
             pobctl_switch:
-                typeof settings.pobctl_switch === 'number' ? settings.pobctl_switch : withDefaults ? 1 : null,
+                typeof data?.nest_pobctl_switch === 'number'
+                    ? data.nest_pobctl_switch
+                    : typeof settings.pobctl_switch === 'number'
+                      ? settings.pobctl_switch
+                      : withDefaults
+                        ? 1
+                        : null,
         };
     }
 

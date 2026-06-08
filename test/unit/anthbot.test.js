@@ -8,22 +8,36 @@ const {
     activeManualZoneIds,
     asInteger,
     asIsoTimestamp,
+    batteryLevel,
+    buildNestMowParamsPayload,
+    buildParamSetPayload,
     autoZones,
     compactZonePayload,
     coerceEnabledValue,
     consumableLifetimes,
+    errorCode,
     errorDescription,
     generalMowerStatus,
+    ipAddress,
     isCharging,
     isCustomDirectionEnabled,
     isLikelyAuthenticationError,
+    isMSeriesModel,
     isNonZero,
+    mapArea,
     manualZones,
+    mappingTaskState,
     parseCommandSelection,
+    rawModeStatus,
     rawRobotStatus,
     rtkBaseStateLabel,
     rtkStateLabel,
     safeGet,
+    simCcid,
+    simPresent,
+    totalMowingArea,
+    totalMowingTime,
+    wifiSsid,
 } = require("../../lib/anthbot");
 
 describe("lib/anthbot helpers", () => {
@@ -62,6 +76,40 @@ describe("lib/anthbot helpers", () => {
             assert.equal(generalMowerStatus({ robot_sta: { value: "backtodock" } }), "returning_to_dock");
             assert.equal(generalMowerStatus({ robot_sta: { value: "camera_cleaning" } }), "camera_cleaning");
             assert.equal(generalMowerStatus({ robot_sta: { value: 99 } }), "unknown");
+        });
+
+        it("falls back to M-series mode values and telemetry", () => {
+            const mSeries = {
+                mode: { value: "charge" },
+                elec: { value: 81 },
+                error: { value: 2012 },
+                net_config: {
+                    ip: "192.168.1.77",
+                    ssid: "GardenWiFi",
+                    "4g_ccid": "8949000000000000000",
+                },
+                rtk: { state: "fixed" },
+                map: { map_area: 321.5 },
+                mapping_task: { state: "running" },
+                mowing_time: { value: 7200 },
+                mowing_area: { value: 456.7 },
+            };
+
+            assert.equal(rawModeStatus(mSeries), "charge");
+            assert.equal(rawRobotStatus(mSeries), "charge");
+            assert.equal(generalMowerStatus(mSeries), "charging");
+            assert.equal(isCharging(mSeries), true);
+            assert.equal(batteryLevel(mSeries), 81);
+            assert.equal(errorCode(mSeries), 2012);
+            assert.equal(wifiSsid(mSeries), "GardenWiFi");
+            assert.equal(ipAddress(mSeries), "192.168.1.77");
+            assert.equal(simCcid(mSeries), "8949000000000000000");
+            assert.equal(simPresent(mSeries), true);
+            assert.equal(rtkStateLabel(mSeries), "fixed");
+            assert.equal(mapArea(mSeries), 321.5);
+            assert.equal(mappingTaskState(mSeries), "running");
+            assert.equal(totalMowingTime(mSeries), 7200);
+            assert.equal(totalMowingArea(mSeries), 456.7);
         });
 
         it("detects charging from the general status", () => {
@@ -124,6 +172,20 @@ describe("lib/anthbot helpers", () => {
 
         it("falls back to unknown when no event code payload entry exists", () => {
             assert.equal(errorDescription({ err_code: 2012 }, { payload: { data: {} } }, "English"), "Unknown error (2012)");
+        });
+
+        it("reads M-series error values in error descriptions", () => {
+            const cache = {
+                payload: {
+                    data: {
+                        "2012": {
+                            English: { event_message: "The machine is stuck" },
+                        },
+                    },
+                },
+            };
+
+            assert.equal(errorDescription({ error: { value: 2012 } }, cache, "English"), "The machine is stuck");
         });
     });
 
@@ -198,6 +260,126 @@ describe("lib/anthbot helpers", () => {
         it("detects likely authentication failures", () => {
             assert.equal(isLikelyAuthenticationError(new Error("403 unauthorized token")), true);
             assert.equal(isLikelyAuthenticationError(new Error("network timeout")), false);
+        });
+
+        it("detects M-series model names", () => {
+            assert.equal(isMSeriesModel("Anthbot M5"), true);
+            assert.equal(isMSeriesModel("Anthbot Genie 600"), false);
+        });
+
+        it("builds sparse M-series param_set payloads without legacy defaults", () => {
+            const payload = buildParamSetPayload(
+                "Anthbot M5",
+                {
+                    param_set: {
+                        mow_count: 2,
+                    },
+                },
+                { rid_switch: 1 },
+            );
+
+            assert.deepEqual(payload, {
+                mow_count: 2,
+                rid_switch: 1,
+            });
+        });
+
+        it("keeps legacy param_set defaults for non-M-series models", () => {
+            const payload = buildParamSetPayload("Anthbot Genie 600", {}, { rid_switch: 1 });
+
+            assert.deepEqual(payload, {
+                cutter_height: 30,
+                mow_count: 1,
+                mow_head: 0,
+                enable_adaptive_head: 1,
+                rid_switch: 1,
+            });
+        });
+
+        it("preserves known mow_head when toggling M-series custom direction mode", () => {
+            const payload = buildParamSetPayload(
+                "Anthbot M9",
+                {
+                    param_set: {
+                        mow_head: 45,
+                        enable_adaptive_head: 1,
+                    },
+                },
+                { enable_adaptive_head: 0 },
+            );
+
+            assert.deepEqual(payload, {
+                mow_head: 45,
+                enable_adaptive_head: 0,
+            });
+        });
+
+        it("builds set_mow_params payloads with preserved current values", () => {
+            const payload = buildNestMowParamsPayload(
+                {
+                    nest_switch: 1,
+                    nest_mow_count: 2,
+                    nest_pobctl_switch: 1,
+                },
+                { nest_cutter_height: 45 },
+            );
+
+            assert.deepEqual(payload, {
+                nest_switch: 1,
+                nest_mow_count: 2,
+                nest_cutter_height: 45,
+                nest_pobctl_switch: 1,
+                nest_pobctl_level: 1,
+            });
+        });
+
+        it("matches command defaults when no current near-charger settings are known", () => {
+            const payload = buildNestMowParamsPayload({}, { nest_pobctl_level: 2 });
+
+            assert.deepEqual(payload, {
+                nest_switch: 0,
+                nest_mow_count: 1,
+                nest_cutter_height: 35,
+                nest_pobctl_switch: 0,
+                nest_pobctl_level: 2,
+            });
+        });
+
+        it("keeps M-series param_set command payloads sparse when no cutter height is involved", async () => {
+            const payloads = [];
+            const client = new AnthbotShadowApiClient({
+                http: {
+                    post: async (_url, payloadBytes) => {
+                        payloads.push(JSON.parse(payloadBytes.toString("utf8")));
+                        return {
+                            status: 200,
+                            data: { ok: true },
+                            headers: {},
+                        };
+                    },
+                },
+                serialNumber: "SERIAL123",
+                regionName: "eu-central-1",
+                iotEndpoint: "a.example.iot.eu-central-1.amazonaws.com",
+                deviceModel: "Anthbot M5",
+            });
+
+            await client.publishServiceCommand({
+                cmd: "param_set",
+                data: { mow_count: 3, rid_switch: 1 },
+            });
+
+            assert.deepEqual(payloads[0], {
+                state: {
+                    desired: {
+                        cmd: "param_set",
+                        data: {
+                            mow_count: 3,
+                            rid_switch: 1,
+                        },
+                    },
+                },
+            });
         });
 
         it("builds stable cloud verification tokens for a fixed timestamp", () => {
@@ -328,6 +510,225 @@ describe("lib/anthbot helpers", () => {
             assert.equal(requests[0].options.headers["x-amz-security-token"], "session");
             assert.match(requests[0].options.headers.Authorization, /Credential=ASIA123\//);
             assert.match(requests[0].options.headers.Authorization, /SignedHeaders=.*x-amz-security-token/);
+        });
+
+        it("refreshes IoT credentials once after a shadow 403", async () => {
+            let getCount = 0;
+            let refreshCount = 0;
+            const client = new AnthbotShadowApiClient({
+                http: {
+                    get: async (_url, options) => {
+                        getCount++;
+                        if (getCount === 1) {
+                            assert.equal(options.headers["x-amz-security-token"], "expired-session");
+                            return {
+                                status: 403,
+                                data: { message: "Forbidden" },
+                            };
+                        }
+                        assert.equal(options.headers["x-amz-security-token"], "fresh-session");
+                        return {
+                            status: 200,
+                            data: {
+                                state: {
+                                    reported: { ok: true },
+                                },
+                            },
+                        };
+                    },
+                },
+                serialNumber: "SERIAL123",
+                regionName: "eu-central-1",
+                iotEndpoint: "a.example.iot.eu-central-1.amazonaws.com",
+                accountClient: {
+                    getDeviceIotCredentials: async serialNumber => {
+                        refreshCount++;
+                        assert.equal(serialNumber, "SERIAL123");
+                        return {
+                            accessKeyId: "ASIA456",
+                            secretAccessKey: "secret2",
+                            sessionToken: "fresh-session",
+                            regionName: "eu-central-1",
+                            endpoint: "a.example.iot.eu-central-1.amazonaws.com",
+                        };
+                    },
+                },
+                iotCredentials: {
+                    accessKeyId: "ASIA123",
+                    secretAccessKey: "secret",
+                    sessionToken: "expired-session",
+                },
+            });
+
+            assert.deepEqual(await client.getNamedShadowReportedState("property"), { ok: true });
+            assert.equal(getCount, 2);
+            assert.equal(refreshCount, 1);
+        });
+
+        it("reads the actual service shadow for M-series devices", async () => {
+            const urls = [];
+            const client = new AnthbotShadowApiClient({
+                http: {
+                    get: async (url) => {
+                        urls.push(url);
+                        return {
+                            status: 200,
+                            data: {
+                                state: {
+                                    reported: { cmd: "find_robot" },
+                                },
+                            },
+                        };
+                    },
+                },
+                serialNumber: "SERIAL123",
+                regionName: "eu-central-1",
+                iotEndpoint: "a.example.iot.eu-central-1.amazonaws.com",
+                deviceModel: "Anthbot M5",
+            });
+
+            assert.deepEqual(await client.getServiceReportedState(), { cmd: "find_robot" });
+            assert.equal(urls.length, 1);
+            assert.match(urls[0], /[?]name=service$/);
+        });
+
+        it("shapes M-series service payloads for param_set and volume_ctl", async () => {
+            const payloads = [];
+            const client = new AnthbotShadowApiClient({
+                http: {
+                    post: async (_url, payloadBytes) => {
+                        payloads.push(JSON.parse(payloadBytes.toString("utf8")));
+                        return {
+                            status: 200,
+                            data: { ok: true },
+                            headers: {},
+                        };
+                    },
+                },
+                serialNumber: "SERIAL123",
+                regionName: "eu-central-1",
+                iotEndpoint: "a.example.iot.eu-central-1.amazonaws.com",
+                deviceModel: "Anthbot M5",
+            });
+
+            await client.publishServiceCommand({
+                cmd: "param_set",
+                data: { cutter_height: 45, mow_count: 2 },
+            });
+            await client.publishServiceCommand({
+                cmd: "volume_ctl",
+                data: { volume: 67 },
+            });
+
+            assert.deepEqual(payloads[0], {
+                state: {
+                    desired: {
+                        cmd: "param_set",
+                        data: {
+                            mow_count: 2,
+                            cutter_ctl_cutter_lift: 45,
+                        },
+                    },
+                },
+            });
+            assert.deepEqual(payloads[1], {
+                state: {
+                    desired: {
+                        cmd: "volume_ctl",
+                        data: {
+                            volume_ctl: 67,
+                        },
+                    },
+                },
+            });
+        });
+
+        it("keeps legacy shadow command payloads unchanged", async () => {
+            const payloads = [];
+            const client = new AnthbotShadowApiClient({
+                http: {
+                    post: async (_url, payloadBytes) => {
+                        payloads.push(JSON.parse(payloadBytes.toString("utf8")));
+                        return {
+                            status: 200,
+                            data: { ok: true },
+                            headers: {},
+                        };
+                    },
+                },
+                serialNumber: "SERIAL123",
+                regionName: "eu-central-1",
+                iotEndpoint: "a.example.iot.eu-central-1.amazonaws.com",
+                deviceModel: "Anthbot Genie 600",
+            });
+
+            await client.publishServiceCommand({
+                cmd: "param_set",
+                data: { cutter_height: 45, mow_count: 2 },
+            });
+
+            assert.deepEqual(payloads[0], {
+                state: {
+                    desired: {
+                        cmd: "param_set",
+                        data: {
+                            cutter_height: 45,
+                            mow_count: 2,
+                        },
+                    },
+                },
+            });
+        });
+
+        it("refreshes IoT credentials once after command publish 403s", async () => {
+            let postCount = 0;
+            let refreshCount = 0;
+            const client = new AnthbotShadowApiClient({
+                http: {
+                    post: async (_url, _payloadBytes, options) => {
+                        postCount++;
+                        const sessionToken = options.headers["x-amz-security-token"];
+                        if (sessionToken === "expired-session") {
+                            return {
+                                status: 403,
+                                data: { message: "Forbidden" },
+                                headers: {},
+                            };
+                        }
+                        assert.equal(sessionToken, "fresh-session");
+                        return {
+                            status: 200,
+                            data: { ok: true },
+                            headers: {},
+                        };
+                    },
+                },
+                serialNumber: "SERIAL123",
+                regionName: "eu-central-1",
+                iotEndpoint: "a.example.iot.eu-central-1.amazonaws.com",
+                accountClient: {
+                    getDeviceIotCredentials: async () => {
+                        refreshCount++;
+                        return {
+                            accessKeyId: "ASIA456",
+                            secretAccessKey: "secret2",
+                            sessionToken: "fresh-session",
+                            regionName: "eu-central-1",
+                            endpoint: "a.example.iot.eu-central-1.amazonaws.com",
+                        };
+                    },
+                },
+                iotCredentials: {
+                    accessKeyId: "ASIA123",
+                    secretAccessKey: "secret",
+                    sessionToken: "expired-session",
+                },
+            });
+
+            await client.publishServiceCommand({ cmd: "find_robot" });
+
+            assert.equal(refreshCount, 1);
+            assert.equal(postCount, 8);
         });
     });
 });

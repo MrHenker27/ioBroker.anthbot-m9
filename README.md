@@ -12,7 +12,7 @@
 
 [![NPM](https://nodei.co/npm/iobroker.anthbot-genie.png?downloads=true)](https://nodei.co/npm/iobroker.anthbot-genie/)
 
-Unofficial ioBroker adapter for [Anthbot Genie robotic lawn mowers](https://de.anthbot.com/products/genie-mahroboter), focused on detailed Genie telemetry, diagnostics, and mower control.
+Unofficial ioBroker adapter for [Anthbot Genie robotic lawn mowers](https://de.anthbot.com/products/genie-mahroboter), focused on detailed Genie telemetry, diagnostics, and mower control across Genie 600/1000/3000/5000 and the newer M5/M9 models.
 
 The adapter connects to the Anthbot cloud account, discovers bound mowers, reads cloud and IoT shadow data, and exposes a broad state tree for status, settings, mower commands, zone data, consumables, location, diagnostics, and raw troubleshooting payloads in ioBroker.
 
@@ -27,8 +27,9 @@ An example ioBroker Blockly with conditions for mower automation is available in
 - Anthbot cloud login with encrypted password storage in ioBroker native config
 - Automatic discovery of mowers bound to the configured Anthbot account
 - Region and IoT endpoint lookup per mower
+- Automatic refresh of temporary IoT credentials after AWS IoT `403` responses
 - Polling of property and service shadows
-- Detailed status states for connection, online state, battery, mower status, charging state, mowing time, mowing area, map status, errors, active mowing mode, point mowing, and zone counts
+- Detailed status states for connection, online state, battery, mower status, charging state, mowing time, mowing area, total mowing time/area, map status, mapping task state, errors, active mowing mode, point mowing, and zone counts
 - Diagnostic states for RTK fix, RTK base station, moved antenna warnings, firmware versions, OTA progress, WiFi, cellular, SIM, Bluetooth, camera/map flags, obstacle avoidance, security flags, system timestamps, and cloud-backed mower error data
 - Location states for anti-loss GPS coordinates and local mower pose
 - Consumable lifetime states and reset buttons for charging port, cameras, and blades
@@ -44,6 +45,17 @@ An example ioBroker Blockly with conditions for mower automation is available in
 - Node.js `>= 22`
 - Anthbot account with at least one bound Genie mower
 - Internet access from the ioBroker host to the Anthbot cloud and AWS IoT endpoint
+
+## Supported devices
+
+- Genie 600
+- Genie 1000
+- Genie 3000
+- Genie 5000
+- M5
+- M9
+
+Other Anthbot models may still work when they expose the same cloud and shadow payload structure, but they are not explicitly mapped or documented here yet.
 
 ## Development
 
@@ -109,8 +121,11 @@ anthbot-genie.<instance>.<serial>.*
 | `<serial>.metrics.batteryLevel` | number | `%` | Battery level |
 | `<serial>.metrics.status.mower` | string | | Normalized mower status |
 | `<serial>.metrics.status.robotRaw` | string | | Raw robot status |
+| `<serial>.metrics.status.modeRaw` | string | | Raw `mode.value` status reported by M5/M9 models |
 | `<serial>.metrics.mowing.time` | number | `s` | Reported mowing time |
 | `<serial>.metrics.mowing.area` | number | `m2` | Reported mowing area |
+| `<serial>.metrics.mowing.totalTime` | number | `s` | Total mowing time reported by M5/M9 models |
+| `<serial>.metrics.mowing.totalArea` | number | `m2` | Total mowing area reported by M5/M9 models |
 | `<serial>.metrics.mowing.borderActive` | boolean | | Border mowing active |
 | `<serial>.metrics.mowing.nearChargerActive` | boolean | | Near-charger mowing active |
 | `<serial>.metrics.mowing.fullYardActive` | boolean | | Full-yard mowing active |
@@ -121,9 +136,12 @@ anthbot-genie.<instance>.<serial>.*
 | `<serial>.metrics.zones.autoCount` | number | | Number of automatic zones |
 | `<serial>.metrics.map.totalArea` | number | `m2` | Total mapped area |
 | `<serial>.metrics.map.status` | string | | Raw map status |
+| `<serial>.metrics.map.mappingTaskState` | string | | Mapping task state reported by M5/M9 models |
 | `<serial>.metrics.error.code` | number | | Last mower error code |
 | `<serial>.metrics.error.description` | string | | Human-readable error description from the cached Anthbot event-code list when known |
 | `<serial>.metrics.error.active` | boolean | | Whether a non-zero mower error is active |
+
+The adapter keeps the same state tree for all supported mower models. On models that do not expose the M5/M9-specific payload fields, the states `metrics.status.modeRaw`, `metrics.mowing.totalTime`, `metrics.mowing.totalArea`, and `metrics.map.mappingTaskState` are still created but remain empty or `null`.
 
 ### Location
 
@@ -138,7 +156,7 @@ anthbot-genie.<instance>.<serial>.*
 
 ### Diagnostics
 
-The `diagnostics` channel exposes read-only troubleshooting data derived from the mower shadow, including RTK state, RTK base state, camera/map/network flags, obstacle avoidance, firmware versions, OTA progress, WiFi/SIM details, timestamps, and the next appointment.
+The `diagnostics` channel exposes read-only troubleshooting data derived from the mower shadow, including RTK state, RTK base state, camera/map/network flags, obstacle avoidance, firmware versions, OTA progress, WiFi/SIM details, timestamps, and the next appointment. On M5/M9 models, the adapter also maps `net_config.*`, `mode.value`, `error.value`, `map.map_area`, `mapping_task.state`, `mowing_time.value`, and `mowing_area.value` into the existing ioBroker state tree where the meanings match.
 
 ### Consumables
 
@@ -155,7 +173,7 @@ The mower accepts consumable reset commands only when the related lifetime value
 
 ### Controls
 
-Writable control states update mower settings through the Anthbot IoT service shadow.
+Writable control states update mower settings through the Anthbot IoT service shadow. The adapter handles the model-specific shadow payload encoding internally, so the same ioBroker control states can be used across supported mower models.
 
 | State | Type | Range | Description |
 | --- | --- | --- | --- |
@@ -276,6 +294,7 @@ For automatic zones, the adapter resolves the selected zone IDs or names to the 
 - Check whether status polling works first.
 - Verify that the target state is under the correct mower serial number.
 - For zone commands, compare the written value with the IDs and names in `zones.manual.list` or `zones.autoList`.
+- The adapter automatically refreshes temporary IoT credentials once after an AWS IoT `403`; if commands still fail after that retry, check the adapter log for model-specific payload or mower-state errors.
 - Check `raw.shadow.service` and the adapter log for command errors.
 
 ## Changelog
@@ -284,6 +303,11 @@ For automatic zones, the adapter resolves the selected zone IDs or names to the 
   Placeholder for the next version (at the beginning of the line):
   ### **WORK IN PROGRESS**
 -->
+### **WORK IN PROGRESS**
+
+- Add M5/M9 payload parity for status, battery, error, network, RTK, map, and total mowing metrics while keeping the existing ioBroker state tree stable.
+- Refresh temporary IoT credentials once on AWS IoT `403` responses and retry the failed shadow read or command publish automatically.
+
 ### 0.1.12 (2026-06-06)
 
 - (reloxx13) **FIXED**: Create the global `info` channel and correct the mower status role so the adapter object structure passes ioBroker review checks.
@@ -309,12 +333,14 @@ For automatic zones, the adapter resolves the selected zone IDs or names to the 
 
 ## Credits
 
-Special credit to the Home Assistant Anthbot Genie projects, which made the Anthbot cloud flow and command mapping much easier to understand:
+Special credit to the community Anthbot Genie projects, which made the Anthbot cloud flow and command mapping much easier to understand:
 
 - [vincentjanv](https://github.com/vincentjanv/anthbot_genie_ha)
 - [AdrianTIonut](https://github.com/AdrianTIonut/anthbot_genie_ha)
 
-This ioBroker adapter is an independent project, but it builds on public API research and implementation ideas from that Home Assistant integration.
+Special thanks to [@Riza-Aslan](https://github.com/Riza-Aslan) for the M5/M9 support research and payload-mapping work that informed this adapter update.
+
+This ioBroker adapter is an independent project, but it builds on public API research and implementation ideas from that community work.
 
 ## Legal Notice
 
