@@ -6,6 +6,8 @@
 [![GitHub version](https://img.shields.io/github/v/release/reloxx13/ioBroker.anthbot-genie)](https://github.com/reloxx13/ioBroker.anthbot-genie/releases)
 [![NPM version](https://img.shields.io/npm/v/iobroker.anthbot-genie.svg)](https://www.npmjs.com/package/iobroker.anthbot-genie)
 [![Downloads](https://img.shields.io/npm/dm/iobroker.anthbot-genie.svg)](https://www.npmjs.com/package/iobroker.anthbot-genie)
+[![ioBroker installs](https://iobroker.live/badges/anthbot-genie-installed.svg)](https://www.iobroker.net/)
+[![ioBroker latest](https://iobroker.live/badges/anthbot-genie-latest.svg)](https://www.iobroker.net/)
 ![License](https://img.shields.io/github/license/reloxx13/ioBroker.anthbot-genie)
 ![ioBroker phase](https://img.shields.io/badge/ioBroker%20phase-testing-yellow)
 [![ioBroker forum](https://img.shields.io/badge/ioBroker-forum-blue)](https://forum.iobroker.net/topic/84392)
