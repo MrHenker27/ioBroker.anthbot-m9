@@ -38,7 +38,8 @@
     "README.md"
   ],
   "scripts": {
-    "check": "npm run check:types && node --check main.js && node --check lib/anthbot.js && node --check test/package/testPackageFiles.js && node --check test/integration/testStartup.js && node --check test/unit/anthbot.test.js",
+    "check": "npm run check:types && npm run check:syntax",
+    "check:syntax": "node tools/check-syntax.js",
     "check:types": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint -c eslint.config.mjs .",
     "lint:fix": "eslint -c eslint.config.mjs . --fix",

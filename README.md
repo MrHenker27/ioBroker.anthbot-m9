@@ -62,7 +62,7 @@ Other Anthbot models may still work when they expose the same cloud and shadow p
 - `npm install` installs runtime and development dependencies.
 - `npm run lint` checks code style using ESLint.
 - `npm run lint:fix` applies automatically fixable ESLint changes.
-- `npm run check` runs Node.js syntax checks for `main.js`, `lib/anthbot.js`, and test files.
+- `npm run check` runs TypeScript and Node.js syntax checks for the adapter entrypoint, split library modules, and test files.
 - `npm run test:js` runs unit tests.
 - `npm run test:package` runs package validation tests.
 - `npm run test:integration` runs integration tests.
@@ -307,6 +307,8 @@ For automatic zones, the adapter resolves the selected zone IDs or names to the 
 
 - Add M5/M9 payload parity for status, battery, error, network, RTK, map, and total mowing metrics while keeping the existing ioBroker state tree stable.
 - Refresh temporary IoT credentials once on AWS IoT `403` responses and retry the failed shadow read or command publish automatically.
+- Refactor the large adapter sources into focused CommonJS modules for Anthbot cloud/shadow clients, payload helpers, adapter object definitions, state derivation, and command handling without changing state IDs or command payload behavior.
+- Expand `npm run check` so syntax validation covers the split `lib/anthbot`, `lib/adapter`, and unit test files through the dedicated syntax-check helper.
 
 ### 0.1.12 (2026-06-06)
 
