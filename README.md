@@ -47,6 +47,50 @@ An example ioBroker Blockly with conditions for mower automation is available in
 - Anthbot account with at least one bound Genie mower
 - Internet access from the ioBroker host to the Anthbot cloud and AWS IoT endpoint
 
+## Installation
+
+The adapter is **not yet included in the ioBroker `latest` repository**. Until that review is finished, it must be installed manually. The preferred installation path is **npm**, and the current review PR is here: [ioBroker/ioBroker.repositories#5949](https://github.com/ioBroker/ioBroker.repositories/pull/5949).
+
+### ioBroker Admin
+
+Open the adapter view and use the custom/GitHub installation dialog. The preferred values are:
+
+```text
+iobroker.anthbot-genie
+```
+
+or explicitly with a version:
+
+```text
+iobroker.anthbot-genie@0.1.13
+```
+
+GitHub is mainly useful for development snapshots or direct testing of unreleased changes:
+
+```text
+https://github.com/reloxx13/ioBroker.anthbot-genie
+```
+
+### CLI
+
+Install from npm:
+
+```bash
+iobroker add anthbot-genie
+```
+
+or explicitly with a version:
+
+```bash
+iobroker add anthbot-genie@0.1.13
+```
+
+GitHub is mainly useful for development snapshots or direct testing of unreleased changes:
+
+```bash
+iobroker url https://github.com/reloxx13/ioBroker.anthbot-genie
+```
+
 ## Supported devices
 
 - Genie 600
