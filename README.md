@@ -1,6 +1,6 @@
 # ioBroker.anthbot-genie
 
-![Logo](admin/anthbot-genie.png)
+<img src="admin/anthbot-genie.png" alt="Logo" width="160" />
 
 [![Test and Release](https://github.com/reloxx13/ioBroker.anthbot-genie/actions/workflows/test-and-release.yml/badge.svg?branch=main)](https://github.com/reloxx13/ioBroker.anthbot-genie/actions/workflows/test-and-release.yml)
 [![NPM version](https://img.shields.io/npm/v/iobroker.anthbot-genie.svg)](https://www.npmjs.com/package/iobroker.anthbot-genie)
