@@ -1,11 +1,11 @@
 # ioBroker.anthbot-genie
 
-<img src="admin/anthbot-genie.png" alt="Logo" width="160" />
+<img src="admin/anthbot-genie.png" alt="Logo" width="80" /> 
 
 [![Test and Release](https://github.com/reloxx13/ioBroker.anthbot-genie/actions/workflows/test-and-release.yml/badge.svg?branch=main)](https://github.com/reloxx13/ioBroker.anthbot-genie/actions/workflows/test-and-release.yml)
+[![GitHub version](https://img.shields.io/github/v/release/reloxx13/ioBroker.anthbot-genie)](https://github.com/reloxx13/ioBroker.anthbot-genie/releases)
 [![NPM version](https://img.shields.io/npm/v/iobroker.anthbot-genie.svg)](https://www.npmjs.com/package/iobroker.anthbot-genie)
 [![Downloads](https://img.shields.io/npm/dm/iobroker.anthbot-genie.svg)](https://www.npmjs.com/package/iobroker.anthbot-genie)
-![GitHub release](https://img.shields.io/github/v/release/reloxx13/ioBroker.anthbot-genie)
 ![License](https://img.shields.io/github/license/reloxx13/ioBroker.anthbot-genie)
 ![ioBroker phase](https://img.shields.io/badge/ioBroker%20phase-testing-yellow)
 [![ioBroker forum](https://img.shields.io/badge/ioBroker-forum-blue)](https://forum.iobroker.net/topic/84392)
