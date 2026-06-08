@@ -1,8 +1,8 @@
-"use strict";
+'use strict';
 
-const fs = require("node:fs");
-const path = require("node:path");
-const { execFileSync } = require("node:child_process");
+const fs = require('node:fs');
+const path = require('node:path');
+const { execFileSync } = require('node:child_process');
 
 /**
  * @param {string} dirPath
@@ -19,7 +19,7 @@ function collectJsFiles(dirPath) {
             files.push(...collectJsFiles(fullPath));
             continue;
         }
-        if (entry.isFile() && entry.name.endsWith(".js")) {
+        if (entry.isFile() && entry.name.endsWith('.js')) {
             files.push(fullPath);
         }
     }
@@ -29,18 +29,18 @@ function collectJsFiles(dirPath) {
 
 const cwd = process.cwd();
 const targets = [
-    "main.js",
-    "lib/anthbot.js",
-    ...collectJsFiles(path.join(cwd, "lib", "anthbot")),
-    ...collectJsFiles(path.join(cwd, "lib", "adapter")),
-    "test/package/testPackageFiles.js",
-    "test/integration/testStartup.js",
-    ...collectJsFiles(path.join(cwd, "test", "unit")),
+    'main.js',
+    'lib/anthbot.js',
+    ...collectJsFiles(path.join(cwd, 'lib', 'anthbot')),
+    ...collectJsFiles(path.join(cwd, 'lib', 'adapter')),
+    'test/package/testPackageFiles.js',
+    'test/integration/testStartup.js',
+    ...collectJsFiles(path.join(cwd, 'test', 'unit')),
 ].map(target => path.resolve(cwd, target));
 
 for (const filePath of targets) {
-    execFileSync(process.execPath, ["--check", filePath], {
+    execFileSync(process.execPath, ['--check', filePath], {
         cwd,
-        stdio: "inherit",
+        stdio: 'inherit',
     });
 }
