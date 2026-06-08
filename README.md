@@ -303,7 +303,7 @@ For automatic zones, the adapter resolves the selected zone IDs or names to the 
   Placeholder for the next version (at the beginning of the line):
   ### **WORK IN PROGRESS**
 -->
-### **WORK IN PROGRESS**
+### 0.1.13 (2026-06-08)
 
 - Add M5/M9 payload parity for status, battery, error, network, RTK, map, and total mowing metrics while keeping the existing ioBroker state tree stable.
 - Refresh temporary IoT credentials once on AWS IoT `403` responses and retry the failed shadow read or command publish automatically.
@@ -328,10 +328,6 @@ For automatic zones, the adapter resolves the selected zone IDs or names to the 
 - Drop the temporary `--legacy-peer-deps` GitHub Actions install override now that the lockfile supports plain `npm ci` again.
 - Re-enable ESLint in the GitHub Actions quick-check job and align the local lint config with the checked JavaScript codebase.
 - Clean up repository metadata so local `repochecker` no longer reports actionable findings.
-
-### 0.1.8 (2026-06-06)
-
-- Run `npm run check` instead of mandatory ESLint in the GitHub Actions quick-check job until the repository has a fully passing lint baseline.
 
 ## Credits
 

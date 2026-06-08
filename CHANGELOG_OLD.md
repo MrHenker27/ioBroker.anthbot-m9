@@ -1,6 +1,10 @@
 # Changelog Archive
 
 Older changelog entries can be moved here after future releases.
+## 0.1.8 (2026-06-06)
+
+- Run `npm run check` instead of mandatory ESLint in the GitHub Actions quick-check job until the repository has a fully passing lint baseline.
+
 ## 0.1.7 (2026-06-06)
 
 - Use `npm install --legacy-peer-deps` in GitHub Actions so the shared ESLint config peer dependencies install correctly during CI.
