@@ -53,7 +53,7 @@ The adapter is **not yet included in the ioBroker `latest` repository**. Until t
 
 ### ioBroker Admin
 
-Open the adapter view and use the custom/GitHub installation dialog. The preferred values are:
+Open the adapter view and use the custom installation dialog. The preferred values are:
 
 ```text
 iobroker.anthbot-genie
@@ -63,12 +63,6 @@ or explicitly with a version:
 
 ```text
 iobroker.anthbot-genie@0.1.13
-```
-
-GitHub is mainly useful for development snapshots or direct testing of unreleased changes:
-
-```text
-https://github.com/reloxx13/ioBroker.anthbot-genie
 ```
 
 ### CLI
@@ -83,12 +77,6 @@ or explicitly with a version:
 
 ```bash
 iobroker add anthbot-genie@0.1.13
-```
-
-GitHub is mainly useful for development snapshots or direct testing of unreleased changes:
-
-```bash
-iobroker url https://github.com/reloxx13/ioBroker.anthbot-genie
 ```
 
 ## Supported devices
