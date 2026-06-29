@@ -1,9 +1,14 @@
 node_modules/
 npm-debug.log
+
 .env
-.envrc
+
 .commitinfo
 .vscode/*
 !.vscode/settings.json
-.codex
-misc/
+
+/misc
+
+/.codex
+/goals
+/.envrc
