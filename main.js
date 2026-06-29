@@ -5,7 +5,12 @@ const utils = require('@iobroker/adapter-core');
 const axios = /** @type {import('axios').AxiosStatic} */ (/** @type {unknown} */ (require('axios')));
 const { AnthbotCloudApiClient } = require('./lib/anthbot/cloud-client');
 const { AnthbotShadowApiClient } = require('./lib/anthbot/shadow-client');
-const { AnthbotGenieError, asInteger, isLikelyAuthenticationError } = require('./lib/anthbot/utils');
+const {
+    AnthbotGenieError,
+    asInteger,
+    deviceObjectIdFromSerial,
+    isLikelyAuthenticationError,
+} = require('./lib/anthbot/utils');
 const {
     BOOLEAN_COMMANDS,
     MAINTENANCE_RESET_TYPES,
@@ -51,6 +56,7 @@ class AnthbotGenieAdapter extends AdapterBase {
         this.cloudClient = null;
         this.authToken = null;
         this.deviceContexts = new Map();
+        this.deviceContextsByObjectRoot = new Map();
         this.eventCodeCache = null;
         this.eventCodeCacheInitialized = false;
         this.pollTimer = null;
@@ -238,9 +244,9 @@ class AnthbotGenieAdapter extends AdapterBase {
 
     async readStoredEventCodeCache() {
         for (const context of this.deviceContexts.values()) {
-            const serial = context.device.serialNumber;
+            const root = context.objectRoot;
             try {
-                const state = await this.getStateAsync(`${serial}.raw.shadow.event-code`);
+                const state = await this.getStateAsync(`${root}.raw.shadow.event-code`);
                 const raw = typeof state?.val === 'string' ? state.val : '';
                 if (!raw) {
                     continue;
@@ -250,7 +256,9 @@ class AnthbotGenieAdapter extends AdapterBase {
                     return parsed;
                 }
             } catch (error) {
-                this.log.debug(`Stored event code cache could not be read for ${serial}: ${error.message}`);
+                this.log.debug(
+                    `Stored event code cache could not be read for ${context.device.serialNumber}: ${error.message}`,
+                );
             }
         }
         return null;
@@ -273,7 +281,7 @@ class AnthbotGenieAdapter extends AdapterBase {
         }
         const value = JSON.stringify(cache);
         for (const context of this.deviceContexts.values()) {
-            await this.setStateAsync(`${context.device.serialNumber}.raw.shadow.event-code`, { val: value, ack: true });
+            await this.setStateAsync(`${context.objectRoot}.raw.shadow.event-code`, { val: value, ack: true });
         }
     }
 
@@ -311,8 +319,10 @@ class AnthbotGenieAdapter extends AdapterBase {
         for (const device of devices) {
             const region = await this.resolveDeviceRegion(device);
             const existing = this.deviceContexts.get(device.serialNumber);
+            const objectRoot = deviceObjectIdFromSerial(device.serialNumber, this.FORBIDDEN_CHARS);
             const context = {
                 device,
+                objectRoot,
                 region,
                 shadowClient: new AnthbotShadowApiClient({
                     http: this.http,
@@ -330,6 +340,7 @@ class AnthbotGenieAdapter extends AdapterBase {
                 lastService: existing?.lastService || {},
             };
             this.deviceContexts.set(device.serialNumber, context);
+            this.deviceContextsByObjectRoot.set(objectRoot, context);
             await this.ensureDeviceObjects(context);
         }
     }
@@ -378,7 +389,7 @@ class AnthbotGenieAdapter extends AdapterBase {
             iotEndpoint = iotCredentials.endpoint || iotEndpoint;
         } catch (error) {
             this.log.warn(
-                `Failed to fetch temporary IoT credentials for ${device.serialNumber}, using bundled fallback credentials: ${error.message}`,
+                `Failed to fetch temporary IoT credentials for ${device.serialNumber}, using bundled fallback signing material: ${error.message}`,
             );
         }
 
@@ -395,9 +406,16 @@ class AnthbotGenieAdapter extends AdapterBase {
             if (seenSerials.has(serial)) {
                 continue;
             }
+            const context = this.deviceContexts.get(serial);
             this.deviceContexts.delete(serial);
+            if (context?.objectRoot) {
+                this.deviceContextsByObjectRoot.delete(context.objectRoot);
+            }
             try {
-                await this.delObjectAsync(serial, { recursive: true });
+                await this.delObjectAsync(
+                    context?.objectRoot || deviceObjectIdFromSerial(serial, this.FORBIDDEN_CHARS),
+                    { recursive: true },
+                );
                 this.log.info(`Removed stale device objects for ${serial}.`);
             } catch (error) {
                 this.log.warn(`Failed to remove stale device objects for ${serial}: ${error.message}`);
@@ -407,7 +425,7 @@ class AnthbotGenieAdapter extends AdapterBase {
 
     async ensureDeviceObjects(context) {
         const serial = context.device.serialNumber;
-        const root = serial;
+        const root = context.objectRoot;
 
         await this.extendObjectAsync(root, {
             type: 'device',
@@ -508,7 +526,7 @@ class AnthbotGenieAdapter extends AdapterBase {
     }
 
     async updateStates(context, data) {
-        const serial = context.device.serialNumber;
+        const root = context.objectRoot;
         const updates = buildDeviceStateUpdates({
             context,
             data,
@@ -518,7 +536,7 @@ class AnthbotGenieAdapter extends AdapterBase {
         });
 
         for (const [suffix, value] of Object.entries(updates)) {
-            await this.setStateAsync(`${serial}.${suffix}`, { val: value, ack: true });
+            await this.setStateAsync(`${root}.${suffix}`, { val: value, ack: true });
         }
     }
 
@@ -532,9 +550,9 @@ class AnthbotGenieAdapter extends AdapterBase {
             return;
         }
 
-        const [serial, section, ...commandParts] = parts;
+        const [objectRoot, section, ...commandParts] = parts;
         const command = commandParts.join('.');
-        const context = this.deviceContexts.get(serial);
+        const context = this.deviceContextsByObjectRoot.get(objectRoot);
         if (!context) {
             this.log.warn(`No device context for state ${id}`);
             return;

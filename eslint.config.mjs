@@ -21,6 +21,7 @@ export default [
             '**/adapter-config.d.ts',
             'widgets/**/*.js',
             'misc',
+            '.codex',
             'node_modules'
         ],
     },

@@ -172,6 +172,34 @@ describe("lib/anthbot clients", () => {
         assert.match(requests[0].options.headers.Authorization, /SignedHeaders=.*x-amz-security-token/);
     });
 
+    it("falls back to bundled signing material when temporary credentials are unavailable", async () => {
+        const requests = [];
+        const client = new AnthbotShadowApiClient({
+            http: {
+                get: async (url, options) => {
+                    requests.push({ url, options });
+                    return {
+                        status: 200,
+                        data: {
+                            state: {
+                                reported: { ok: true },
+                            },
+                        },
+                    };
+                },
+            },
+            serialNumber: "SERIAL123",
+            regionName: "us-east-1",
+            iotEndpoint: "a2bhy9nr7jkgaj-ats.iot.us-east-1.amazonaws.com",
+        });
+
+        await client.getNamedShadowReportedState("property");
+
+        assert.equal(requests.length, 1);
+        assert.match(requests[0].options.headers.Authorization, /Credential=AKIAV2C4RVIAOLEXB545\//);
+        assert.equal(requests[0].options.headers["x-amz-security-token"], undefined);
+    });
+
     it("refreshes IoT credentials once after a shadow 403", async () => {
         let getCount = 0;
         let refreshCount = 0;
