@@ -5,6 +5,12 @@ const assert = require("node:assert/strict");
 const { AnthbotCloudApiClient, AnthbotShadowApiClient } = require("../../../lib/anthbot");
 
 describe("lib/anthbot clients", () => {
+    const tempCredentials = {
+        accessKeyId: "ASIA123",
+        secretAccessKey: "secret",
+        sessionToken: "session",
+    };
+
     it("keeps M-series param_set command payloads sparse when no cutter height is involved", async () => {
         const payloads = [];
         const client = new AnthbotShadowApiClient({
@@ -22,6 +28,7 @@ describe("lib/anthbot clients", () => {
             regionName: "eu-central-1",
             iotEndpoint: "a.example.iot.eu-central-1.amazonaws.com",
             deviceModel: "Anthbot M5",
+            iotCredentials: tempCredentials,
         });
 
         await client.publishServiceCommand({
@@ -157,11 +164,7 @@ describe("lib/anthbot clients", () => {
             serialNumber: "SERIAL123",
             regionName: "eu-central-1",
             iotEndpoint: "a.example.iot.eu-central-1.amazonaws.com",
-            iotCredentials: {
-                accessKeyId: "ASIA123",
-                secretAccessKey: "secret",
-                sessionToken: "session",
-            },
+            iotCredentials: tempCredentials,
         });
 
         await client.getNamedShadowReportedState("property");
@@ -172,20 +175,11 @@ describe("lib/anthbot clients", () => {
         assert.match(requests[0].options.headers.Authorization, /SignedHeaders=.*x-amz-security-token/);
     });
 
-    it("falls back to bundled signing material when temporary credentials are unavailable", async () => {
-        const requests = [];
+    it("requires temporary credentials for shadow access", async () => {
         const client = new AnthbotShadowApiClient({
             http: {
-                get: async (url, options) => {
-                    requests.push({ url, options });
-                    return {
-                        status: 200,
-                        data: {
-                            state: {
-                                reported: { ok: true },
-                            },
-                        },
-                    };
+                get: async () => {
+                    throw new Error("request should not be sent without temporary credentials");
                 },
             },
             serialNumber: "SERIAL123",
@@ -193,11 +187,10 @@ describe("lib/anthbot clients", () => {
             iotEndpoint: "a2bhy9nr7jkgaj-ats.iot.us-east-1.amazonaws.com",
         });
 
-        await client.getNamedShadowReportedState("property");
-
-        assert.equal(requests.length, 1);
-        assert.match(requests[0].options.headers.Authorization, /Credential=AKIAV2C4RVIAOLEXB545\//);
-        assert.equal(requests[0].options.headers["x-amz-security-token"], undefined);
+        await assert.rejects(
+            client.getNamedShadowReportedState("property"),
+            /Temporary IoT credentials are required for shadow access/,
+        );
     });
 
     it("refreshes IoT credentials once after a shadow 403", async () => {
@@ -273,6 +266,7 @@ describe("lib/anthbot clients", () => {
             regionName: "eu-central-1",
             iotEndpoint: "a.example.iot.eu-central-1.amazonaws.com",
             deviceModel: "Anthbot M5",
+            iotCredentials: tempCredentials,
         });
 
         assert.deepEqual(await client.getServiceReportedState(), { cmd: "find_robot" });
@@ -297,6 +291,7 @@ describe("lib/anthbot clients", () => {
             regionName: "eu-central-1",
             iotEndpoint: "a.example.iot.eu-central-1.amazonaws.com",
             deviceModel: "Anthbot M5",
+            iotCredentials: tempCredentials,
         });
 
         await client.publishServiceCommand({
@@ -348,6 +343,7 @@ describe("lib/anthbot clients", () => {
             regionName: "eu-central-1",
             iotEndpoint: "a.example.iot.eu-central-1.amazonaws.com",
             deviceModel: "Anthbot Genie 600",
+            iotCredentials: tempCredentials,
         });
 
         await client.publishServiceCommand({
