@@ -324,15 +324,9 @@ class AnthbotGenieAdapter extends AdapterBase {
                 device,
                 objectRoot,
                 region,
-                shadowClient: new AnthbotShadowApiClient({
-                    http: this.http,
-                    serialNumber: device.serialNumber,
-                    regionName: region.regionName,
-                    iotEndpoint: region.iotEndpoint,
-                    accountClient: this.cloudClient,
-                    iotCredentials: region.iotCredentials,
-                    deviceModel: device.model,
-                }),
+                shadowClient: region.iotCredentials
+                    ? this.buildShadowClient(device, region, region.iotCredentials)
+                    : null,
                 iotCredentials: region.iotCredentials,
                 areaDefinition: existing?.areaDefinition || {},
                 lastAreaTime: existing?.lastAreaTime || null,
@@ -389,7 +383,7 @@ class AnthbotGenieAdapter extends AdapterBase {
             iotEndpoint = iotCredentials.endpoint || iotEndpoint;
         } catch (error) {
             this.log.warn(
-                `Failed to fetch temporary IoT credentials for ${device.serialNumber}, using bundled fallback signing material: ${error.message}`,
+                `Failed to fetch temporary IoT credentials for ${device.serialNumber}; shadow access is unavailable until STS succeeds again: ${error.message}`,
             );
         }
 
@@ -456,6 +450,11 @@ class AnthbotGenieAdapter extends AdapterBase {
 
     async refreshDevice(context) {
         await this.ensureDeviceIotCredentials(context);
+        if (!context.shadowClient) {
+            throw new AnthbotGenieError(
+                `Skipping ${context.device.serialNumber}: temporary IoT credentials are unavailable for shadow access`,
+            );
+        }
         const propertyState = await context.shadowClient.getShadowReportedState();
         let serviceState = {};
         try {
@@ -501,27 +500,40 @@ class AnthbotGenieAdapter extends AdapterBase {
 
     async ensureDeviceIotCredentials(context) {
         if (
+            context.shadowClient &&
             context.iotCredentials &&
             (!context.iotCredentials.expiresAt || context.iotCredentials.expiresAt - Date.now() > 60000)
         ) {
             return;
         }
-        const iotCredentials = await this.cloudClient.getDeviceIotCredentials(context.device.serialNumber);
-        context.iotCredentials = iotCredentials;
-        context.region = {
-            ...context.region,
-            regionName: iotCredentials.regionName || context.region.regionName,
-            iotEndpoint: iotCredentials.endpoint || context.region.iotEndpoint,
-            iotCredentials,
-        };
-        context.shadowClient = new AnthbotShadowApiClient({
+        try {
+            const iotCredentials = await this.cloudClient.getDeviceIotCredentials(context.device.serialNumber);
+            context.iotCredentials = iotCredentials;
+            context.region = {
+                ...context.region,
+                regionName: iotCredentials.regionName || context.region.regionName,
+                iotEndpoint: iotCredentials.endpoint || context.region.iotEndpoint,
+                iotCredentials,
+            };
+            context.shadowClient = this.buildShadowClient(context.device, context.region, iotCredentials);
+        } catch (error) {
+            context.iotCredentials = null;
+            context.shadowClient = null;
+            throw new AnthbotGenieError(
+                `Temporary IoT credentials are unavailable for ${context.device.serialNumber}; shadow access is disabled until the STS endpoint recovers: ${error.message}`,
+            );
+        }
+    }
+
+    buildShadowClient(device, region, iotCredentials) {
+        return new AnthbotShadowApiClient({
             http: this.http,
-            serialNumber: context.device.serialNumber,
-            regionName: context.region.regionName,
-            iotEndpoint: context.region.iotEndpoint,
+            serialNumber: device.serialNumber,
+            regionName: region.regionName,
+            iotEndpoint: region.iotEndpoint,
             accountClient: this.cloudClient,
             iotCredentials,
-            deviceModel: context.device.model,
+            deviceModel: device.model,
         });
     }
 
