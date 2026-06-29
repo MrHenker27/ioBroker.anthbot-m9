@@ -13,6 +13,7 @@ const {
     compactZonePayload,
     coerceEnabledValue,
     consumableLifetimes,
+    deviceObjectIdFromSerial,
     errorCode,
     errorDescription,
     generalMowerStatus,
@@ -64,6 +65,14 @@ describe("lib/anthbot utils and payload helpers", () => {
             assert.equal(isNonZero("0"), false);
             assert.equal(coerceEnabledValue("enabled"), true);
             assert.equal(coerceEnabledValue("disabled"), false);
+        });
+
+        it("derives stable safe device object ids from serial numbers", () => {
+            const forbiddenChars = /[./\s[\]*,",';<>?]/g;
+            assert.equal(deviceObjectIdFromSerial("SERIAL123", forbiddenChars), "SERIAL123");
+            assert.equal(deviceObjectIdFromSerial("SN 123.45", forbiddenChars), "SN_123_45");
+            assert.equal(deviceObjectIdFromSerial(" SN/.123 ", forbiddenChars), "SN__123");
+            assert.equal(deviceObjectIdFromSerial("   ", forbiddenChars), "device");
         });
     });
 

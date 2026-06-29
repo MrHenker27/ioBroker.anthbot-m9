@@ -49,11 +49,11 @@ An example ioBroker Blockly with conditions for mower automation is available in
 
 ## Installation
 
-The adapter is **not yet included in the ioBroker `latest` repository**. Until that review is finished, it must be installed manually. The preferred installation path is **npm**, and the current review PR is here: [ioBroker/ioBroker.repositories#5949](https://github.com/ioBroker/ioBroker.repositories/pull/5949).
+The adapter is currently under review for inclusion in the ioBroker repository. Until it is listed there, install it through ioBroker's custom adapter installation flow or from the CLI. The current repository review PR is here: [ioBroker/ioBroker.repositories#5949](https://github.com/ioBroker/ioBroker.repositories/pull/5949).
 
 ### ioBroker Admin
 
-Open the adapter view and use the custom installation dialog. The preferred values are:
+Open the adapter view and use the custom installation dialog with:
 
 ```text
 iobroker.anthbot-genie
@@ -67,7 +67,7 @@ iobroker.anthbot-genie@0.1.13
 
 ### CLI
 
-Install from npm:
+Install with:
 
 ```bash
 iobroker add anthbot-genie
@@ -127,7 +127,7 @@ After saving the configuration, start or restart the adapter instance.
 
 ## States
 
-The adapter creates one device tree per mower serial number:
+The adapter creates one device tree per mower serial number. If Anthbot ever returns a serial with characters that are unsafe for ioBroker object IDs, the adapter normalizes only those characters while keeping the original serial number in the device object's native metadata:
 
 ```text
 anthbot-genie.<instance>.<serial>.*
