@@ -362,6 +362,8 @@ For automatic zones, the adapter resolves the selected zone IDs or names to the 
 - Re-enable ESLint in the GitHub Actions quick-check job and align the local lint config with the checked JavaScript codebase.
 - Clean up repository metadata so local `repochecker` no longer reports actionable findings.
 
+[Older changelogs can be found there](CHANGELOG_OLD.md)
+
 ## Credits
 
 Special credit to the community Anthbot Genie projects, which made the Anthbot cloud flow and command mapping much easier to understand:
