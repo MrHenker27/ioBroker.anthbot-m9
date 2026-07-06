@@ -74,6 +74,11 @@ describe("lib/anthbot utils and payload helpers", () => {
             assert.equal(deviceObjectIdFromSerial(" SN/.123 ", forbiddenChars), "SN__123");
             assert.equal(deviceObjectIdFromSerial("   ", forbiddenChars), "device");
         });
+
+        it("normalizes whitespace even when the adapter forbidden character set does not include spaces", () => {
+            const forbiddenChars = /[.[\]*,",';<>?]/g;
+            assert.equal(deviceObjectIdFromSerial("SN 123\t45", forbiddenChars), "SN_123_45");
+        });
     });
 
     describe("status mapping", () => {

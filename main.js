@@ -18,6 +18,7 @@ const {
     getDeviceChannelDefinitions,
     getDeviceStateDefinitions,
 } = require('./lib/adapter/definitions');
+const { normalizePollIntervalSeconds } = require('./lib/adapter/config');
 const { buildDeviceStateUpdates, getControlFallbackValue } = require('./lib/adapter/state-updates');
 const { executeCommand, executeConsumableCommand, executeControl } = require('./lib/adapter/actions');
 
@@ -139,7 +140,7 @@ class AnthbotGenieAdapter extends AdapterBase {
         if (this.pollTimer) {
             this.clearTimeout(this.pollTimer);
         }
-        const intervalSeconds = Math.max(10, Number(this.anthbotConfig.pollInterval) || 60);
+        const intervalSeconds = normalizePollIntervalSeconds(this.anthbotConfig.pollInterval);
         this.pollTimer = this.setTimeout(async () => {
             this.pollTimer = null;
             try {
