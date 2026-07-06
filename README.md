@@ -8,7 +8,7 @@
 [![Downloads](https://img.shields.io/npm/dm/iobroker.anthbot-genie.svg)](https://www.npmjs.com/package/iobroker.anthbot-genie)
 [![ioBroker installs](https://iobroker.live/badges/anthbot-genie-installed.svg)](https://www.iobroker.net/)
 ![License](https://img.shields.io/github/license/reloxx13/ioBroker.anthbot-genie)
-![ioBroker phase](https://img.shields.io/badge/ioBroker%20phase-testing-yellow)
+![ioBroker phase](https://img.shields.io/badge/ioBroker%20phase-latest--repo-green)
 [![ioBroker forum](https://img.shields.io/badge/ioBroker-forum-blue)](https://forum.iobroker.net/topic/84392)
 
 [![NPM](https://nodei.co/npm/iobroker.anthbot-genie.png?downloads=true)](https://nodei.co/npm/iobroker.anthbot-genie/)
@@ -19,7 +19,7 @@ The adapter connects to the Anthbot cloud account, discovers bound mowers, reads
 
 It is intended for users who want more than a basic online/battery/status view: RTK and base station state, firmware and OTA details, network and SIM information, GPS and pose data, map lifecycle timestamps, mower error details, consumable lifetimes, rain settings, zone metadata, and writable mowing controls are exposed as ioBroker states.
 
-This adapter is currently in testing. Please report feedback and test results in the [ioBroker forum test thread](https://forum.iobroker.net/topic/84392).
+This adapter is available in the ioBroker `latest` repository. Please report feedback and test results in the [ioBroker forum thread](https://forum.iobroker.net/topic/84392).
 
 An example ioBroker Blockly with conditions for mower automation is available in the [Blockly automation example](https://forum.iobroker.net/topic/84392/2).
 
@@ -49,21 +49,11 @@ An example ioBroker Blockly with conditions for mower automation is available in
 
 ## Installation
 
-The adapter is currently under review for inclusion in the ioBroker repository. Until it is listed there, install it through ioBroker's custom adapter installation flow or from the CLI. The current repository review PR is here: [ioBroker/ioBroker.repositories#5949](https://github.com/ioBroker/ioBroker.repositories/pull/5949).
+The adapter is available in the ioBroker `latest` repository and can be installed from the ioBroker adapter view or from the CLI.
 
 ### ioBroker Admin
 
-Open the adapter view and use the custom installation dialog with:
-
-```text
-iobroker.anthbot-genie
-```
-
-or explicitly with a version:
-
-```text
-iobroker.anthbot-genie@0.1.13
-```
+Open the adapter view, search for `anthbot-genie`, and install the adapter from the `latest` repository.
 
 ### CLI
 
