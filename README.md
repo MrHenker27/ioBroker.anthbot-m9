@@ -53,13 +53,17 @@ The adapter is available in the ioBroker `latest` repository and can be installe
 
 ### ioBroker Admin
 
-Open the adapter view, search for `anthbot-genie`, and install the adapter from the `latest` repository.
+If the `latest` repository is not active yet, open ioBroker Admin, go to **Settings -> Repositories**, select or enable `latest`, and refresh the adapter list.
+
+Then open the adapter view, search for `anthbot-genie`, and install the adapter from the `latest` repository.
 
 ### CLI
 
 Install with:
 
 ```bash
+iobroker repo set latest
+iobroker update
 iobroker add anthbot-genie
 ```
 
