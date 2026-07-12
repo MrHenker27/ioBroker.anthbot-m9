@@ -46,7 +46,7 @@ class AnthbotGenieAdapter extends AdapterBase {
     constructor(options = {}) {
         super({
             ...options,
-            name: 'anthbot-genie',
+            name: 'anthbot-m9',
         });
 
         this.on('ready', this.onReady.bind(this));

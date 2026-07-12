@@ -1,4 +1,15 @@
-# ioBroker.anthbot-genie
+# ioBroker.anthbot-m9
+
+## Community Edition
+
+**Originally developed by:** reloxx13
+
+**Community Edition maintained by:** MrHenker27
+
+This project is based on the original **ioBroker.anthbot-genie** adapter and extends it with additional features for the Anthbot M9.
+
+---
+
 
 <img src="admin/anthbot-genie.png" alt="Logo" width="80" /> 
 

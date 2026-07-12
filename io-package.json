@@ -1,7 +1,7 @@
 {
   "common": {
-    "name": "anthbot-genie",
-    "version": "0.1.13",
+    "name": "anthbot-m9",
+    "version": "0.2.0",
     "news": {
       "0.1.13": {
         "en": "Add M5/M9 payload parity for status, battery, error, network, RTK, map, and total mowing metrics while keeping the existing ioBroker state tree stable.\nRefresh temporary IoT credentials once on AWS IoT `403` responses and retry the failed shadow read or command publish automatically.\nRefactor the large adapter sources into focused CommonJS modules for Anthbot cloud/shadow clients, payload helpers, adapter object definitions, state derivation, and command handling without changing state IDs or command payload behavior.\nExpand `npm run check` so syntax validation covers the split `lib/anthbot`, `lib/adapter`, and unit test files through the dedicated syntax-check helper.",
@@ -128,9 +128,9 @@
       "license": "MIT",
       "type": "free"
     },
-    "icon": "anthbot-genie.png",
-    "extIcon": "https://raw.githubusercontent.com/reloxx13/ioBroker.anthbot-genie/main/admin/anthbot-genie.png",
-    "readme": "https://github.com/reloxx13/ioBroker.anthbot-genie/blob/main/README.md",
+    "icon": "anthbot-m9.png",
+    "extIcon": "https://raw.githubusercontent.com/MrHenker27/ioBroker.anthbot-m9/main/admin/anthbot-m9.png",
+    "readme": "https://github.com/MrHenker27/ioBroker.anthbot-m9/blob/main/README.md",
     "keywords": [
       "anthbot",
       "anthbot-genie",
