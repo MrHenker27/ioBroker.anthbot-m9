@@ -96,17 +96,41 @@
       "lg": 6,
       "xl": 6
     },
-    "pollInterval": {
+    "pollIntervalActive": {
       "type": "number",
-      "label": "Poll interval in seconds",
-      "min": 10,
+      "label": "Poll interval while active (seconds)",
+      "min": 15,
       "max": 3600,
       "step": 1,
       "xs": 12,
       "sm": 12,
-      "md": 6,
-      "lg": 6,
-      "xl": 6
+      "md": 4,
+      "lg": 4,
+      "xl": 4
+    },
+    "pollIntervalCharging": {
+      "type": "number",
+      "label": "Poll interval while charging (seconds)",
+      "min": 15,
+      "max": 3600,
+      "step": 1,
+      "xs": 12,
+      "sm": 12,
+      "md": 4,
+      "lg": 4,
+      "xl": 4
+    },
+    "pollIntervalIdle": {
+      "type": "number",
+      "label": "Poll interval while idle (seconds)",
+      "min": 15,
+      "max": 3600,
+      "step": 1,
+      "xs": 12,
+      "sm": 12,
+      "md": 4,
+      "lg": 4,
+      "xl": 4
     },
     "apiHost": {
       "type": "text",

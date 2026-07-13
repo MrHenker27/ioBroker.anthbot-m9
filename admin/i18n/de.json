@@ -6,6 +6,8 @@
     "Error description language": "Sprache der Fehlerbeschreibung",
     "Examples: 49 for Germany, 32 for Belgium, 1 for US/Canada": "Beispiele: 49 für Deutschland, 32 für Belgien, 1 für USA/Kanada",
     "Language used for Anthbot cloud error descriptions": "Sprache für Anthbot-Cloud-Fehlerbeschreibungen",
-    "Poll interval in seconds": "Abfrageintervall in Sekunden",
+    "Poll interval while active (seconds)": "Aktualisierung während des Mähens (Sekunden)",
+    "Poll interval while charging (seconds)": "Aktualisierung während des Ladens (Sekunden)",
+    "Poll interval while idle (seconds)": "Aktualisierung im Standby (Sekunden)",
     "The email address associated with your Anthbot account": "Die E-Mail-Adresse, die mit Ihrem Anthbot-Konto verknüpft ist"
 }

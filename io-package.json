@@ -163,7 +163,8 @@
       {
         "admin": ">=7.7.22"
       }
-    ]
+    ],
+    "installedFrom": "/opt/ioBroker.anthbot-m9"
   },
   "encryptedNative": [
     "password"
@@ -177,7 +178,9 @@
     "password": "",
     "areaCode": "49",
     "apiHost": "api.anthbot.com",
-    "pollInterval": 60,
+    "pollIntervalActive": 30,
+    "pollIntervalCharging": 300,
+    "pollIntervalIdle": 900,
     "errorDescriptionLanguage": "English"
   },
   "objects": [

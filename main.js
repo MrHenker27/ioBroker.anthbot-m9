@@ -18,7 +18,39 @@ const {
     getDeviceChannelDefinitions,
     getDeviceStateDefinitions,
 } = require('./lib/adapter/definitions');
-const { normalizePollIntervalSeconds } = require('./lib/adapter/config');
+const { generalMowerStatus, isCharging } = require('./lib/anthbot/payload');
+'use strict';
+
+const DEFAULT_ACTIVE_POLL_INTERVAL_SECONDS = 30;
+const DEFAULT_CHARGING_POLL_INTERVAL_SECONDS = 300;
+const DEFAULT_IDLE_POLL_INTERVAL_SECONDS = 900;
+
+const MIN_POLL_INTERVAL_SECONDS = 15;
+const MAX_POLL_INTERVAL_SECONDS = 3600;
+
+/**
+ * @param {string|number|null|undefined} value
+ * @param {number} defaultValue
+ * @returns {number}
+ */
+function normalizePollIntervalSeconds(value, defaultValue) {
+    const parsed = Number(value);
+    const intervalSeconds = Number.isFinite(parsed) && parsed > 0 ? parsed : defaultValue;
+
+    return Math.min(
+        MAX_POLL_INTERVAL_SECONDS,
+        Math.max(MIN_POLL_INTERVAL_SECONDS, intervalSeconds),
+    );
+}
+
+module.exports = {
+    DEFAULT_ACTIVE_POLL_INTERVAL_SECONDS,
+    DEFAULT_CHARGING_POLL_INTERVAL_SECONDS,
+    DEFAULT_IDLE_POLL_INTERVAL_SECONDS,
+    MAX_POLL_INTERVAL_SECONDS,
+    MIN_POLL_INTERVAL_SECONDS,
+    normalizePollIntervalSeconds,
+};
 const { buildDeviceStateUpdates, getControlFallbackValue } = require('./lib/adapter/state-updates');
 const { executeCommand, executeConsumableCommand, executeControl } = require('./lib/adapter/actions');
 
@@ -133,16 +165,59 @@ class AnthbotGenieAdapter extends AdapterBase {
         }
     }
 
-    schedulePoll() {
+        schedulePoll() {
         if (this.unloaded) {
             return;
         }
+
         if (this.pollTimer) {
             this.clearTimeout(this.pollTimer);
         }
-        const intervalSeconds = normalizePollIntervalSeconds(this.anthbotConfig.pollInterval);
+
+        const contexts = Array.from(this.deviceContexts.values());
+
+        const anyCharging = contexts.some(context =>
+           isCharging(context.lastReported || {}),
+        );
+
+        const activeStatuses = new Set([
+            'mowing',
+            'returning_to_dock',
+            'mapping',
+            'positioning',
+            'resuming',
+            'remote_control',
+            'going_to_target',
+         ]);
+
+        const anyActive = contexts.some(context =>
+            activeStatuses.has(
+                generalMowerStatus(context.lastReported || {}),
+            ),
+        );
+
+        let intervalSeconds;
+
+        if (anyActive) {
+            intervalSeconds = normalizePollIntervalSeconds(
+                this.anthbotConfig.pollIntervalActive,
+                DEFAULT_ACTIVE_POLL_INTERVAL_SECONDS,
+            );
+        } else if (anyCharging) {
+            intervalSeconds = normalizePollIntervalSeconds(
+                this.anthbotConfig.pollIntervalCharging,
+                DEFAULT_CHARGING_POLL_INTERVAL_SECONDS,
+            );
+        } else {
+            intervalSeconds = normalizePollIntervalSeconds(
+                this.anthbotConfig.pollIntervalIdle,
+                DEFAULT_IDLE_POLL_INTERVAL_SECONDS,
+            );
+        }
+
         this.pollTimer = this.setTimeout(async () => {
             this.pollTimer = null;
+
             try {
                 await this.refreshAll();
             } finally {
@@ -178,7 +253,7 @@ class AnthbotGenieAdapter extends AdapterBase {
                     await this.refreshDevice(context);
                     successful += 1;
                 } catch (error) {
-                    this.log.warn(`Refresh failed for ${context.device.serialNumber}: ${error.message}`);
+                    this.log.warn(`Refresh failed for ${context.device.serialNumber}: ${error.stack || JSON.stringify(error) || String(error)}`);
                 }
             }
         } catch (error) {
@@ -471,14 +546,18 @@ class AnthbotGenieAdapter extends AdapterBase {
             (areaTime && areaTime !== context.lastAreaTime);
         if (shouldRefreshArea) {
             try {
-                context.areaDefinition = await this.cloudClient.getDeviceAreaDefinition(context.device.serialNumber);
+                const map = await this.cloudClient.getDeviceMap(context.device.serialNumber);
+                context.areaDefinition = map.areaDefinition;
+                context.mapData = map.mapData;
                 context.lastAreaTime = areaTime;
             } catch (error) {
                 if (isLikelyAuthenticationError(error)) {
                     await this.ensureSession(true);
-                    context.areaDefinition = await this.cloudClient.getDeviceAreaDefinition(
+                    const map = await this.cloudClient.getDeviceMap(
                         context.device.serialNumber,
                     );
+                    context.areaDefinition = map.areaDefinition;
+                    context.mapData = map.mapData;
                     context.lastAreaTime = areaTime;
                 } else {
                     this.log.debug(
