@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "anthbot-m9",
-    "version": "0.2.0",
+    "version": "0.2.3",
     "news": {
       "0.1.13": {
         "en": "Add M5/M9 payload parity for status, battery, error, network, RTK, map, and total mowing metrics while keeping the existing ioBroker state tree stable.\nRefresh temporary IoT credentials once on AWS IoT `403` responses and retry the failed shadow read or command publish automatically.\nRefactor the large adapter sources into focused CommonJS modules for Anthbot cloud/shadow clients, payload helpers, adapter object definitions, state derivation, and command handling without changing state IDs or command payload behavior.\nExpand `npm run check` so syntax validation covers the split `lib/anthbot`, `lib/adapter`, and unit test files through the dedicated syntax-check helper.",
@@ -163,8 +163,7 @@
       {
         "admin": ">=7.7.22"
       }
-    ],
-    "installedFrom": "/opt/ioBroker.anthbot-m9"
+    ]
   },
   "encryptedNative": [
     "password"
@@ -178,10 +177,16 @@
     "password": "",
     "areaCode": "49",
     "apiHost": "api.anthbot.com",
+    "errorDescriptionLanguage": "English",
     "pollIntervalActive": 30,
-    "pollIntervalCharging": 300,
-    "pollIntervalIdle": 900,
-    "errorDescriptionLanguage": "English"
+    "pollIntervalCharging": 60,
+    "pollIntervalIdle": 60,
+    "pollIntervalIdleLong": 180,
+    "idleLongAfterMinutes": 10,
+    "nightPollingEnabled": false,
+    "pollIntervalNight": 300,
+    "nightStartHour": 22,
+    "nightEndHour": 6
   },
   "objects": [
     {
@@ -211,5 +216,6 @@
       },
       "native": {}
     }
-  ]
+  ],
+  "version": "0.2.3"
 }

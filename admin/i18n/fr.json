@@ -6,6 +6,11 @@
     "Error description language": "Langue de description des erreurs",
     "Examples: 49 for Germany, 32 for Belgium, 1 for US/Canada": "Exemples : 49 pour l'Allemagne, 32 pour la Belgique, 1 pour les États-Unis/Canada",
     "Language used for Anthbot cloud error descriptions": "Langue utilisée pour les descriptions d'erreur du cloud Anthbot",
-    "Poll interval in seconds": "Intervalle d'interrogation en secondes",
-    "The email address associated with your Anthbot account": "L'adresse e-mail associée à votre compte Anthbot"
+    "The email address associated with your Anthbot account": "L'adresse e-mail associée à votre compte Anthbot",
+    "Poll interval while active (seconds)": "Poll interval while active (seconds)",
+    "Poll interval while charging (seconds)": "Poll interval while charging (seconds)",
+    "Poll interval while idle (seconds)": "Poll interval while idle (seconds)",
+    "Refresh interval while mowing, mapping, returning or remote controlling": "Refresh interval while mowing, mapping, returning or remote controlling",
+    "Refresh interval while the mower is charging": "Refresh interval while the mower is charging",
+    "Refresh interval while the mower is in standby or paused": "Refresh interval while the mower is in standby or paused"
 }

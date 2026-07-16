@@ -1,7 +1,7 @@
 {
   "name": "iobroker.anthbot-m9",
-  "version": "0.2.0",
-  "description": "Unofficial ioBroker adapter for Anthbot Genie robotic lawn mowers with cloud telemetry, diagnostics, consumables, zones, and controls.",
+  "version": "0.2.3",
+  "description": "Unofficial ioBroker adapter for the Anthbot M9 robotic lawn mower.",
   "author": "reloxx13",
   "license": "MIT",
   "main": "main.js",
@@ -11,8 +11,6 @@
     "iobroker-adapter",
     "anthbot",
     "anthbot-genie",
-    "anthbot-m9",
-    "m9",
     "robotic-lawn-mower",
     "lawn-mower",
     "mower",
@@ -59,7 +57,8 @@
   "dependencies": {
     "@iobroker/adapter-core": "^3.4.1",
     "axios": "^1.18.0",
-    "tar": "^7.5.20"
+    "sharp": "^0.35.3",
+    "tar": "^7.4.3"
   },
   "devDependencies": {
     "@alcalzone/release-script": "^5.2.1",

@@ -2,6 +2,7 @@
 
 /** @type {typeof import('@iobroker/adapter-core')} */
 const utils = require('@iobroker/adapter-core');
+const path = require('node:path');
 const axios = /** @type {import('axios').AxiosStatic} */ (/** @type {unknown} */ (require('axios')));
 const { AnthbotCloudApiClient } = require('./lib/anthbot/cloud-client');
 const { AnthbotShadowApiClient } = require('./lib/anthbot/shadow-client');
@@ -18,41 +19,9 @@ const {
     getDeviceChannelDefinitions,
     getDeviceStateDefinitions,
 } = require('./lib/adapter/definitions');
-const { generalMowerStatus, isCharging } = require('./lib/anthbot/payload');
-'use strict';
-
-const DEFAULT_ACTIVE_POLL_INTERVAL_SECONDS = 30;
-const DEFAULT_CHARGING_POLL_INTERVAL_SECONDS = 300;
-const DEFAULT_IDLE_POLL_INTERVAL_SECONDS = 900;
-
-const MIN_POLL_INTERVAL_SECONDS = 15;
-const MAX_POLL_INTERVAL_SECONDS = 3600;
-
-/**
- * @param {string|number|null|undefined} value
- * @param {number} defaultValue
- * @returns {number}
- */
-function normalizePollIntervalSeconds(value, defaultValue) {
-    const parsed = Number(value);
-    const intervalSeconds = Number.isFinite(parsed) && parsed > 0 ? parsed : defaultValue;
-
-    return Math.min(
-        MAX_POLL_INTERVAL_SECONDS,
-        Math.max(MIN_POLL_INTERVAL_SECONDS, intervalSeconds),
-    );
-}
-
-module.exports = {
-    DEFAULT_ACTIVE_POLL_INTERVAL_SECONDS,
-    DEFAULT_CHARGING_POLL_INTERVAL_SECONDS,
-    DEFAULT_IDLE_POLL_INTERVAL_SECONDS,
-    MAX_POLL_INTERVAL_SECONDS,
-    MIN_POLL_INTERVAL_SECONDS,
-    normalizePollIntervalSeconds,
-};
 const { buildDeviceStateUpdates, getControlFallbackValue } = require('./lib/adapter/state-updates');
 const { executeCommand, executeConsumableCommand, executeControl } = require('./lib/adapter/actions');
+const { resolvePollingInterval, updatePollingCategory } = require('./lib/adapter/polling');
 
 /**
  * @typedef {object} AnthbotAdapterConfig
@@ -60,7 +29,15 @@ const { executeCommand, executeConsumableCommand, executeControl } = require('./
  * @property {string} password
  * @property {string} areaCode
  * @property {string} apiHost
- * @property {number} pollInterval
+ * @property {number} pollIntervalActive
+ * @property {number} pollIntervalCharging
+ * @property {number} pollIntervalIdle
+ * @property {number} pollIntervalIdleLong
+ * @property {number} idleLongAfterMinutes
+ * @property {boolean} nightPollingEnabled
+ * @property {number} pollIntervalNight
+ * @property {number} nightStartHour
+ * @property {number} nightEndHour
  * @property {string} errorDescriptionLanguage
  */
 
@@ -165,59 +142,23 @@ class AnthbotGenieAdapter extends AdapterBase {
         }
     }
 
-        schedulePoll() {
+    schedulePoll() {
         if (this.unloaded) {
             return;
         }
-
         if (this.pollTimer) {
             this.clearTimeout(this.pollTimer);
         }
 
-        const contexts = Array.from(this.deviceContexts.values());
+        const polling = resolvePollingInterval({
+            contexts: Array.from(this.deviceContexts.values()),
+            config: this.anthbotConfig,
+        });
 
-        const anyCharging = contexts.some(context =>
-           isCharging(context.lastReported || {}),
-        );
-
-        const activeStatuses = new Set([
-            'mowing',
-            'returning_to_dock',
-            'mapping',
-            'positioning',
-            'resuming',
-            'remote_control',
-            'going_to_target',
-         ]);
-
-        const anyActive = contexts.some(context =>
-            activeStatuses.has(
-                generalMowerStatus(context.lastReported || {}),
-            ),
-        );
-
-        let intervalSeconds;
-
-        if (anyActive) {
-            intervalSeconds = normalizePollIntervalSeconds(
-                this.anthbotConfig.pollIntervalActive,
-                DEFAULT_ACTIVE_POLL_INTERVAL_SECONDS,
-            );
-        } else if (anyCharging) {
-            intervalSeconds = normalizePollIntervalSeconds(
-                this.anthbotConfig.pollIntervalCharging,
-                DEFAULT_CHARGING_POLL_INTERVAL_SECONDS,
-            );
-        } else {
-            intervalSeconds = normalizePollIntervalSeconds(
-                this.anthbotConfig.pollIntervalIdle,
-                DEFAULT_IDLE_POLL_INTERVAL_SECONDS,
-            );
-        }
+        this.log.debug(`Next poll in ${polling.seconds}s (${polling.reason}).`);
 
         this.pollTimer = this.setTimeout(async () => {
             this.pollTimer = null;
-
             try {
                 await this.refreshAll();
             } finally {
@@ -225,7 +166,7 @@ class AnthbotGenieAdapter extends AdapterBase {
                     this.schedulePoll();
                 }
             }
-        }, intervalSeconds * 1000);
+        }, polling.seconds * 1000);
     }
 
     async refreshAll(forceLogin = false) {
@@ -253,7 +194,9 @@ class AnthbotGenieAdapter extends AdapterBase {
                     await this.refreshDevice(context);
                     successful += 1;
                 } catch (error) {
-                    this.log.warn(`Refresh failed for ${context.device.serialNumber}: ${error.stack || JSON.stringify(error) || String(error)}`);
+                    this.log.warn(
+                        `Refresh failed for ${context.device.serialNumber}: ${error?.stack || error?.message || String(error)}`,
+                    );
                 }
             }
         } catch (error) {
@@ -405,14 +348,40 @@ class AnthbotGenieAdapter extends AdapterBase {
                     : null,
                 iotCredentials: region.iotCredentials,
                 areaDefinition: existing?.areaDefinition || {},
+                mapData: existing?.mapData || {},
                 lastAreaTime: existing?.lastAreaTime || null,
                 lastReported: existing?.lastReported || {},
                 lastService: existing?.lastService || {},
+                pollingCategory: existing?.pollingCategory || null,
+                pollingCategorySince: existing?.pollingCategorySince || Date.now(),
+                lastMapSvg: existing?.lastMapSvg || '',
+                dockPose: existing?.dockPose || null,
+                mapDebug: Boolean(existing?.mapDebug),
+                mapLayers: existing?.mapLayers || {
+                    showManualZones: false,
+                    showAutoZones: false,
+                    showNoGoZones: true,
+                    showPaths: true,
+                    showCurrentTrack: true,
+                    showLegend: false,
+                },
+                pathHistory: existing?.pathHistory || { pathId: null, points: [] },
+                mapExport: existing?.mapExport || {},
+                mapExportDirectory: this.getMapExportDirectory(device.serialNumber),
+                zoneSelection: existing?.zoneSelection || { selected: '', lastResult: {} },
             };
             this.deviceContexts.set(device.serialNumber, context);
             this.deviceContextsByObjectRoot.set(objectRoot, context);
             await this.ensureDeviceObjects(context);
         }
+    }
+
+    getMapExportDirectory(serialNumber) {
+        const instanceDataDirectory =
+            typeof /** @type {any} */ (this).getAbsoluteInstanceDataDir === 'function'
+                ? /** @type {any} */ (this).getAbsoluteInstanceDataDir()
+                : path.join(__dirname, 'data');
+        return path.join(instanceDataDirectory, 'map-exports', String(serialNumber));
     }
 
     async resolveDeviceRegion(device) {
@@ -531,19 +500,20 @@ class AnthbotGenieAdapter extends AdapterBase {
                 `Skipping ${context.device.serialNumber}: temporary IoT credentials are unavailable for shadow access`,
             );
         }
+
         const propertyState = await context.shadowClient.getShadowReportedState();
-        let serviceState = {};
-        try {
-            serviceState = await context.shadowClient.getServiceReportedState();
-        } catch (error) {
-            this.log.debug(`Service shadow failed for ${context.device.serialNumber}: ${error.message}`);
-        }
+        // Do not poll the service shadow here. It doubles the AWS IoT request
+        // count and causes TOO_MANY_REQUESTS while the official app is open.
+        const serviceState = context.lastService || {};
 
         const areaTime = typeof propertyState.area_time === 'string' ? propertyState.area_time : null;
         const shouldRefreshArea =
             !context.areaDefinition ||
             Object.keys(context.areaDefinition).length === 0 ||
+            !context.mapData ||
+            Object.keys(context.mapData).length === 0 ||
             (areaTime && areaTime !== context.lastAreaTime);
+
         if (shouldRefreshArea) {
             try {
                 const map = await this.cloudClient.getDeviceMap(context.device.serialNumber);
@@ -553,9 +523,7 @@ class AnthbotGenieAdapter extends AdapterBase {
             } catch (error) {
                 if (isLikelyAuthenticationError(error)) {
                     await this.ensureSession(true);
-                    const map = await this.cloudClient.getDeviceMap(
-                        context.device.serialNumber,
-                    );
+                    const map = await this.cloudClient.getDeviceMap(context.device.serialNumber);
                     context.areaDefinition = map.areaDefinition;
                     context.mapData = map.mapData;
                     context.lastAreaTime = areaTime;
@@ -568,14 +536,14 @@ class AnthbotGenieAdapter extends AdapterBase {
         }
 
         context.lastReported = propertyState;
+        updatePollingCategory(context);
         context.lastService = serviceState;
 
-        const merged = {
+        await this.updateStates(context, {
             ...propertyState,
             _service_reported: serviceState,
             _area_definition: context.areaDefinition || {},
-        };
-        await this.updateStates(context, merged);
+        });
     }
 
     async ensureDeviceIotCredentials(context) {
@@ -650,6 +618,12 @@ class AnthbotGenieAdapter extends AdapterBase {
             return;
         }
 
+        const localOnly =
+            (section === 'controls' &&
+                (command.startsWith('map.') || command === 'zoneSelection.selected')) ||
+            (section === 'commands' &&
+                ['map.clearTrack', 'map.saveSvg', 'map.createPng'].includes(command));
+
         let commandError = null;
         try {
             if (section === 'commands') {
@@ -661,9 +635,25 @@ class AnthbotGenieAdapter extends AdapterBase {
             }
         } catch (error) {
             commandError = error;
+            if (section === 'commands' && command === 'mowing.startSelectedZone') {
+                context.zoneSelection = context.zoneSelection || {};
+                context.zoneSelection.lastResult = {
+                    ok: false,
+                    message: error?.message || String(error),
+                    time: new Date().toISOString(),
+                };
+            }
         } finally {
             try {
-                await this.refreshDevice(context);
+                if (localOnly) {
+                    await this.updateStates(context, {
+                        ...(context.lastReported || {}),
+                        _service_reported: context.lastService || {},
+                        _area_definition: context.areaDefinition || {},
+                    });
+                } else {
+                    await this.refreshDevice(context);
+                }
             } catch (refreshError) {
                 this.log.warn(`Post-command refresh failed for ${id}: ${refreshError.message}`);
             }
@@ -696,7 +686,7 @@ class AnthbotGenieAdapter extends AdapterBase {
     }
 
     getControlFallbackValue(context, control) {
-        return getControlFallbackValue(context.lastReported || {}, control);
+        return getControlFallbackValue(context.lastReported || {}, control, context);
     }
 
     async handleCommandState(context, command, value) {
@@ -719,8 +709,22 @@ class AnthbotGenieAdapter extends AdapterBase {
             return;
         }
 
-        await this.ensureDeviceIotCredentials(context);
+        const localOnly = control.startsWith('map.') || control === 'zoneSelection.selected';
+        if (!localOnly) {
+            await this.ensureDeviceIotCredentials(context);
+        }
+
         await this.executeControl(context, control, value);
+
+        if (localOnly) {
+            await this.updateStates(context, {
+                ...context.lastReported,
+                _service_reported: context.lastService || {},
+                _area_definition: context.areaDefinition || {},
+            });
+            return;
+        }
+
         await context.shadowClient.requestAllProperties();
         await this.delay(1000);
     }
