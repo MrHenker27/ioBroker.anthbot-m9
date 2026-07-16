@@ -27,12 +27,13 @@ describe('M9 position selection', () => {
             'mowing',
             now,
         );
+
         assert.equal(result.source, 'curpath-live');
         assert.equal(result.pose.x, 1.5);
         assert.equal(result.pose.y, 2);
     });
 
-    it('uses property pose when stationary', () => {
+    it('uses the fixed map origin while charging', () => {
         const now = 1_000_000;
         const result = selectM9Position(
             {
@@ -42,11 +43,13 @@ describe('M9 position selection', () => {
             'charging',
             now,
         );
-        assert.equal(result.source, 'property-pose');
-        assert.deepEqual(result.pose, { x: 3, y: 4 });
+
+        assert.equal(result.source, 'dock-position-charging');
+        assert.deepEqual(result.pose, { x: 0, y: 0, yaw: 0 });
+        assert.deepEqual(result.dockPose, { x: 0, y: 0, yaw: 0 });
     });
 
-    it('does not call a stale path live while active', () => {
+    it('retains a usable stale curpath position while active', () => {
         const now = 1_000_000;
         const result = selectM9Position(
             {
@@ -56,6 +59,9 @@ describe('M9 position selection', () => {
             'mowing',
             now,
         );
-        assert.equal(result.source, 'property-pose-active-fallback');
+
+        assert.equal(result.source, 'curpath-last-known');
+        assert.equal(result.pose.x, 1.5);
+        assert.equal(result.pose.y, 2);
     });
 });
