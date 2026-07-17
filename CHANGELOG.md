@@ -1,4 +1,4 @@
-## 0.2.19 (2026-07-17)
+## 0.3.0 (2026-07-17)
 
 - RTK skyplot is now rendered directly from `diagnostics.admin.skyplotHtml` using the supported JSONConfig `state` component with `control: html`.
 - Removed the non-triggering `textSendTo` path from the Admin layout.

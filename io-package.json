@@ -3,7 +3,7 @@
         "name": "anthbot-m9",
         "version": "0.3.0",
         "news": {
-            "0.2.19": {
+            "0.3.0": {
                 "en": "Display the RTK satellite map directly from the live HTML state instead of relying on a sendTo widget.",
                 "de": "RTK-Satellitenkarte wird direkt aus dem Live-HTML-Datenpunkt angezeigt; keine abhängige sendTo-Komponente mehr.",
                 "ru": "Карта спутников RTK отображается напрямую из HTML-состояния.",
