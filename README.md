@@ -384,3 +384,8 @@ MIT License
 Copyright (c) 2026 reloxx13
 
 See [LICENSE](LICENSE) for details.
+
+
+### MQTT live updates
+
+Version 0.2.4 subscribes to the AWS IoT named shadows `property` and `service` over a SigV4-signed MQTT WebSocket connection. Changes triggered in the official Anthbot app therefore reach ioBroker without waiting for the next HTTP poll. Configurable polling remains active as a safety fallback.

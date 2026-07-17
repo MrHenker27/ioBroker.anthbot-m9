@@ -6,6 +6,7 @@ const path = require('node:path');
 const axios = /** @type {import('axios').AxiosStatic} */ (/** @type {unknown} */ (require('axios')));
 const { AnthbotCloudApiClient } = require('./lib/anthbot/cloud-client');
 const { AnthbotShadowApiClient } = require('./lib/anthbot/shadow-client');
+const { AnthbotMqttShadowClient } = require('./lib/anthbot/mqtt-shadow-client');
 const {
     AnthbotGenieError,
     asInteger,
@@ -38,6 +39,8 @@ const { resolvePollingInterval, updatePollingCategory } = require('./lib/adapter
  * @property {number} pollIntervalNight
  * @property {number} nightStartHour
  * @property {number} nightEndHour
+ * @property {boolean} mqttEnabled
+ * @property {number} mqttFallbackPollInterval
  * @property {string} errorDescriptionLanguage
  */
 
@@ -136,6 +139,9 @@ class AnthbotGenieAdapter extends AdapterBase {
                 this.clearTimeout(this.pollTimer);
                 this.pollTimer = null;
             }
+            for (const context of this.deviceContexts.values()) {
+                context.mqttClient?.stop().catch(() => {});
+            }
             callback();
         } catch {
             callback();
@@ -150,12 +156,25 @@ class AnthbotGenieAdapter extends AdapterBase {
             this.clearTimeout(this.pollTimer);
         }
 
+        const contexts = Array.from(this.deviceContexts.values());
         const polling = resolvePollingInterval({
-            contexts: Array.from(this.deviceContexts.values()),
+            contexts,
             config: this.anthbotConfig,
         });
+        const mqttConnected =
+            this.anthbotConfig.mqttEnabled !== false &&
+            contexts.length > 0 &&
+            contexts.every(context => context.mqttClient?.connected);
+        const mqttFallbackSeconds = Math.max(
+            60,
+            Number(this.anthbotConfig.mqttFallbackPollInterval) || 300,
+        );
+        const intervalSeconds = mqttConnected
+            ? Math.max(polling.seconds, mqttFallbackSeconds)
+            : polling.seconds;
+        const reason = mqttConnected ? `mqtt-fallback/${polling.reason}` : polling.reason;
 
-        this.log.debug(`Next poll in ${polling.seconds}s (${polling.reason}).`);
+        this.log.debug(`Next poll in ${intervalSeconds}s (${reason}).`);
 
         this.pollTimer = this.setTimeout(async () => {
             this.pollTimer = null;
@@ -166,7 +185,7 @@ class AnthbotGenieAdapter extends AdapterBase {
                     this.schedulePoll();
                 }
             }
-        }, polling.seconds * 1000);
+        }, intervalSeconds * 1000);
     }
 
     async refreshAll(forceLogin = false) {
@@ -338,6 +357,9 @@ class AnthbotGenieAdapter extends AdapterBase {
         for (const device of devices) {
             const region = await this.resolveDeviceRegion(device);
             const existing = this.deviceContexts.get(device.serialNumber);
+            if (existing?.mqttClient) {
+                await existing.mqttClient.stop();
+            }
             const objectRoot = deviceObjectIdFromSerial(device.serialNumber, this.FORBIDDEN_CHARS);
             const context = {
                 device,
@@ -365,14 +387,23 @@ class AnthbotGenieAdapter extends AdapterBase {
                     showCurrentTrack: true,
                     showLegend: false,
                 },
-                pathHistory: existing?.pathHistory || { pathId: null, points: [] },
+                pathHistory: existing?.pathHistory || { taskId: null, packetPathId: null, points: [] },
                 mapExport: existing?.mapExport || {},
                 mapExportDirectory: this.getMapExportDirectory(device.serialNumber),
                 zoneSelection: existing?.zoneSelection || { selected: '', lastResult: {} },
+                mqttClient: null,
+                mqttStatus: existing?.mqttStatus || {
+                    state: 'disabled',
+                    connected: false,
+                    reconnectCount: 0,
+                    lastMessageAt: null,
+                    lastError: '',
+                },
             };
             this.deviceContexts.set(device.serialNumber, context);
             this.deviceContextsByObjectRoot.set(objectRoot, context);
             await this.ensureDeviceObjects(context);
+            await this.ensureDeviceMqtt(context);
         }
     }
 
@@ -446,6 +477,7 @@ class AnthbotGenieAdapter extends AdapterBase {
                 continue;
             }
             const context = this.deviceContexts.get(serial);
+            await context?.mqttClient?.stop().catch(() => {});
             this.deviceContexts.delete(serial);
             if (context?.objectRoot) {
                 this.deviceContextsByObjectRoot.delete(context.objectRoot);
@@ -502,11 +534,15 @@ class AnthbotGenieAdapter extends AdapterBase {
         }
 
         const propertyState = await context.shadowClient.getShadowReportedState();
-        // Do not poll the service shadow here. It doubles the AWS IoT request
-        // count and causes TOO_MANY_REQUESTS while the official app is open.
-        const serviceState = context.lastService || {};
+        await this.applyPropertyState(context, propertyState, 'http');
+    }
 
-        const areaTime = typeof propertyState.area_time === 'string' ? propertyState.area_time : null;
+    async applyPropertyState(context, propertyState, source) {
+        const mergedPropertyState = {
+            ...(context.lastReported || {}),
+            ...(propertyState || {}),
+        };
+        const areaTime = typeof mergedPropertyState.area_time === 'string' ? mergedPropertyState.area_time : null;
         const shouldRefreshArea =
             !context.areaDefinition ||
             Object.keys(context.areaDefinition).length === 0 ||
@@ -535,14 +571,100 @@ class AnthbotGenieAdapter extends AdapterBase {
             }
         }
 
-        context.lastReported = propertyState;
+        context.lastReported = mergedPropertyState;
+        context.lastPropertySource = source;
         updatePollingCategory(context);
-        context.lastService = serviceState;
 
         await this.updateStates(context, {
-            ...propertyState,
-            _service_reported: serviceState,
+            ...mergedPropertyState,
+            _service_reported: context.lastService || {},
             _area_definition: context.areaDefinition || {},
+        });
+
+    }
+
+    async applyServiceState(context, serviceState, source) {
+        context.lastService = {
+            ...(context.lastService || {}),
+            ...(serviceState || {}),
+        };
+        context.lastServiceSource = source;
+        await this.updateStates(context, {
+            ...(context.lastReported || {}),
+            _service_reported: context.lastService,
+            _area_definition: context.areaDefinition || {},
+        });
+    }
+
+    async ensureDeviceMqtt(context) {
+        if (this.anthbotConfig.mqttEnabled === false) {
+            if (context.mqttClient) {
+                await context.mqttClient.stop();
+                context.mqttClient = null;
+            }
+            context.mqttStatus = { state: 'disabled', connected: false, reconnectCount: 0, lastMessageAt: null, lastError: '' };
+            return;
+        }
+        if (context.mqttClient) {
+            return;
+        }
+
+        context.mqttClient = new AnthbotMqttShadowClient({
+            serialNumber: context.device.serialNumber,
+            credentialsProvider: async () => {
+                const credentials = await this.cloudClient.getDeviceIotCredentials(context.device.serialNumber);
+                context.iotCredentials = credentials;
+                context.region = {
+                    ...context.region,
+                    regionName: credentials.regionName || context.region.regionName,
+                    iotEndpoint: credentials.endpoint || context.region.iotEndpoint,
+                    iotCredentials: credentials,
+                };
+                context.shadowClient = this.buildShadowClient(context.device, context.region, credentials);
+                return credentials;
+            },
+            onPropertyState: async state => this.applyPropertyState(context, state, 'mqtt'),
+            onServiceState: async state => this.applyServiceState(context, state, 'mqtt'),
+            onStatus: async status => {
+                const wasConnected = Boolean(context.mqttStatus?.connected);
+                context.mqttStatus = status;
+                await this.updateMqttStatusStates(context);
+                if (wasConnected !== Boolean(status.connected)) {
+                    this.schedulePoll();
+                }
+            },
+            log: (level, message) => {
+                const logger = this.log[level] || this.log.debug;
+                logger.call(this.log, message);
+            },
+        });
+        context.mqttClient.start().catch(error => {
+            this.log.debug(`MQTT start failed for ${context.device.serialNumber}: ${error.message}`);
+        });
+    }
+
+    async updateMqttStatusStates(context) {
+        const root = context.objectRoot;
+        const status = context.mqttStatus || {};
+        await this.setStateAsync(`${root}.diagnostics.mqtt.connected`, {
+            val: Boolean(status.connected),
+            ack: true,
+        });
+        await this.setStateAsync(`${root}.diagnostics.mqtt.state`, {
+            val: String(status.state || ''),
+            ack: true,
+        });
+        await this.setStateAsync(`${root}.diagnostics.mqtt.lastMessage`, {
+            val: status.lastMessageAt || '',
+            ack: true,
+        });
+        await this.setStateAsync(`${root}.diagnostics.mqtt.lastError`, {
+            val: status.lastError || '',
+            ack: true,
+        });
+        await this.setStateAsync(`${root}.diagnostics.mqtt.reconnectCount`, {
+            val: Number(status.reconnectCount) || 0,
+            ack: true,
         });
     }
 

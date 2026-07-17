@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "anthbot-m9",
-    "version": "0.2.3",
+    "version": "0.2.5",
     "news": {
+      "0.2.5": {
+        "en": "Keep the complete mowing track for each task and render a wider track.",
+        "de": "Die vollständige Mähspur je Auftrag bleibt erhalten und wird breiter dargestellt.",
+        "ru": "Полный трек кошения сохраняется для каждой задачи и отображается шире.",
+        "pt": "Mantém o percurso completo de cada tarefa de corte e apresenta uma linha mais larga.",
+        "nl": "Bewaart het volledige maaispoor per taak en toont een bredere lijn.",
+        "fr": "Conserve la trace complète de chaque tâche de tonte et affiche une ligne plus large.",
+        "it": "Mantiene la traccia completa per ogni attività di taglio e mostra una linea più larga.",
+        "es": "Conserva el recorrido completo de cada tarea de corte y muestra una línea más ancha.",
+        "pl": "Zachowuje pełną trasę koszenia dla każdego zadania i wyświetla grubszą linię.",
+        "uk": "Зберігає повний маршрут косіння для кожного завдання та показує ширшу лінію.",
+        "zh-cn": "为每个割草任务保留完整轨迹，并以更粗的线条显示。"
+      },
       "0.1.13": {
         "en": "Add M5/M9 payload parity for status, battery, error, network, RTK, map, and total mowing metrics while keeping the existing ioBroker state tree stable.\nRefresh temporary IoT credentials once on AWS IoT `403` responses and retry the failed shadow read or command publish automatically.\nRefactor the large adapter sources into focused CommonJS modules for Anthbot cloud/shadow clients, payload helpers, adapter object definitions, state derivation, and command handling without changing state IDs or command payload behavior.\nExpand `npm run check` so syntax validation covers the split `lib/anthbot`, `lib/adapter`, and unit test files through the dedicated syntax-check helper.",
         "de": "Fügen Sie die M5/M9-Nutzlastparität für Status, Batterie, Fehler, Netzwerk, RTK, Karte und Gesamtmähmetriken hinzu, während Sie den vorhandenen ioBroker-Zustandsbaum stabil halten.\nAktualisieren Sie temporäre IoT-Anmeldeinformationen einmal in AWS IoT `403`-Antworten und wiederholen Sie das fehlgeschlagene Shadow Read oder den Befehl publish automatisch.\nRefaktorisieren Sie die großen Adapterquellen in fokussierte CommonJS-Module für Anthbot Cloud/Shadow-Clients, Nutzlast-Helfer, Adapterobjektdefinitionen, Zustandsableitung und Befehlsverarbeitung, ohne die Zustands-IDs oder das Befehlsnutzlastverhalten zu ändern.\nErweitern Sie `npm run check`, so dass die Syntaxvalidierung die Split `lib/anthbot`, `lib/adapter` und Unit-Testdateien über den dedizierten Syntax-Check-Helfer abdeckt.",
@@ -93,6 +106,10 @@
         "pl": "Aktualizacja pliku konfiguracyjnego JSON, aby włączyć tekst pomocy dla konta użytkownika Anthony Bot.\nAktualizuj tłumaczenia i plik konfiguracyjny JSON dla konta Anthony\nDostosowany układ dla kodu obszaru oraz dodany interwał ankietowy i konfiguracje hosta API z odpowiednimi ustawieniami widoczności.\nBump wersja zależności admin w jo- package.json\nAktualizacja wersji zależności admin z > = 7.6.20 do > = 7.7.22.\nDodaj instrukcję GitHub Copilot dla rozwoju adaptera jOBroker\nDodaj automatyczną kontrolę wersji szablonu instrukcji Copilot\ndodaj pliki konfiguracyjne ESLint i Prettier ze skryptami lintowania\nRefaktor struktury kodu dla poprawy czytelności i utrzymania\nBump protobufjs w grupie npm _ and _ przędza w katalogu 1\ndowngrade @ iobroker / testing do wersji 5.0.4",
         "uk": "Оновлений JSON config, щоб включити текст для імені облікового запису Anthbot.\nОновлення перекладу та налаштування JSON для адреси електронної пошти Anthbot\nНалаштовано макет для коду області та додано інтервал опитування та налаштування користувачів API з відповідними налаштуваннями видимості.\nEnglish, Українська, Français..\nОновлено версію залежності адміністратора від >=7.6.20 до >=7.7.22.\nДодавання інструкцій GitHub Copilot для розробки адаптерів ioBroker\nДодати автоматичну перевірку версії для шаблону інструкцій Copilot\nдодати файли конфігурації ESLint та Prettier з скриптами linting\nРефакторна структура коду для підвищення читабельності та стійкості\nBump protobufjs в npm and yarn група через 1 каталог\n@iobroker/testing to version 5.0.4 для сумісності",
         "zh-cn": "更新了 JSON 配置以包含 Anthbot 账户用户名的帮助文本 .\n更新 Anthbot 账户电子邮件地址的翻译和 JSON 配置\n调整了区域代码的布局,并增加了有适当可见度设置的民调间隔和API主机配置.\n在io-package.json中跳跃的管理员依赖版本\n更新了行政依赖版本,从QQ7.6.20到QQ7.7.22.\n为 ioBroker 适配器开发添加 GitHub 副驾驶指令\n为 Copilot 指令模板添加自动版本检查\n添加带有 Linting 脚本的 ESLint 和 Pretier 配置文件\n为改进可读性和可维护性而重新设计代码结构\n横跨一个目录的 npm  和  yarn 组中的 bump protobufjs\n为兼容性将@iobroduc/ testing 降级到 5. 0.4 版本"
+      },
+      "0.2.4": {
+        "en": "Added AWS IoT MQTT live shadow updates with HTTP fallback polling.",
+        "de": "AWS-IoT-MQTT-Live-Aktualisierungen mit HTTP-Sicherheitsabfrage ergänzt."
       }
     },
     "titleLang": {
@@ -186,7 +203,9 @@
     "nightPollingEnabled": false,
     "pollIntervalNight": 300,
     "nightStartHour": 22,
-    "nightEndHour": 6
+    "nightEndHour": 6,
+    "mqttEnabled": true,
+    "mqttFallbackPollInterval": 300
   },
   "objects": [
     {

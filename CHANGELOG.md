@@ -1,4 +1,18 @@
+## 0.2.4 (2026-07-16)
+
+- Added AWS IoT MQTT-over-WebSocket live named-shadow subscriptions.
+- Property changes from the Anthbot app are reflected immediately in ioBroker.
+- Kept configurable HTTP polling as a 300-second safety fallback while MQTT is connected.
+- Added MQTT diagnostics states.
+
 # Changelog
+
+## 0.2.5 (2026-07-17)
+
+- Keep the accumulated mower track for the complete mowing task.
+- Reset the track only when a new mower task id starts or on explicit clear.
+- Increase the rendered track width for a closed, gap-free appearance.
+- Raise the in-memory task track limit to 50,000 points.
 
 ## 0.2.3 (2026-07-16)
 

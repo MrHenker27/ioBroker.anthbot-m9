@@ -106,6 +106,32 @@
       "lg": 6,
       "xl": 6
     },
+    "mqttEnabled": {
+      "type": "checkbox",
+      "label": "Enable MQTT live updates",
+      "help": "Receive device shadow changes immediately through AWS IoT MQTT",
+      "default": true,
+      "xs": 12,
+      "sm": 12,
+      "md": 6,
+      "lg": 6,
+      "xl": 6,
+      "newLine": true
+    },
+    "mqttFallbackPollInterval": {
+      "type": "number",
+      "label": "MQTT fallback poll interval (seconds)",
+      "help": "HTTP safety poll while MQTT is connected",
+      "min": 60,
+      "max": 3600,
+      "step": 1,
+      "default": 300,
+      "xs": 12,
+      "sm": 12,
+      "md": 6,
+      "lg": 6,
+      "xl": 6
+    },
     "pollIntervalActive": {
       "type": "number",
       "label": "Poll interval while active (seconds)",

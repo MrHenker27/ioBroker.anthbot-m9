@@ -26,5 +26,15 @@
   "Night starts at (hour)": "Night starts at (hour)",
   "Local server hour from which night polling is used": "Local server hour from which night polling is used",
   "Night ends at (hour)": "Night ends at (hour)",
-  "Local server hour at which normal polling resumes": "Local server hour at which normal polling resumes"
+  "Local server hour at which normal polling resumes": "Local server hour at which normal polling resumes",
+  "Enable MQTT live updates": "Enable MQTT live updates",
+  "Receive device shadow changes immediately through AWS IoT MQTT": "Receive device shadow changes immediately through AWS IoT MQTT",
+  "MQTT fallback poll interval (seconds)": "MQTT fallback poll interval (seconds)",
+  "HTTP safety poll while MQTT is connected": "HTTP safety poll while MQTT is connected",
+  "MQTT diagnostics": "MQTT diagnostics",
+  "MQTT connected": "MQTT connected",
+  "MQTT state": "MQTT state",
+  "Last MQTT message": "Last MQTT message",
+  "Last MQTT error": "Last MQTT error",
+  "MQTT reconnect count": "MQTT reconnect count"
 }

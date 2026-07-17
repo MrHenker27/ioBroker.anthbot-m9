@@ -1,6 +1,6 @@
 {
   "name": "iobroker.anthbot-m9",
-  "version": "0.2.3",
+  "version": "0.2.5",
   "description": "Unofficial ioBroker adapter for the Anthbot M9 robotic lawn mower.",
   "author": "reloxx13",
   "license": "MIT",
@@ -57,6 +57,7 @@
   "dependencies": {
     "@iobroker/adapter-core": "^3.4.1",
     "axios": "^1.18.0",
+    "mqtt": "^5.15.2",
     "sharp": "^0.35.3",
     "tar": "^7.4.3"
   },
