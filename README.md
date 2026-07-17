@@ -384,3 +384,26 @@ MIT License
 Copyright (c) 2026 reloxx13
 
 See [LICENSE](LICENSE) for details.
+
+
+### MQTT live updates
+
+Version 0.2.4 subscribes to the AWS IoT named shadows `property` and `service` over a SigV4-signed MQTT WebSocket connection. Changes triggered in the official Anthbot app therefore reach ioBroker without waiting for the next HTTP poll. Configurable polling remains active as a safety fallback.
+
+## GNSS and RTK diagnostics
+
+Version 0.2.6 keeps the two positioning sides separate:
+
+- `diagnostics.gnss.base.*` contains values that can be assigned to the RTK/NetRTK base station.
+- `diagnostics.gnss.robot.*` contains only values that can be assigned to Kevin.
+- `diagnostics.gnss.assessment.*` provides a cautious interpretation. It never copies the base station's satellite count into Kevin's states.
+- `diagnostics.gnss.rawCandidates` stores all GNSS/RTK-related fields found in the current payload so newly discovered Anthbot fields can be identified later.
+
+The NetRTK satellite screen in the official app appears to describe the base station. A strong base status therefore does not prove that Kevin currently has a fixed GNSS solution. If the cloud payload does not expose Kevin's satellite count or accuracy, the adapter reports `unknown`/empty values rather than inventing them.
+
+`assessment.odometryLikely` is only an inference. It becomes true when Kevin is active, has no GNSS fix and the adapter still receives fresh movement/position information. This does not prove the exact sensor fusion used by the mower.
+
+
+## App reverse engineering notes (2.15.3)
+
+The NetRTK page sends `req_rtk_base_info`. The robot/base then exposes `rtk_base.rtk_id`, `rtk_base.state` and `bt_satellite_time`. The app downloads `rtk_manager_<serial>.tar.gz` using the `device/rtk` presigned URL category and parses `<rtk_id>/rtk_base_info.bin`. The binary contains a 13-byte header followed by seven-byte satellite records (system, frequency, id, elevation, azimuth and signal strength). Map downloads are checked against `map.time`, `area_time`, `map.map_id`, `map.area_id`, `map.plan_id` and `map.state`; therefore v0.2.8 no longer relies only on the old top-level `area_time`.

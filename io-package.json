@@ -1,212 +1,292 @@
 {
-  "common": {
-    "name": "anthbot-genie",
-    "version": "0.1.13",
-    "news": {
-      "0.1.13": {
-        "en": "Add M5/M9 payload parity for status, battery, error, network, RTK, map, and total mowing metrics while keeping the existing ioBroker state tree stable.\nRefresh temporary IoT credentials once on AWS IoT `403` responses and retry the failed shadow read or command publish automatically.\nRefactor the large adapter sources into focused CommonJS modules for Anthbot cloud/shadow clients, payload helpers, adapter object definitions, state derivation, and command handling without changing state IDs or command payload behavior.\nExpand `npm run check` so syntax validation covers the split `lib/anthbot`, `lib/adapter`, and unit test files through the dedicated syntax-check helper.",
-        "de": "Fügen Sie die M5/M9-Nutzlastparität für Status, Batterie, Fehler, Netzwerk, RTK, Karte und Gesamtmähmetriken hinzu, während Sie den vorhandenen ioBroker-Zustandsbaum stabil halten.\nAktualisieren Sie temporäre IoT-Anmeldeinformationen einmal in AWS IoT `403`-Antworten und wiederholen Sie das fehlgeschlagene Shadow Read oder den Befehl publish automatisch.\nRefaktorisieren Sie die großen Adapterquellen in fokussierte CommonJS-Module für Anthbot Cloud/Shadow-Clients, Nutzlast-Helfer, Adapterobjektdefinitionen, Zustandsableitung und Befehlsverarbeitung, ohne die Zustands-IDs oder das Befehlsnutzlastverhalten zu ändern.\nErweitern Sie `npm run check`, so dass die Syntaxvalidierung die Split `lib/anthbot`, `lib/adapter` und Unit-Testdateien über den dedizierten Syntax-Check-Helfer abdeckt.",
-        "ru": "Добавьте паритет полезной нагрузки M5/M9 для статуса, батареи, ошибок, сети, RTK, карты и общих показателей косилок, сохраняя при этом существующее дерево состояния ioBroker стабильным.\nОбновите временные учетные данные IoT после ответов AWS IoT «403» и перепроверьте неисправное чтение теней или автоматически публикуйте команду.\nРефактор больших источников адаптера в сфокусированные модули CommonJS для облачных / теневых клиентов Anthbot, помощников полезной нагрузки, определений объектов адаптера, вывода состояния и обработки команд без изменения идентификаторов состояния или поведения полезной нагрузки команды.\nРасширьте ‘npm run check’, чтобы синтаксическая валидация покрывала раздельные ‘lib/anthbot’, ‘lib/adapter’ и тестовые файлы через специальный помощник для проверки синтаксиса.",
-        "pt": "Adicione M5/M9 paridade de carga útil para status, bateria, erro, rede, RTK, mapa e métricas de corte total, mantendo a árvore de estado ioBroker existente estável.\nAtualizar credenciais de IoT temporárias uma vez nas respostas do AWS IoT `403` e tentar novamente a leitura ou o comando shadow falhado publicar automaticamente.\nRefaça as grandes fontes de adaptadores em módulos CommonJS focados para clientes de nuvem Anthbot/shadow, ajudantes de carga útil, definições de objeto adaptador, derivação de estado e manipulação de comandos sem alterar IDs de estado ou o comportamento de carga útil de comando.\nExpanda `npm run check` para que a validação de sintaxe cubra a divisão `lib/anthbot`, `lib/adapter` e os arquivos de teste unitários através do assistente dedicado de verificação de sintaxe.",
-        "nl": "Voeg M5/M9 payload pariteit voor status, batterij, fout, netwerk, RTK, kaart, en totale maaimetrics terwijl het houden van de bestaande ioBroker state tree stabiel.\nVernieuw tijdelijke IoT-gegevens één keer op AWS IoT .\nRefactor de grote adapter bronnen in gefocuste CommonJS modules voor Anthbot cloud/schaduw clients, payload helpers, adapter object definities, state afleiding, en commando behandeling zonder het wijzigen van status ID's of commando payload gedrag.\nBreid de controle van de syntaxis uit, zodat de syntaxisatie betrekking heeft op de split-lib/anthbot.",
-        "fr": "Ajouter la parité de charge utile M5/M9 pour l'état, la batterie, l'erreur, le réseau, la RTK, la carte et les mesures de tonte totale tout en maintenant l'arborescence d'état ioBroker existante stable.\nRafraîchir les identifiants IoT temporaires une fois sur les réponses IoT `403` AWS et réessayer la lecture ou la commande d'ombre échouée publier automatiquement.\nRefactorer les grandes sources d'adaptateur en modules CommonJS ciblés pour les clients de Cloud/Shadow Anthbot, les helpers de charge utile, les définitions d'objets d'adaptateur, la dérivation d'état et la gestion des commandes sans changer les identifiants d'état ou le comportement de charge utile de commande.\nExpand `npm run check` de sorte que la validation syntaxique couvre la division `lib/anthbot`, `lib/adaptateur`, et les fichiers de test unitaires via l'aide de vérification syntaxique dédiée.",
-        "it": "Aggiungere M5/M9 payload parity per stato, batteria, errore, rete, RTK, mappa e metriche totali di cucito mantenendo l'albero di stato ioBroker esistente stabile.\nAggiornare le credenziali IoT temporanee una volta su AWS IoT `403 ` risposte e riprovare l'ombra fallita leggere o comandare pubblicare automaticamente.\nRefactor le grandi sorgenti di adattatore in moduli CommonJS focalizzati per i client cloud/shadow Anthbot, helper payload, definizioni di oggetti adattatori, derivazione di stato e gestione dei comandi senza cambiare ID di stato o comportamento di carico di comando.\nEspandi `npm run check` in modo da la validazione della sintassi copre la divisione `lib/anthbot`, `lib/adapter` e i file di prova unità attraverso l'helper di controllo sintassi dedicato.",
-        "es": "Agregue la paridad de carga útil M5/M9 para el estado, la batería, el error, la red, RTK, el mapa y las métricas de mowing total manteniendo el árbol de estado ioBroker existente estable.\nRefresca las credenciales temporales de IoT una vez en las respuestas AWS IoT `403` y retratar la sombra fallida leer o comando publicar automáticamente.\nRefactor las grandes fuentes de adaptador en módulos CommonJS enfocados para clientes Anthbot cloud/shadow, ayudantes de carga, definiciones de objetos de adaptación, derivación del estado y manejo de comandos sin cambiar los IDs del estado o el comportamiento de carga de comando.\nExpand `npm run check`, por lo que la validación de sintaxis cubre la división `lib/anthbot`, `lib/adapter`, y archivos de prueba de unidad a través del ayudante de control de sintaxis dedicado.",
-        "pl": "Dodawanie parytetu obciążenia M5 / M9 dla stanu, baterii, błędu, sieci, RTK, mapy i całkowitego pomiaru koszenia przy zachowaniu stabilności istniejącego drzewa w stanie jOBroker.\nOdśwież tymczasowe referencje IoT w odpowiedzi AWS IoT '403' i ponownie wypróbuj nieudany odczyt cienia lub polecenie opublikowane automatycznie.\nZmień duże źródła adaptera w skoncentrowane moduły THORJS dla klientów w chmurze / cieniu wąskotorowych, pomocników ładowności, definicji obiektów adaptera, derivation stanu i obsługi poleceń bez zmiany identyfikatorów stanu lub zachowania polecenia ładunku.\nRozwiń 'npm run check', tak aby walidacja składni obejmowała podział 'lib / antbot', 'lib / adapter' i pliki testowe jednostki za pośrednictwem dedykowanego pomocnika kontroli syntaksu- check.",
-        "uk": "Додати парність корисного навантаження M5/M9 для стану, акумулятора, помилки, мережі, RTK, карти та загальної метрики для скошування при зберіганні існуючого ioBroker State Tree стабільного.\nВідповідає тимчасові облікові дані Інтернету на відповідіх AWS IoT `403` та автоматично переробляючи нездійсненне тіньове читання або командне видання.\nРефакторування великих джерел адаптера на фокусовані модулі CommonJS для клієнтів Anthbot Cloud/shadow, ідентифікаторів платного навантаження, визначення об'єктів адаптера, визначення стану, а також управління командами без зміни ID або поведінки командного навантаження.\nВитрата `npm run check` так синтаксисна перевірка охоплює спліт `lib/anthbot`, `lib/adapter`, а також блок тестових файлів через спеціальний помічник синтаксису-check.",
-        "zh-cn": "在保持现有ioBroker状态树稳定的同时,在状态、电池、误差、网络、RTK、地图和总切割度量衡方面增加M5/M9有效载荷等值.\n在 AWS IOT `403' 回复中刷新一次临时 IOT 证书,并自动重试失败的阴影读取或命令发布 .\n为Anthbot 云/阴影客户端、有效载荷帮助器、适配器对象定义、状态衍生和指令处理重塑大型适配器源,而不改变状态ID或命令有效载荷行为.\n扩展“ npm 运行检查” 所以语法验证涵盖“lib/anthbot”、“lib/adapter”和单元测试文件,通过专用语法检查帮助器进行."
-      },
-      "0.1.12": {
-        "en": "**FIXED**: Create the global `info` channel and correct the mower status role so the adapter object structure passes ioBroker review checks.",
-        "de": "**FIXED**: Erstellen Sie den globalen `info` Kanal und korrigieren Sie die Mähstatus-Rolle, so dass die Adapter Objektstruktur ioBroker Überprüfung überprüft.",
-        "ru": "** Фиксированный**: Создайте глобальный информационный канал и исправьте статус косилки, чтобы структура объекта адаптера прошла проверку ioBroker.",
-        "pt": "**FIXED**: Crie o canal global 'info' e corrija o papel do cortador de grama para que a estrutura do objeto do adaptador passe as verificações de revisão do ioBroker.",
-        "nl": "** VAST**: Creëer het globale kanaal van de info en corrigeer de rol van de maaierstatus, zodat de structuur van het adapterobject joBroker-beoordelingschecks passeert.",
-        "fr": "**FIXÉ**: Créez le canal `info` global et corrigez le rôle de statut de tondeuse de sorte que la structure de l'objet adaptateur passe les vérifications d'examen ioBroker.",
-        "it": "**FISSO ** Creare il canale globale `info` e correggere il ruolo dello stato del falciatore in modo che la struttura dell'oggetto dell'adattatore passi ioBroker controlli di revisione.",
-        "es": "**FIXED**: Crear el canal global de 'info' y corregir el papel de estado de la cortadora para que la estructura del objeto del adaptador pase los cheques de revisión ioBroker.",
-        "pl": "* *FIXED* * Stwórz globalny kanał 'info' i skoryguj rolę statusu kosiarki, tak aby struktura obiektu adaptera przeszła kontrolę przeglądową jOBrokera. ",
-        "uk": "**FIXED***: Створіть глобальний канал `info` і виправте роль стану косарки, щоб структура об'єкта адаптера переходить на перевірку ioBroker.",
-        "zh-cn": "(单位:千美元) 创建全局“信息”通道并纠正剪切器状态角色,使适配器对象结构通过ioBroker审查检查."
-      },
-      "0.1.11": {
-        "en": "Refresh existing mower device, channel, and state objects with extendObjectAsync so updated runtime i18n names are applied to already-created objects too.",
-        "de": "Aktualisieren Sie vorhandene Geräte-, Kanal- und Zustandsobjekte des Mähers mit extendObjectAsync, damit aktualisierte Laufzeit-i18n-Namen auch auf bereits angelegte Objekte angewendet werden.",
-        "ru": "Обновляйте существующие объекты устройства, канала и состояния газонокосилки через extendObjectAsync, чтобы новые runtime-i18n-имена применялись и к уже созданным объектам.",
-        "pt": "Atualize os objetos existentes de dispositivo, canal e estado do cortador com extendObjectAsync para que os nomes i18n de tempo de execução também sejam aplicados aos objetos já criados.",
-        "nl": "Werk bestaande apparaat-, kanaal- en statusobjecten van de maaier bij met extendObjectAsync zodat bijgewerkte runtime-i18n-namen ook op al aangemaakte objecten worden toegepast.",
-        "fr": "Actualisez les objets existants de tondeuse, de canal et d'état avec extendObjectAsync afin que les noms i18n d'exécution mis à jour soient aussi appliqués aux objets déjà créés.",
-        "it": "Aggiorna gli oggetti esistenti di dispositivo, canale e stato del rasaerba con extendObjectAsync, così i nomi i18n runtime aggiornati vengono applicati anche agli oggetti già creati.",
-        "es": "Actualiza los objetos existentes de dispositivo, canal y estado del cortacésped con extendObjectAsync para que los nombres i18n de ejecución actualizados también se apliquen a los objetos ya creados.",
-        "pl": "Odśwież istniejące obiekty urządzenia, kanału i stanu kosiarki za pomocą extendObjectAsync, aby zaktualizowane nazwy i18n czasu działania zostały zastosowane również do już utworzonych obiektów.",
-        "uk": "Оновлюйте наявні об'єкти пристрою, каналу й стану косарки через extendObjectAsync, щоб оновлені runtime-i18n-назви застосовувалися і до вже створених об'єктів.",
-        "zh-cn": "使用 extendObjectAsync 刷新现有的割草机设备、通道和状态对象，让更新后的运行时 i18n 名称也应用到已创建的对象。"
-      },
-      "0.1.10": {
-        "en": "Align ioBroker object metadata with the repository object-structure checker by creating the global info channel, correcting the mower status role, and emitting full recommended i18n keys for object names.\nKeep admin translations in the repository-checker-friendly admin/i18n/<lang>.json layout and load backend/runtime object-name translations from root i18n/<lang>.json files via adapter-core I18n.",
-        "de": "Richten Sie die ioBroker-Objektmetadaten am Objektstruktur-Prüfer des Repositories aus, indem Sie den globalen info-Kanal anlegen, die Rolle des Mäherstatus korrigieren und vollständige empfohlene i18n-Schlüssel für Objektnamen ausgeben.\nBehalten Sie Admin-Übersetzungen im repochecker-freundlichen Layout admin/i18n/<lang>.json und laden Sie Backend-/Laufzeit-Objektnamen über adapter-core I18n aus den i18n/<lang>.json-Dateien im Projektstamm.",
-        "ru": "Приведите метаданные объектов ioBroker в соответствие с проверкой структуры объектов репозитория: создайте глобальный канал info, исправьте роль статуса газонокосилки и публикуйте полные рекомендуемые i18n-ключи для имён объектов.\nХраните переводы Admin в удобном для repochecker формате admin/i18n/<lang>.json и загружайте имена backend/runtime-объектов из корневых файлов i18n/<lang>.json через adapter-core I18n.",
-        "pt": "Alinhe os metadados de objetos do ioBroker ao verificador de estrutura de objetos do repositório criando o canal global info, corrigindo o papel do status do cortador e emitindo chaves i18n recomendadas completas para os nomes dos objetos.\nMantenha as traduções do Admin no layout admin/i18n/<lang>.json compatível com o repochecker e carregue os nomes de objetos de backend/runtime a partir dos arquivos raiz i18n/<lang>.json via adapter-core I18n.",
-        "nl": "Lijn de ioBroker-objectmetadata uit met de objectstructuurcontrole van de repository door het globale info-kanaal aan te maken, de rol van de maaierstatus te corrigeren en volledige aanbevolen i18n-sleutels voor objectnamen uit te geven.\nHoud admin-vertalingen in de repochecker-vriendelijke layout admin/i18n/<lang>.json en laad backend-/runtime-objectnamen via adapter-core I18n uit de i18n/<lang>.json-bestanden in de projectroot.",
-        "fr": "Alignez les métadonnées d'objet ioBroker sur le contrôleur de structure d'objet du dépôt en créant le canal global info, en corrigeant le rôle du statut de la tondeuse et en générant les clés i18n recommandées complètes pour les noms d'objet.\nConservez les traductions Admin dans la mise en page admin/i18n/<lang>.json compatible repochecker et chargez les noms d'objet backend/runtime depuis les fichiers racine i18n/<lang>.json via adapter-core I18n.",
-        "it": "Allinea i metadati degli oggetti ioBroker al controllo della struttura oggetti del repository creando il canale globale info, correggendo il ruolo dello stato del rasaerba ed emettendo chiavi i18n consigliate complete per i nomi oggetto.\nMantieni le traduzioni Admin nel layout admin/i18n/<lang>.json compatibile con repochecker e carica i nomi oggetto backend/runtime dai file radice i18n/<lang>.json tramite adapter-core I18n.",
-        "es": "Alinea los metadatos de objetos de ioBroker con el verificador de estructura de objetos del repositorio creando el canal global info, corrigiendo el rol del estado del cortacésped y emitiendo claves i18n recomendadas completas para los nombres de objeto.\nMantén las traducciones de Admin en el formato admin/i18n/<lang>.json compatible con repochecker y carga los nombres de objetos de backend/runtime desde los archivos raíz i18n/<lang>.json mediante adapter-core I18n.",
-        "pl": "Dopasuj metadane obiektów ioBroker do kontrolera struktury obiektów repozytorium, tworząc globalny kanał info, korygując rolę statusu kosiarki i emitując pełne zalecane klucze i18n dla nazw obiektów.\nZachowaj tłumaczenia Admin w układzie admin/i18n/<lang>.json przyjaznym dla repochecker oraz ładuj nazwy obiektów backend/runtime z głównych plików i18n/<lang>.json przez adapter-core I18n.",
-        "uk": "Узгодьте метадані об'єктів ioBroker із перевіркою структури об'єктів репозиторію: створіть глобальний канал info, виправте роль стану косарки та виводьте повні рекомендовані i18n-ключі для назв об'єктів.\nЗберігайте переклади Admin у зручному для repochecker форматі admin/i18n/<lang>.json і завантажуйте назви backend/runtime-об'єктів із кореневих файлів i18n/<lang>.json через adapter-core I18n.",
-        "zh-cn": "通过创建全局 info 通道、修正割草机状态角色并为对象名称输出完整的推荐 i18n 键，使 ioBroker 对象元数据符合仓库对象结构检查器的要求。\n将 Admin 翻译保存在适合 repochecker 的 admin/i18n/<lang>.json 结构中，并通过 adapter-core I18n 从根目录下的 i18n/<lang>.json 文件加载后端/运行时对象名称。"
-      },
-      "0.1.9": {
-        "en": "Drop the temporary --legacy-peer-deps CI install override.\nRe-enable ESLint in the GitHub Actions quick-check job.\nClean up repository metadata so repochecker has no actionable findings.",
-        "de": "Entfernen Sie die temporäre CI-Installationsausnahme für --legacy-peer-deps.\nAktivieren Sie ESLint im GitHub-Actions-Schnellcheck erneut.\nBereinigen Sie die Repository-Metadaten, damit der repochecker keine umsetzbaren Befunde mehr meldet.",
-        "ru": "Удалите временное исключение установки CI для --legacy-peer-deps.\nСнова включите ESLint в задании быстрого контроля GitHub Actions.\nОчистите метаданные репозитория, чтобы repochecker не сообщал об устранимых замечаниях.",
-        "pt": "Remova a exceção temporária de instalação de CI para --legacy-peer-deps.\nReative o ESLint na tarefa de verificação rápida do GitHub Actions.\nLimpe os metadados do repositório para que o repochecker não aponte mais achados acionáveis.",
-        "nl": "Verwijder de tijdelijke CI-installatie-uitzondering voor --legacy-peer-deps.\nSchakel ESLint weer in voor de snelle GitHub Actions-controle.\nRuim de repositorymetadata op zodat repochecker geen uitvoerbare bevindingen meer meldt.",
-        "fr": "Supprimez la dérogation temporaire d'installation CI pour --legacy-peer-deps.\nRéactivez ESLint dans le job de vérification rapide GitHub Actions.\nNettoyez les métadonnées du dépôt afin que repochecker ne signale plus de constat actionnable.",
-        "it": "Rimuovi l'eccezione temporanea di installazione CI per --legacy-peer-deps.\nRiattiva ESLint nel job di controllo rapido di GitHub Actions.\nRipulisci i metadati del repository in modo che repochecker non segnali più rilievi azionabili.",
-        "es": "Elimina la excepción temporal de instalación de CI para --legacy-peer-deps.\nVuelve a activar ESLint en el trabajo de comprobación rápida de GitHub Actions.\nLimpia los metadatos del repositorio para que repochecker no informe más hallazgos accionables.",
-        "pl": "Usuń tymczasowy wyjątek instalacyjny CI dla --legacy-peer-deps.\nWłącz ponownie ESLint w zadaniu szybkiej kontroli GitHub Actions.\nUporządkuj metadane repozytorium, aby repochecker nie zgłaszał już możliwych do wykonania uwag.",
-        "uk": "Приберіть тимчасовий виняток інсталяції CI для --legacy-peer-deps.\nЗнову увімкніть ESLint у швидкій перевірці GitHub Actions.\nОчистьте метадані репозиторію, щоб repochecker більше не повідомляв про виправні зауваження.",
-        "zh-cn": "移除用于 --legacy-peer-deps 的临时 CI 安装例外。\n在 GitHub Actions 快速检查任务中重新启用 ESLint。\n清理仓库元数据，使 repochecker 不再报告可操作的问题。"
-      },
-      "0.1.8": {
-        "en": "Run `npm run check` instead of mandatory ESLint in the GitHub Actions quick-check job until the repository has a fully passing lint baseline.",
-        "de": "Starten Sie `npm Run Check` anstelle der obligatorischen ESLint in der GitHub Actions Schnell-Check-Job, bis das Repository eine vollständig durchlaufende schlanke Basislinie hat.",
-        "ru": "Запустите «npm run check» вместо обязательного ESLint в GitHub Actions, быстро проверяя работу, пока репозиторий не получит полностью проходящую исходную линию.",
-        "pt": "Execute `npm run check` em vez de ESLint obrigatório na tarefa de verificação rápida do GitHub Actions até que o repositório tenha uma linha de base totalmente passageira.",
-        "nl": "Voer de controle uit in plaats van de verplichte ESLint in de snelcontroletaak van GitHub Acties totdat de repository een volledig passerende pluisbasis heeft.",
-        "fr": "Exécutez `npm run check` au lieu d'ESLint obligatoire dans la tâche de vérification rapide GitHub Actions jusqu'à ce que le dépôt ait une ligne de base de lint passant complètement.",
-        "it": "Eseguire `npm run check` invece di ESLint obbligatorio nel GitHub Actions lavoro di controllo rapido fino a quando il repository ha una linea di base lint completamente passare.",
-        "es": "Ejecutar `npm run check` en lugar de ESLint obligatorio en el trabajo de control rápido GitHub Actions hasta que el repositorio tenga una línea de referencia totalmente pasada.",
-        "pl": "Uruchom 'npm run check' zamiast obowiązkowego ESLint w GitHub Actions quick- check zadanie do momentu, gdy repozytorium będzie miało w pełni przechodzącą linię bazową.",
-        "uk": "Запуск `npm запустіть перевірку` замість обов’язкового ESLint в GitHub Дії швидкого пошуку роботи, доки репозиторій має повну прохідну базову лінію.",
-        "zh-cn": "运行“ npm 运行检查” , 而不是在 GitHub 动作中进行强制的 ESLint 快速检查, 直到存储器有一个完全经过线程的基线 ."
-      },
-      "0.1.5": {
-        "en": "Updated JSON config to include help text for Anthbot account username.\nUpdate translations and JSON config for Anthbot account email address\nAdjusted layout for area code and added poll interval and API host configurations with proper visibility settings.\nBump admin dependency version in io-package.json\nUpdated admin dependency version from >=7.6.20 to >=7.7.22.\nAdd GitHub Copilot instructions for ioBroker adapter development\nAdd automated version check for Copilot instructions template\nadd ESLint and Prettier configuration files with linting scripts\nRefactor code structure for improved readability and maintainability\nBump protobufjs in the npm_and_yarn group across 1 directory\ndowngrade @iobroker/testing to version 5.0.4 for compatibility",
-        "de": "Aktualisierte JSON config, um Hilfetext für Anthbot-Account-Benutzername aufzunehmen.\nÜbersetzungen aktualisieren und JSON config für Anthbot Konto E-Mail Adresse\nBestimmtes Layout für Bereichscode und hinzugefügt Umfrageintervall und API-Host-Konfigurationen mit richtigen Sichteinstellungen.\nBump Admin Abhängigkeitsversion in io-package.json\nAktualisierte Adminabhängigkeitsversion von >=7.6.20 bis >=7.7.22.\nGitHub Copilot Anleitung für ioBroker Adapter Entwicklung hinzufügen\nAutomatische Versionsprüfung für Copilot Anleitungsvorlage hinzufügen\neSLint und Prettier Konfigurationsdateien mit Linting-Skripten hinzufügen\nRefactor-Codestruktur für verbesserte Lesbarkeit und Aufrechterhaltungsfähigkeit\nBump protobufjs in der npm and yarn Gruppe über 1 Verzeichnis\ndowngrade @iobroker/test auf version 5.0.4 für kompatibilität",
-        "ru": "Обновленная конфигурация JSON включает в себя текст справки для имени пользователя учетной записи Anthbot.\nОбновление переводов и конфигурация JSON для адреса электронной почты учетной записи Anthbot\nСкорректированный макет для кода области и добавленный интервал опроса и конфигурации хоста API с надлежащими настройками видимости.\nВерсия зависимости от администратора Bump в io-package.json\nОбновленная версия зависимостей администратора от >=7.6.20 до >=7.7.22.\nДобавить инструкции GitHub Copilot для разработки адаптера ioBroker\nДобавить автоматизированную проверку версии шаблона инструкций Copilot\nдобавить файлы конфигурации ESLint и Prettier со скриптами\nСтруктура кода рефактора для улучшения читаемости и ремонтопригодности\nBump protobufjs в группе npm and yarn в 1 каталоге\nпонижение рейтинга @iobroker/тестирование версии 5.0.4 для совместимости",
-        "pt": "Configuração atualizada do JSON para incluir texto de ajuda para o nome de usuário da conta Anthbot.\nAtualizar traduções e configuração do JSON para o endereço de e-mail da conta Anthbot\nLayout ajustado para código de área e intervalo de pesquisa adicionado e configurações host API com configurações de visibilidade adequada.\nVersão de dependência de administrador Bump em io-package.json\nVersão atualizada de dependência do administrador de >=7.6.20 a >=7.7.22.\nAdicionar instruções do GitHub Copilot para o desenvolvimento do adaptador ioBroker\nAdicionar verificação de versão automatizada para modelo de instruções Copilot\nadicionar arquivos de configuração ESLint e Prettier com scripts de linting\nEstrutura de código de refator para melhor legibilidade e manutenção\nBump protobufjs no grupo npm and yarn em 1 diretório\ndowngrade @iobroker/testing para a versão 5.0.4 para compatibilidade",
-        "nl": "Bijgewerkt JSON config om hulptekst voor Anthbot-account gebruikersnaam in te voegen.\nUpdate vertalingen en JSON configuratie voor Anthbot account e-mailadres\nAangepaste lay-out voor gebiedscode en toegevoegd poll interval en API host configuraties met juiste zichtbaarheidsinstellingen.\nBump admin afhankelijkheid versie in io-package.json\nVoor de toepassing van deze post wordt verstaan onder:.\nGitHub Copilot-instructies voor ioBroker-adapterontwikkeling toevoegen\nAutomated version check for Copilot gebruiksaanwijzing template toevoegen\neSLint- en Prettiger configuratiebestanden toevoegen met linting scripts\nRefactorcodestructuur voor verbeterde leesbaarheid en onderhoud\nBump protobufjs in de npm and yarn-groep over 1 map\ndowngrade @iobroker/testing naar versie 5.0.4 voor compatibiliteit",
-        "fr": "Mise à jour de la configuration JSON pour inclure le texte d'aide pour le nom d'utilisateur du compte Anthbot.\nMettre à jour les traductions et la configuration JSON pour l'adresse e-mail du compte Anthbot\nMise en page ajustée pour l'indicatif régional et ajout d'intervalle de sondage et de configurations d'hôte API avec des paramètres de visibilité appropriés.\nVersion de dépendance admin Bump dans io-package.json\nVersion de dépendance admin mise à jour de >=7.6.20 à >=7.7.22.\nAjouter les instructions du copilote GitHub pour le développement de l'adaptateur ioBroker\nAjouter une vérification de version automatisée pour le modèle d'instructions Copilot\najouter des fichiers de configuration ESLint et Prettier avec des scripts de lintage\nStructure du code de refacteur pour améliorer la lisibilité et la maintenance\nBump protobufjs dans le groupe npm and yarn à travers 1 répertoire\ndowngrade @iobroker/test de la version 5.0.4 pour la compatibilité",
-        "it": "Aggiornato JSON config per includere il testo di aiuto per il nome utente dell'account Anthbot.\nTraduzioni di aggiornamento e configurazione JSON per l'indirizzo email dell'account Anthbot\nLayout regolato per il codice di area e l'intervallo di sondaggio aggiunto e le configurazioni di host API con impostazioni di visibilità adeguate.\nVersione di dipendenza dell'amministrazione del buffer in io-package.json\nVersione di dipendenza da admin aggiornata da >=7.6.20 a >=7.7.22.\nAggiungi istruzioni GitHub Copilot per lo sviluppo dell'adattatore ioBroker\nAggiungi il controllo automatico della versione per il modello di istruzioni Copilot\naggiungere file di configurazione ESLint e Prettier con script di linting\nStruttura del codice di fabbrica per una migliore leggibilità e manutenbilità\nBump protobufjs nel gruppo npm and yarn in 1 directory\ndowngrade @iobroker/testing alla versione 5.0.4 per compatibilità",
-        "es": "Actualizado configuración JSON para incluir texto de ayuda para el nombre de usuario de la cuenta Anthbot.\nActualizar traducciones y configuración de JSON para la dirección de correo electrónico de la cuenta Anthbot\nDiseño ajustado para código de área y intervalo de votación añadido y configuraciones de host API con ajustes de visibilidad adecuados.\nVersión de dependencia de Bump admin en io-package.json\nActualización de la versión de dependencia de administración de >=7.6.20 a ≤=7.7.22.\nAñadir instrucciones GitHub Copilot para el desarrollo del adaptador ioBroker\nAgregar el cheque automático de la versión para la plantilla de instrucciones de Copilot\nañadir archivos de configuración ESLint y Prettier con scripts de forro\nEstructura de código de refactor para mejorar la legibilidad y la sostenibilidad\nBump protobufjs en el grupo npm and yarn a través de 1 directorio\ndowngrade @iobroker/testing a la versión 5.0.4 para compatibilidad",
-        "pl": "Aktualizacja pliku konfiguracyjnego JSON, aby włączyć tekst pomocy dla konta użytkownika Anthony Bot.\nAktualizuj tłumaczenia i plik konfiguracyjny JSON dla konta Anthony\nDostosowany układ dla kodu obszaru oraz dodany interwał ankietowy i konfiguracje hosta API z odpowiednimi ustawieniami widoczności.\nBump wersja zależności admin w jo- package.json\nAktualizacja wersji zależności admin z > = 7.6.20 do > = 7.7.22.\nDodaj instrukcję GitHub Copilot dla rozwoju adaptera jOBroker\nDodaj automatyczną kontrolę wersji szablonu instrukcji Copilot\ndodaj pliki konfiguracyjne ESLint i Prettier ze skryptami lintowania\nRefaktor struktury kodu dla poprawy czytelności i utrzymania\nBump protobufjs w grupie npm _ and _ przędza w katalogu 1\ndowngrade @ iobroker / testing do wersji 5.0.4",
-        "uk": "Оновлений JSON config, щоб включити текст для імені облікового запису Anthbot.\nОновлення перекладу та налаштування JSON для адреси електронної пошти Anthbot\nНалаштовано макет для коду області та додано інтервал опитування та налаштування користувачів API з відповідними налаштуваннями видимості.\nEnglish, Українська, Français..\nОновлено версію залежності адміністратора від >=7.6.20 до >=7.7.22.\nДодавання інструкцій GitHub Copilot для розробки адаптерів ioBroker\nДодати автоматичну перевірку версії для шаблону інструкцій Copilot\nдодати файли конфігурації ESLint та Prettier з скриптами linting\nРефакторна структура коду для підвищення читабельності та стійкості\nBump protobufjs в npm and yarn група через 1 каталог\n@iobroker/testing to version 5.0.4 для сумісності",
-        "zh-cn": "更新了 JSON 配置以包含 Anthbot 账户用户名的帮助文本 .\n更新 Anthbot 账户电子邮件地址的翻译和 JSON 配置\n调整了区域代码的布局,并增加了有适当可见度设置的民调间隔和API主机配置.\n在io-package.json中跳跃的管理员依赖版本\n更新了行政依赖版本,从QQ7.6.20到QQ7.7.22.\n为 ioBroker 适配器开发添加 GitHub 副驾驶指令\n为 Copilot 指令模板添加自动版本检查\n添加带有 Linting 脚本的 ESLint 和 Pretier 配置文件\n为改进可读性和可维护性而重新设计代码结构\n横跨一个目录的 npm  和  yarn 组中的 bump protobufjs\n为兼容性将@iobroduc/ testing 降级到 5. 0.4 版本"
-      }
-    },
-    "titleLang": {
-      "en": "Anthbot Genie",
-      "de": "Anthbot Genie",
-      "ru": "Anthbot Genie",
-      "pt": "Anthbot Genie",
-      "nl": "Anthbot Genie",
-      "fr": "Anthbot Genie",
-      "it": "Anthbot Genie",
-      "es": "Anthbot Genie",
-      "pl": "Anthbot Genie",
-      "uk": "Anthbot Genie",
-      "zh-cn": "Anthbot Genie"
-    },
-    "desc": {
-      "en": "Unofficial cloud adapter for Anthbot Genie robotic lawn mowers with telemetry, diagnostics, consumables, zones, and controls",
-      "de": "Inoffizieller Cloud-Adapter für Statusabfrage und Steuerung von Anthbot Genie",
-      "ru": "Неофициальный облачный адаптер для управления газонокосилками Anthbot Genie и опроса состояния",
-      "pt": "Adaptador de nuvem não oficial para controlar cortadores Anthbot Genie e consultar o estado",
-      "nl": "Onofficiële cloudadapter voor bediening van Anthbot Genie-maaiers en statuspolling",
-      "fr": "Adaptateur cloud non officiel pour le contrôle des tondeuses Anthbot Genie et l'interrogation de leur état",
-      "it": "Adattatore cloud non ufficiale per il controllo dei rasaerba Anthbot Genie e il polling dello stato",
-      "es": "Adaptador en la nube no oficial para controlar cortacéspedes Anthbot Genie y consultar su estado",
-      "pl": "Nieoficjalny adapter chmurowy do sterowania kosiarkami Anthbot Genie i odpytywania stanu",
-      "uk": "Неофіційний хмарний адаптер для керування косарками Anthbot Genie та опитування стану",
-      "zh-cn": "用于控制 Anthbot Genie 割草机并轮询状态的非官方云适配器"
-    },
-    "authors": [
-      "reloxx13"
-    ],
-    "licenseInformation": {
-      "license": "MIT",
-      "type": "free"
-    },
-    "icon": "anthbot-genie.png",
-    "extIcon": "https://raw.githubusercontent.com/reloxx13/ioBroker.anthbot-genie/main/admin/anthbot-genie.png",
-    "readme": "https://github.com/reloxx13/ioBroker.anthbot-genie/blob/main/README.md",
-    "keywords": [
-      "anthbot",
-      "anthbot-genie",
-      "robotic-lawn-mower",
-      "lawn-mower",
-      "mower",
-      "home-automation",
-      "rtk",
-      "cloud-api",
-      "iot"
-    ],
-    "platform": "Javascript/Node.js",
-    "mode": "daemon",
-    "tier": 2,
-    "type": "garden",
-    "compact": true,
-    "connectionType": "cloud",
-    "dataSource": "poll",
-    "loglevel": "info",
-    "enabled": false,
-    "adminUI": {
-      "config": "json"
-    },
-    "dependencies": [
-      {
-        "js-controller": ">=6.0.11"
-      }
-    ],
-    "globalDependencies": [
-      {
-        "admin": ">=7.7.22"
-      }
-    ]
-  },
-  "encryptedNative": [
-    "password"
-  ],
-  "protectedNative": [
-    "username",
-    "password"
-  ],
-  "native": {
-    "username": "",
-    "password": "",
-    "areaCode": "49",
-    "apiHost": "api.anthbot.com",
-    "pollInterval": 60,
-    "errorDescriptionLanguage": "English"
-  },
-  "objects": [
-    {
-      "_id": "info",
-      "type": "channel",
-      "common": {
-        "name": {
-          "en": "Info",
-          "de": "Info"
-        }
-      },
-      "native": {}
-    },
-    {
-      "_id": "info.connection",
-      "type": "state",
-      "common": {
-        "name": {
-          "en": "Cloud connection",
-          "de": "Cloud-Verbindung"
+    "common": {
+        "name": "anthbot-m9",
+        "version": "0.3.0",
+        "news": {
+            "0.2.19": {
+                "en": "Display the RTK satellite map directly from the live HTML state instead of relying on a sendTo widget.",
+                "de": "RTK-Satellitenkarte wird direkt aus dem Live-HTML-Datenpunkt angezeigt; keine abhängige sendTo-Komponente mehr.",
+                "ru": "Карта спутников RTK отображается напрямую из HTML-состояния.",
+                "pt": "Mapa RTK exibido diretamente a partir do estado HTML.",
+                "nl": "RTK-satellietkaart direct vanuit de HTML-status.",
+                "fr": "Carte RTK affichée directement depuis l’état HTML.",
+                "it": "Mappa RTK visualizzata direttamente dallo stato HTML.",
+                "es": "Mapa RTK mostrado directamente desde el estado HTML.",
+                "pl": "Mapa RTK wyświetlana bezpośrednio ze stanu HTML.",
+                "uk": "Карта RTK відображається безпосередньо зі стану HTML.",
+                "zh-cn": "直接从 HTML 状态显示 RTK 卫星图。"
+            },
+            "0.2.11": {
+                "en": "Display the RTK satellite sky plot with the supported imageSendTo component and describe mower RTK code 1 as active positioning without inventing satellite values.",
+                "de": "RTK-Satellitenkarte wird über imageSendTo angezeigt; Mäher-RTK-Code 1 wird als aktive Positionierung beschrieben, ohne Satellitenwerte zu erfinden.",
+                "ru": "Карта спутников RTK отображается через imageSendTo; код RTK 1 описан как активное позиционирование без выдуманных данных.",
+                "pt": "Mapa de satélites RTK exibido via imageSendTo; código RTK 1 descrito como posicionamento ativo sem inventar valores.",
+                "nl": "RTK-satellietkaart via imageSendTo; RTK-code 1 wordt als actieve positionering beschreven zonder waarden te verzinnen.",
+                "fr": "Carte satellite RTK via imageSendTo; le code RTK 1 est décrit comme positionnement actif sans inventer de valeurs.",
+                "it": "Mappa satellitare RTK tramite imageSendTo; codice RTK 1 descritto come posizionamento attivo senza inventare valori.",
+                "es": "Mapa de satélites RTK mediante imageSendTo; código RTK 1 descrito como posicionamiento activo sin inventar valores.",
+                "pl": "Mapa satelitów RTK przez imageSendTo; kod RTK 1 opisany jako aktywne pozycjonowanie bez zgadywania danych.",
+                "uk": "Карта супутників RTK через imageSendTo; код RTK 1 описано як активне позиціонування без вигаданих даних.",
+                "zh-cn": "通过 imageSendTo 显示 RTK 卫星图；将 RTK 代码 1 描述为定位已激活，不虚构卫星数据。"
+            },
+            "0.2.10": {
+                "en": "Fixed RTK sky plot display in Admin, stopped interpreting numeric mower RTK codes as live GNSS fix, and localized the moved-antenna status.",
+                "de": "RTK-Satellitenkarte im Admin korrigiert, numerische Mäher-RTK-Codes werden nicht mehr als Live-GNSS-Fix gedeutet und der Antennenstatus ist deutsch.",
+                "ru": "Исправлено отображение карты спутников RTK, числовые коды RTK больше не трактуются как GNSS fix, статус антенны локализован.",
+                "pt": "Corrigida a exibição do mapa de satélites RTK, códigos RTK numéricos não são mais interpretados como fix GNSS e o estado da antena foi localizado.",
+                "nl": "RTK-satellietkaart in Admin hersteld, numerieke RTK-codes worden niet meer als GNSS-fix geïnterpreteerd en antennestatus is gelokaliseerd.",
+                "fr": "Affichage de la carte satellite RTK corrigé, les codes RTK numériques ne sont plus interprétés comme fix GNSS et le statut d’antenne est localisé.",
+                "it": "Corretta la mappa satellitare RTK, i codici RTK numerici non sono più interpretati come fix GNSS e lo stato antenna è localizzato.",
+                "es": "Corregido el mapa de satélites RTK, los códigos RTK numéricos ya no se interpretan como fix GNSS y el estado de antena está localizado.",
+                "pl": "Naprawiono mapę satelitów RTK, numeryczne kody RTK nie są już interpretowane jako fix GNSS, a stan anteny jest zlokalizowany.",
+                "uk": "Виправлено карту супутників RTK, числові коди RTK більше не трактуються як GNSS fix, стан антени локалізовано.",
+                "zh-cn": "修复管理界面的 RTK 卫星图，不再将数字 RTK 状态码解释为实时 GNSS 定位，并本地化天线移动状态。"
+            },
+            "0.2.6": {
+                "en": "Add separate GNSS/RTK diagnostics for Kevin and the base station, raw field discovery and cautious positioning assessments.",
+                "de": "Ergänzt getrennte GNSS-/RTK-Diagnosen für Kevin und die Basisstation, Rohfeld-Erkennung und vorsichtige Positionsbewertungen.",
+                "ru": "Добавлена раздельная диагностика GNSS/RTK для робота и базовой станции.",
+                "pt": "Adiciona diagnósticos GNSS/RTK separados para o robô e a estação base.",
+                "nl": "Voegt afzonderlijke GNSS/RTK-diagnose toe voor de robot en het basisstation.",
+                "fr": "Ajoute des diagnostics GNSS/RTK séparés pour le robot et la station de base.",
+                "it": "Aggiunge diagnostica GNSS/RTK separata per robot e stazione base.",
+                "es": "Añade diagnósticos GNSS/RTK separados para el robot y la estación base.",
+                "pl": "Dodaje oddzielną diagnostykę GNSS/RTK robota i stacji bazowej.",
+                "uk": "Додає окрему діагностику GNSS/RTK для робота та базової станції.",
+                "zh-cn": "为机器人和基站增加独立的 GNSS/RTK 诊断。"
+            },
+            "0.2.5": {
+                "en": "Keep the complete mowing track for each task and render a wider track.",
+                "de": "Die vollständige Mähspur je Auftrag bleibt erhalten und wird breiter dargestellt.",
+                "ru": "Полный трек кошения сохраняется для каждой задачи и отображается шире.",
+                "pt": "Mantém o percurso completo de cada tarefa de corte e apresenta uma linha mais larga.",
+                "nl": "Bewaart het volledige maaispoor per taak en toont een bredere lijn.",
+                "fr": "Conserve la trace complète de chaque tâche de tonte et affiche une ligne plus large.",
+                "it": "Mantiene la traccia completa per ogni attività di taglio e mostra una linea più larga.",
+                "es": "Conserva el recorrido completo de cada tarea de corte y muestra una línea más ancha.",
+                "pl": "Zachowuje pełną trasę koszenia dla każdego zadania i wyświetla grubszą linię.",
+                "uk": "Зберігає повний маршрут косіння для кожного завдання та показує ширшу лінію.",
+                "zh-cn": "为每个割草任务保留完整轨迹，并以更粗的线条显示。"
+            },
+            "0.1.13": {
+                "en": "Add M5/M9 payload parity for status, battery, error, network, RTK, map, and total mowing metrics while keeping the existing ioBroker state tree stable.\nRefresh temporary IoT credentials once on AWS IoT `403` responses and retry the failed shadow read or command publish automatically.\nRefactor the large adapter sources into focused CommonJS modules for Anthbot cloud/shadow clients, payload helpers, adapter object definitions, state derivation, and command handling without changing state IDs or command payload behavior.\nExpand `npm run check` so syntax validation covers the split `lib/anthbot`, `lib/adapter`, and unit test files through the dedicated syntax-check helper.",
+                "de": "Fügen Sie die M5/M9-Nutzlastparität für Status, Batterie, Fehler, Netzwerk, RTK, Karte und Gesamtmähmetriken hinzu, während Sie den vorhandenen ioBroker-Zustandsbaum stabil halten.\nAktualisieren Sie temporäre IoT-Anmeldeinformationen einmal in AWS IoT `403`-Antworten und wiederholen Sie das fehlgeschlagene Shadow Read oder den Befehl publish automatisch.\nRefaktorisieren Sie die großen Adapterquellen in fokussierte CommonJS-Module für Anthbot Cloud/Shadow-Clients, Nutzlast-Helfer, Adapterobjektdefinitionen, Zustandsableitung und Befehlsverarbeitung, ohne die Zustands-IDs oder das Befehlsnutzlastverhalten zu ändern.\nErweitern Sie `npm run check`, so dass die Syntaxvalidierung die Split `lib/anthbot`, `lib/adapter` und Unit-Testdateien über den dedizierten Syntax-Check-Helfer abdeckt.",
+                "ru": "Добавьте паритет полезной нагрузки M5/M9 для статуса, батареи, ошибок, сети, RTK, карты и общих показателей косилок, сохраняя при этом существующее дерево состояния ioBroker стабильным.\nОбновите временные учетные данные IoT после ответов AWS IoT «403» и перепроверьте неисправное чтение теней или автоматически публикуйте команду.\nРефактор больших источников адаптера в сфокусированные модули CommonJS для облачных / теневых клиентов Anthbot, помощников полезной нагрузки, определений объектов адаптера, вывода состояния и обработки команд без изменения идентификаторов состояния или поведения полезной нагрузки команды.\nРасширьте ‘npm run check’, чтобы синтаксическая валидация покрывала раздельные ‘lib/anthbot’, ‘lib/adapter’ и тестовые файлы через специальный помощник для проверки синтаксиса.",
+                "pt": "Adicione M5/M9 paridade de carga útil para status, bateria, erro, rede, RTK, mapa e métricas de corte total, mantendo a árvore de estado ioBroker existente estável.\nAtualizar credenciais de IoT temporárias uma vez nas respostas do AWS IoT `403` e tentar novamente a leitura ou o comando shadow falhado publicar automaticamente.\nRefaça as grandes fontes de adaptadores em módulos CommonJS focados para clientes de nuvem Anthbot/shadow, ajudantes de carga útil, definições de objeto adaptador, derivação de estado e manipulação de comandos sem alterar IDs de estado ou o comportamento de carga útil de comando.\nExpanda `npm run check` para que a validação de sintaxe cubra a divisão `lib/anthbot`, `lib/adapter` e os arquivos de teste unitários através do assistente dedicado de verificação de sintaxe.",
+                "nl": "Voeg M5/M9 payload pariteit voor status, batterij, fout, netwerk, RTK, kaart, en totale maaimetrics terwijl het houden van de bestaande ioBroker state tree stabiel.\nVernieuw tijdelijke IoT-gegevens één keer op AWS IoT .\nRefactor de grote adapter bronnen in gefocuste CommonJS modules voor Anthbot cloud/schaduw clients, payload helpers, adapter object definities, state afleiding, en commando behandeling zonder het wijzigen van status ID's of commando payload gedrag.\nBreid de controle van de syntaxis uit, zodat de syntaxisatie betrekking heeft op de split-lib/anthbot.",
+                "fr": "Ajouter la parité de charge utile M5/M9 pour l'état, la batterie, l'erreur, le réseau, la RTK, la carte et les mesures de tonte totale tout en maintenant l'arborescence d'état ioBroker existante stable.\nRafraîchir les identifiants IoT temporaires une fois sur les réponses IoT `403` AWS et réessayer la lecture ou la commande d'ombre échouée publier automatiquement.\nRefactorer les grandes sources d'adaptateur en modules CommonJS ciblés pour les clients de Cloud/Shadow Anthbot, les helpers de charge utile, les définitions d'objets d'adaptateur, la dérivation d'état et la gestion des commandes sans changer les identifiants d'état ou le comportement de charge utile de commande.\nExpand `npm run check` de sorte que la validation syntaxique couvre la division `lib/anthbot`, `lib/adaptateur`, et les fichiers de test unitaires via l'aide de vérification syntaxique dédiée.",
+                "it": "Aggiungere M5/M9 payload parity per stato, batteria, errore, rete, RTK, mappa e metriche totali di cucito mantenendo l'albero di stato ioBroker esistente stabile.\nAggiornare le credenziali IoT temporanee una volta su AWS IoT `403 ` risposte e riprovare l'ombra fallita leggere o comandare pubblicare automaticamente.\nRefactor le grandi sorgenti di adattatore in moduli CommonJS focalizzati per i client cloud/shadow Anthbot, helper payload, definizioni di oggetti adattatori, derivazione di stato e gestione dei comandi senza cambiare ID di stato o comportamento di carico di comando.\nEspandi `npm run check` in modo da la validazione della sintassi copre la divisione `lib/anthbot`, `lib/adapter` e i file di prova unità attraverso l'helper di controllo sintassi dedicato.",
+                "es": "Agregue la paridad de carga útil M5/M9 para el estado, la batería, el error, la red, RTK, el mapa y las métricas de mowing total manteniendo el árbol de estado ioBroker existente estable.\nRefresca las credenciales temporales de IoT una vez en las respuestas AWS IoT `403` y retratar la sombra fallida leer o comando publicar automáticamente.\nRefactor las grandes fuentes de adaptador en módulos CommonJS enfocados para clientes Anthbot cloud/shadow, ayudantes de carga, definiciones de objetos de adaptación, derivación del estado y manejo de comandos sin cambiar los IDs del estado o el comportamiento de carga de comando.\nExpand `npm run check`, por lo que la validación de sintaxis cubre la división `lib/anthbot`, `lib/adapter`, y archivos de prueba de unidad a través del ayudante de control de sintaxis dedicado.",
+                "pl": "Dodawanie parytetu obciążenia M5 / M9 dla stanu, baterii, błędu, sieci, RTK, mapy i całkowitego pomiaru koszenia przy zachowaniu stabilności istniejącego drzewa w stanie jOBroker.\nOdśwież tymczasowe referencje IoT w odpowiedzi AWS IoT '403' i ponownie wypróbuj nieudany odczyt cienia lub polecenie opublikowane automatycznie.\nZmień duże źródła adaptera w skoncentrowane moduły THORJS dla klientów w chmurze / cieniu wąskotorowych, pomocników ładowności, definicji obiektów adaptera, derivation stanu i obsługi poleceń bez zmiany identyfikatorów stanu lub zachowania polecenia ładunku.\nRozwiń 'npm run check', tak aby walidacja składni obejmowała podział 'lib / antbot', 'lib / adapter' i pliki testowe jednostki za pośrednictwem dedykowanego pomocnika kontroli syntaksu- check.",
+                "uk": "Додати парність корисного навантаження M5/M9 для стану, акумулятора, помилки, мережі, RTK, карти та загальної метрики для скошування при зберіганні існуючого ioBroker State Tree стабільного.\nВідповідає тимчасові облікові дані Інтернету на відповідіх AWS IoT `403` та автоматично переробляючи нездійсненне тіньове читання або командне видання.\nРефакторування великих джерел адаптера на фокусовані модулі CommonJS для клієнтів Anthbot Cloud/shadow, ідентифікаторів платного навантаження, визначення об'єктів адаптера, визначення стану, а також управління командами без зміни ID або поведінки командного навантаження.\nВитрата `npm run check` так синтаксисна перевірка охоплює спліт `lib/anthbot`, `lib/adapter`, а також блок тестових файлів через спеціальний помічник синтаксису-check.",
+                "zh-cn": "在保持现有ioBroker状态树稳定的同时,在状态、电池、误差、网络、RTK、地图和总切割度量衡方面增加M5/M9有效载荷等值.\n在 AWS IOT `403' 回复中刷新一次临时 IOT 证书,并自动重试失败的阴影读取或命令发布 .\n为Anthbot 云/阴影客户端、有效载荷帮助器、适配器对象定义、状态衍生和指令处理重塑大型适配器源,而不改变状态ID或命令有效载荷行为.\n扩展“ npm 运行检查” 所以语法验证涵盖“lib/anthbot”、“lib/adapter”和单元测试文件,通过专用语法检查帮助器进行."
+            },
+            "0.1.12": {
+                "en": "**FIXED**: Create the global `info` channel and correct the mower status role so the adapter object structure passes ioBroker review checks.",
+                "de": "**FIXED**: Erstellen Sie den globalen `info` Kanal und korrigieren Sie die Mähstatus-Rolle, so dass die Adapter Objektstruktur ioBroker Überprüfung überprüft.",
+                "ru": "** Фиксированный**: Создайте глобальный информационный канал и исправьте статус косилки, чтобы структура объекта адаптера прошла проверку ioBroker.",
+                "pt": "**FIXED**: Crie o canal global 'info' e corrija o papel do cortador de grama para que a estrutura do objeto do adaptador passe as verificações de revisão do ioBroker.",
+                "nl": "** VAST**: Creëer het globale kanaal van de info en corrigeer de rol van de maaierstatus, zodat de structuur van het adapterobject joBroker-beoordelingschecks passeert.",
+                "fr": "**FIXÉ**: Créez le canal `info` global et corrigez le rôle de statut de tondeuse de sorte que la structure de l'objet adaptateur passe les vérifications d'examen ioBroker.",
+                "it": "**FISSO ** Creare il canale globale `info` e correggere il ruolo dello stato del falciatore in modo che la struttura dell'oggetto dell'adattatore passi ioBroker controlli di revisione.",
+                "es": "**FIXED**: Crear el canal global de 'info' y corregir el papel de estado de la cortadora para que la estructura del objeto del adaptador pase los cheques de revisión ioBroker.",
+                "pl": "* *FIXED* * Stwórz globalny kanał 'info' i skoryguj rolę statusu kosiarki, tak aby struktura obiektu adaptera przeszła kontrolę przeglądową jOBrokera. ",
+                "uk": "**FIXED***: Створіть глобальний канал `info` і виправте роль стану косарки, щоб структура об'єкта адаптера переходить на перевірку ioBroker.",
+                "zh-cn": "(单位:千美元) 创建全局“信息”通道并纠正剪切器状态角色,使适配器对象结构通过ioBroker审查检查."
+            },
+            "0.1.11": {
+                "en": "Refresh existing mower device, channel, and state objects with extendObjectAsync so updated runtime i18n names are applied to already-created objects too.",
+                "de": "Aktualisieren Sie vorhandene Geräte-, Kanal- und Zustandsobjekte des Mähers mit extendObjectAsync, damit aktualisierte Laufzeit-i18n-Namen auch auf bereits angelegte Objekte angewendet werden.",
+                "ru": "Обновляйте существующие объекты устройства, канала и состояния газонокосилки через extendObjectAsync, чтобы новые runtime-i18n-имена применялись и к уже созданным объектам.",
+                "pt": "Atualize os objetos existentes de dispositivo, canal e estado do cortador com extendObjectAsync para que os nomes i18n de tempo de execução também sejam aplicados aos objetos já criados.",
+                "nl": "Werk bestaande apparaat-, kanaal- en statusobjecten van de maaier bij met extendObjectAsync zodat bijgewerkte runtime-i18n-namen ook op al aangemaakte objecten worden toegepast.",
+                "fr": "Actualisez les objets existants de tondeuse, de canal et d'état avec extendObjectAsync afin que les noms i18n d'exécution mis à jour soient aussi appliqués aux objets déjà créés.",
+                "it": "Aggiorna gli oggetti esistenti di dispositivo, canale e stato del rasaerba con extendObjectAsync, così i nomi i18n runtime aggiornati vengono applicati anche agli oggetti già creati.",
+                "es": "Actualiza los objetos existentes de dispositivo, canal y estado del cortacésped con extendObjectAsync para que los nombres i18n de ejecución actualizados también se apliquen a los objetos ya creados.",
+                "pl": "Odśwież istniejące obiekty urządzenia, kanału i stanu kosiarki za pomocą extendObjectAsync, aby zaktualizowane nazwy i18n czasu działania zostały zastosowane również do już utworzonych obiektów.",
+                "uk": "Оновлюйте наявні об'єкти пристрою, каналу й стану косарки через extendObjectAsync, щоб оновлені runtime-i18n-назви застосовувалися і до вже створених об'єктів.",
+                "zh-cn": "使用 extendObjectAsync 刷新现有的割草机设备、通道和状态对象，让更新后的运行时 i18n 名称也应用到已创建的对象。"
+            },
+            "0.1.10": {
+                "en": "Align ioBroker object metadata with the repository object-structure checker by creating the global info channel, correcting the mower status role, and emitting full recommended i18n keys for object names.\nKeep admin translations in the repository-checker-friendly admin/i18n/<lang>.json layout and load backend/runtime object-name translations from root i18n/<lang>.json files via adapter-core I18n.",
+                "de": "Richten Sie die ioBroker-Objektmetadaten am Objektstruktur-Prüfer des Repositories aus, indem Sie den globalen info-Kanal anlegen, die Rolle des Mäherstatus korrigieren und vollständige empfohlene i18n-Schlüssel für Objektnamen ausgeben.\nBehalten Sie Admin-Übersetzungen im repochecker-freundlichen Layout admin/i18n/<lang>.json und laden Sie Backend-/Laufzeit-Objektnamen über adapter-core I18n aus den i18n/<lang>.json-Dateien im Projektstamm.",
+                "ru": "Приведите метаданные объектов ioBroker в соответствие с проверкой структуры объектов репозитория: создайте глобальный канал info, исправьте роль статуса газонокосилки и публикуйте полные рекомендуемые i18n-ключи для имён объектов.\nХраните переводы Admin в удобном для repochecker формате admin/i18n/<lang>.json и загружайте имена backend/runtime-объектов из корневых файлов i18n/<lang>.json через adapter-core I18n.",
+                "pt": "Alinhe os metadados de objetos do ioBroker ao verificador de estrutura de objetos do repositório criando o canal global info, corrigindo o papel do status do cortador e emitindo chaves i18n recomendadas completas para os nomes dos objetos.\nMantenha as traduções do Admin no layout admin/i18n/<lang>.json compatível com o repochecker e carregue os nomes de objetos de backend/runtime a partir dos arquivos raiz i18n/<lang>.json via adapter-core I18n.",
+                "nl": "Lijn de ioBroker-objectmetadata uit met de objectstructuurcontrole van de repository door het globale info-kanaal aan te maken, de rol van de maaierstatus te corrigeren en volledige aanbevolen i18n-sleutels voor objectnamen uit te geven.\nHoud admin-vertalingen in de repochecker-vriendelijke layout admin/i18n/<lang>.json en laad backend-/runtime-objectnamen via adapter-core I18n uit de i18n/<lang>.json-bestanden in de projectroot.",
+                "fr": "Alignez les métadonnées d'objet ioBroker sur le contrôleur de structure d'objet du dépôt en créant le canal global info, en corrigeant le rôle du statut de la tondeuse et en générant les clés i18n recommandées complètes pour les noms d'objet.\nConservez les traductions Admin dans la mise en page admin/i18n/<lang>.json compatible repochecker et chargez les noms d'objet backend/runtime depuis les fichiers racine i18n/<lang>.json via adapter-core I18n.",
+                "it": "Allinea i metadati degli oggetti ioBroker al controllo della struttura oggetti del repository creando il canale globale info, correggendo il ruolo dello stato del rasaerba ed emettendo chiavi i18n consigliate complete per i nomi oggetto.\nMantieni le traduzioni Admin nel layout admin/i18n/<lang>.json compatibile con repochecker e carica i nomi oggetto backend/runtime dai file radice i18n/<lang>.json tramite adapter-core I18n.",
+                "es": "Alinea los metadatos de objetos de ioBroker con el verificador de estructura de objetos del repositorio creando el canal global info, corrigiendo el rol del estado del cortacésped y emitiendo claves i18n recomendadas completas para los nombres de objeto.\nMantén las traducciones de Admin en el formato admin/i18n/<lang>.json compatible con repochecker y carga los nombres de objetos de backend/runtime desde los archivos raíz i18n/<lang>.json mediante adapter-core I18n.",
+                "pl": "Dopasuj metadane obiektów ioBroker do kontrolera struktury obiektów repozytorium, tworząc globalny kanał info, korygując rolę statusu kosiarki i emitując pełne zalecane klucze i18n dla nazw obiektów.\nZachowaj tłumaczenia Admin w układzie admin/i18n/<lang>.json przyjaznym dla repochecker oraz ładuj nazwy obiektów backend/runtime z głównych plików i18n/<lang>.json przez adapter-core I18n.",
+                "uk": "Узгодьте метадані об'єктів ioBroker із перевіркою структури об'єктів репозиторію: створіть глобальний канал info, виправте роль стану косарки та виводьте повні рекомендовані i18n-ключі для назв об'єктів.\nЗберігайте переклади Admin у зручному для repochecker форматі admin/i18n/<lang>.json і завантажуйте назви backend/runtime-об'єктів із кореневих файлів i18n/<lang>.json через adapter-core I18n.",
+                "zh-cn": "通过创建全局 info 通道、修正割草机状态角色并为对象名称输出完整的推荐 i18n 键，使 ioBroker 对象元数据符合仓库对象结构检查器的要求。\n将 Admin 翻译保存在适合 repochecker 的 admin/i18n/<lang>.json 结构中，并通过 adapter-core I18n 从根目录下的 i18n/<lang>.json 文件加载后端/运行时对象名称。"
+            },
+            "0.1.9": {
+                "en": "Drop the temporary --legacy-peer-deps CI install override.\nRe-enable ESLint in the GitHub Actions quick-check job.\nClean up repository metadata so repochecker has no actionable findings.",
+                "de": "Entfernen Sie die temporäre CI-Installationsausnahme für --legacy-peer-deps.\nAktivieren Sie ESLint im GitHub-Actions-Schnellcheck erneut.\nBereinigen Sie die Repository-Metadaten, damit der repochecker keine umsetzbaren Befunde mehr meldet.",
+                "ru": "Удалите временное исключение установки CI для --legacy-peer-deps.\nСнова включите ESLint в задании быстрого контроля GitHub Actions.\nОчистите метаданные репозитория, чтобы repochecker не сообщал об устранимых замечаниях.",
+                "pt": "Remova a exceção temporária de instalação de CI para --legacy-peer-deps.\nReative o ESLint na tarefa de verificação rápida do GitHub Actions.\nLimpe os metadados do repositório para que o repochecker não aponte mais achados acionáveis.",
+                "nl": "Verwijder de tijdelijke CI-installatie-uitzondering voor --legacy-peer-deps.\nSchakel ESLint weer in voor de snelle GitHub Actions-controle.\nRuim de repositorymetadata op zodat repochecker geen uitvoerbare bevindingen meer meldt.",
+                "fr": "Supprimez la dérogation temporaire d'installation CI pour --legacy-peer-deps.\nRéactivez ESLint dans le job de vérification rapide GitHub Actions.\nNettoyez les métadonnées du dépôt afin que repochecker ne signale plus de constat actionnable.",
+                "it": "Rimuovi l'eccezione temporanea di installazione CI per --legacy-peer-deps.\nRiattiva ESLint nel job di controllo rapido di GitHub Actions.\nRipulisci i metadati del repository in modo che repochecker non segnali più rilievi azionabili.",
+                "es": "Elimina la excepción temporal de instalación de CI para --legacy-peer-deps.\nVuelve a activar ESLint en el trabajo de comprobación rápida de GitHub Actions.\nLimpia los metadatos del repositorio para que repochecker no informe más hallazgos accionables.",
+                "pl": "Usuń tymczasowy wyjątek instalacyjny CI dla --legacy-peer-deps.\nWłącz ponownie ESLint w zadaniu szybkiej kontroli GitHub Actions.\nUporządkuj metadane repozytorium, aby repochecker nie zgłaszał już możliwych do wykonania uwag.",
+                "uk": "Приберіть тимчасовий виняток інсталяції CI для --legacy-peer-deps.\nЗнову увімкніть ESLint у швидкій перевірці GitHub Actions.\nОчистьте метадані репозиторію, щоб repochecker більше не повідомляв про виправні зауваження.",
+                "zh-cn": "移除用于 --legacy-peer-deps 的临时 CI 安装例外。\n在 GitHub Actions 快速检查任务中重新启用 ESLint。\n清理仓库元数据，使 repochecker 不再报告可操作的问题。"
+            },
+            "0.1.8": {
+                "en": "Run `npm run check` instead of mandatory ESLint in the GitHub Actions quick-check job until the repository has a fully passing lint baseline.",
+                "de": "Starten Sie `npm Run Check` anstelle der obligatorischen ESLint in der GitHub Actions Schnell-Check-Job, bis das Repository eine vollständig durchlaufende schlanke Basislinie hat.",
+                "ru": "Запустите «npm run check» вместо обязательного ESLint в GitHub Actions, быстро проверяя работу, пока репозиторий не получит полностью проходящую исходную линию.",
+                "pt": "Execute `npm run check` em vez de ESLint obrigatório na tarefa de verificação rápida do GitHub Actions até que o repositório tenha uma linha de base totalmente passageira.",
+                "nl": "Voer de controle uit in plaats van de verplichte ESLint in de snelcontroletaak van GitHub Acties totdat de repository een volledig passerende pluisbasis heeft.",
+                "fr": "Exécutez `npm run check` au lieu d'ESLint obligatoire dans la tâche de vérification rapide GitHub Actions jusqu'à ce que le dépôt ait une ligne de base de lint passant complètement.",
+                "it": "Eseguire `npm run check` invece di ESLint obbligatorio nel GitHub Actions lavoro di controllo rapido fino a quando il repository ha una linea di base lint completamente passare.",
+                "es": "Ejecutar `npm run check` en lugar de ESLint obligatorio en el trabajo de control rápido GitHub Actions hasta que el repositorio tenga una línea de referencia totalmente pasada.",
+                "pl": "Uruchom 'npm run check' zamiast obowiązkowego ESLint w GitHub Actions quick- check zadanie do momentu, gdy repozytorium będzie miało w pełni przechodzącą linię bazową.",
+                "uk": "Запуск `npm запустіть перевірку` замість обов’язкового ESLint в GitHub Дії швидкого пошуку роботи, доки репозиторій має повну прохідну базову лінію.",
+                "zh-cn": "运行“ npm 运行检查” , 而不是在 GitHub 动作中进行强制的 ESLint 快速检查, 直到存储器有一个完全经过线程的基线 ."
+            },
+            "0.1.5": {
+                "en": "Updated JSON config to include help text for Anthbot account username.\nUpdate translations and JSON config for Anthbot account email address\nAdjusted layout for area code and added poll interval and API host configurations with proper visibility settings.\nBump admin dependency version in io-package.json\nUpdated admin dependency version from >=7.6.20 to >=7.7.22.\nAdd GitHub Copilot instructions for ioBroker adapter development\nAdd automated version check for Copilot instructions template\nadd ESLint and Prettier configuration files with linting scripts\nRefactor code structure for improved readability and maintainability\nBump protobufjs in the npm_and_yarn group across 1 directory\ndowngrade @iobroker/testing to version 5.0.4 for compatibility",
+                "de": "Aktualisierte JSON config, um Hilfetext für Anthbot-Account-Benutzername aufzunehmen.\nÜbersetzungen aktualisieren und JSON config für Anthbot Konto E-Mail Adresse\nBestimmtes Layout für Bereichscode und hinzugefügt Umfrageintervall und API-Host-Konfigurationen mit richtigen Sichteinstellungen.\nBump Admin Abhängigkeitsversion in io-package.json\nAktualisierte Adminabhängigkeitsversion von >=7.6.20 bis >=7.7.22.\nGitHub Copilot Anleitung für ioBroker Adapter Entwicklung hinzufügen\nAutomatische Versionsprüfung für Copilot Anleitungsvorlage hinzufügen\neSLint und Prettier Konfigurationsdateien mit Linting-Skripten hinzufügen\nRefactor-Codestruktur für verbesserte Lesbarkeit und Aufrechterhaltungsfähigkeit\nBump protobufjs in der npm and yarn Gruppe über 1 Verzeichnis\ndowngrade @iobroker/test auf version 5.0.4 für kompatibilität",
+                "ru": "Обновленная конфигурация JSON включает в себя текст справки для имени пользователя учетной записи Anthbot.\nОбновление переводов и конфигурация JSON для адреса электронной почты учетной записи Anthbot\nСкорректированный макет для кода области и добавленный интервал опроса и конфигурации хоста API с надлежащими настройками видимости.\nВерсия зависимости от администратора Bump в io-package.json\nОбновленная версия зависимостей администратора от >=7.6.20 до >=7.7.22.\nДобавить инструкции GitHub Copilot для разработки адаптера ioBroker\nДобавить автоматизированную проверку версии шаблона инструкций Copilot\nдобавить файлы конфигурации ESLint и Prettier со скриптами\nСтруктура кода рефактора для улучшения читаемости и ремонтопригодности\nBump protobufjs в группе npm and yarn в 1 каталоге\nпонижение рейтинга @iobroker/тестирование версии 5.0.4 для совместимости",
+                "pt": "Configuração atualizada do JSON para incluir texto de ajuda para o nome de usuário da conta Anthbot.\nAtualizar traduções e configuração do JSON para o endereço de e-mail da conta Anthbot\nLayout ajustado para código de área e intervalo de pesquisa adicionado e configurações host API com configurações de visibilidade adequada.\nVersão de dependência de administrador Bump em io-package.json\nVersão atualizada de dependência do administrador de >=7.6.20 a >=7.7.22.\nAdicionar instruções do GitHub Copilot para o desenvolvimento do adaptador ioBroker\nAdicionar verificação de versão automatizada para modelo de instruções Copilot\nadicionar arquivos de configuração ESLint e Prettier com scripts de linting\nEstrutura de código de refator para melhor legibilidade e manutenção\nBump protobufjs no grupo npm and yarn em 1 diretório\ndowngrade @iobroker/testing para a versão 5.0.4 para compatibilidade",
+                "nl": "Bijgewerkt JSON config om hulptekst voor Anthbot-account gebruikersnaam in te voegen.\nUpdate vertalingen en JSON configuratie voor Anthbot account e-mailadres\nAangepaste lay-out voor gebiedscode en toegevoegd poll interval en API host configuraties met juiste zichtbaarheidsinstellingen.\nBump admin afhankelijkheid versie in io-package.json\nVoor de toepassing van deze post wordt verstaan onder:.\nGitHub Copilot-instructies voor ioBroker-adapterontwikkeling toevoegen\nAutomated version check for Copilot gebruiksaanwijzing template toevoegen\neSLint- en Prettiger configuratiebestanden toevoegen met linting scripts\nRefactorcodestructuur voor verbeterde leesbaarheid en onderhoud\nBump protobufjs in de npm and yarn-groep over 1 map\ndowngrade @iobroker/testing naar versie 5.0.4 voor compatibiliteit",
+                "fr": "Mise à jour de la configuration JSON pour inclure le texte d'aide pour le nom d'utilisateur du compte Anthbot.\nMettre à jour les traductions et la configuration JSON pour l'adresse e-mail du compte Anthbot\nMise en page ajustée pour l'indicatif régional et ajout d'intervalle de sondage et de configurations d'hôte API avec des paramètres de visibilité appropriés.\nVersion de dépendance admin Bump dans io-package.json\nVersion de dépendance admin mise à jour de >=7.6.20 à >=7.7.22.\nAjouter les instructions du copilote GitHub pour le développement de l'adaptateur ioBroker\nAjouter une vérification de version automatisée pour le modèle d'instructions Copilot\najouter des fichiers de configuration ESLint et Prettier avec des scripts de lintage\nStructure du code de refacteur pour améliorer la lisibilité et la maintenance\nBump protobufjs dans le groupe npm and yarn à travers 1 répertoire\ndowngrade @iobroker/test de la version 5.0.4 pour la compatibilité",
+                "it": "Aggiornato JSON config per includere il testo di aiuto per il nome utente dell'account Anthbot.\nTraduzioni di aggiornamento e configurazione JSON per l'indirizzo email dell'account Anthbot\nLayout regolato per il codice di area e l'intervallo di sondaggio aggiunto e le configurazioni di host API con impostazioni di visibilità adeguate.\nVersione di dipendenza dell'amministrazione del buffer in io-package.json\nVersione di dipendenza da admin aggiornata da >=7.6.20 a >=7.7.22.\nAggiungi istruzioni GitHub Copilot per lo sviluppo dell'adattatore ioBroker\nAggiungi il controllo automatico della versione per il modello di istruzioni Copilot\naggiungere file di configurazione ESLint e Prettier con script di linting\nStruttura del codice di fabbrica per una migliore leggibilità e manutenbilità\nBump protobufjs nel gruppo npm and yarn in 1 directory\ndowngrade @iobroker/testing alla versione 5.0.4 per compatibilità",
+                "es": "Actualizado configuración JSON para incluir texto de ayuda para el nombre de usuario de la cuenta Anthbot.\nActualizar traducciones y configuración de JSON para la dirección de correo electrónico de la cuenta Anthbot\nDiseño ajustado para código de área y intervalo de votación añadido y configuraciones de host API con ajustes de visibilidad adecuados.\nVersión de dependencia de Bump admin en io-package.json\nActualización de la versión de dependencia de administración de >=7.6.20 a ≤=7.7.22.\nAñadir instrucciones GitHub Copilot para el desarrollo del adaptador ioBroker\nAgregar el cheque automático de la versión para la plantilla de instrucciones de Copilot\nañadir archivos de configuración ESLint y Prettier con scripts de forro\nEstructura de código de refactor para mejorar la legibilidad y la sostenibilidad\nBump protobufjs en el grupo npm and yarn a través de 1 directorio\ndowngrade @iobroker/testing a la versión 5.0.4 para compatibilidad",
+                "pl": "Aktualizacja pliku konfiguracyjnego JSON, aby włączyć tekst pomocy dla konta użytkownika Anthony Bot.\nAktualizuj tłumaczenia i plik konfiguracyjny JSON dla konta Anthony\nDostosowany układ dla kodu obszaru oraz dodany interwał ankietowy i konfiguracje hosta API z odpowiednimi ustawieniami widoczności.\nBump wersja zależności admin w jo- package.json\nAktualizacja wersji zależności admin z > = 7.6.20 do > = 7.7.22.\nDodaj instrukcję GitHub Copilot dla rozwoju adaptera jOBroker\nDodaj automatyczną kontrolę wersji szablonu instrukcji Copilot\ndodaj pliki konfiguracyjne ESLint i Prettier ze skryptami lintowania\nRefaktor struktury kodu dla poprawy czytelności i utrzymania\nBump protobufjs w grupie npm _ and _ przędza w katalogu 1\ndowngrade @ iobroker / testing do wersji 5.0.4",
+                "uk": "Оновлений JSON config, щоб включити текст для імені облікового запису Anthbot.\nОновлення перекладу та налаштування JSON для адреси електронної пошти Anthbot\nНалаштовано макет для коду області та додано інтервал опитування та налаштування користувачів API з відповідними налаштуваннями видимості.\nEnglish, Українська, Français..\nОновлено версію залежності адміністратора від >=7.6.20 до >=7.7.22.\nДодавання інструкцій GitHub Copilot для розробки адаптерів ioBroker\nДодати автоматичну перевірку версії для шаблону інструкцій Copilot\nдодати файли конфігурації ESLint та Prettier з скриптами linting\nРефакторна структура коду для підвищення читабельності та стійкості\nBump protobufjs в npm and yarn група через 1 каталог\n@iobroker/testing to version 5.0.4 для сумісності",
+                "zh-cn": "更新了 JSON 配置以包含 Anthbot 账户用户名的帮助文本 .\n更新 Anthbot 账户电子邮件地址的翻译和 JSON 配置\n调整了区域代码的布局,并增加了有适当可见度设置的民调间隔和API主机配置.\n在io-package.json中跳跃的管理员依赖版本\n更新了行政依赖版本,从QQ7.6.20到QQ7.7.22.\n为 ioBroker 适配器开发添加 GitHub 副驾驶指令\n为 Copilot 指令模板添加自动版本检查\n添加带有 Linting 脚本的 ESLint 和 Pretier 配置文件\n为改进可读性和可维护性而重新设计代码结构\n横跨一个目录的 npm  和  yarn 组中的 bump protobufjs\n为兼容性将@iobroduc/ testing 降级到 5. 0.4 版本"
+            },
+            "0.2.4": {
+                "en": "Added AWS IoT MQTT live shadow updates with HTTP fallback polling.",
+                "de": "AWS-IoT-MQTT-Live-Aktualisierungen mit HTTP-Sicherheitsabfrage ergänzt."
+            }
         },
-        "type": "boolean",
-        "role": "indicator.connected",
-        "read": true,
-        "write": false,
-        "def": false
-      },
-      "native": {}
-    }
-  ]
+        "titleLang": {
+            "en": "Anthbot Genie",
+            "de": "Anthbot Genie",
+            "ru": "Anthbot Genie",
+            "pt": "Anthbot Genie",
+            "nl": "Anthbot Genie",
+            "fr": "Anthbot Genie",
+            "it": "Anthbot Genie",
+            "es": "Anthbot Genie",
+            "pl": "Anthbot Genie",
+            "uk": "Anthbot Genie",
+            "zh-cn": "Anthbot Genie"
+        },
+        "desc": {
+            "en": "Unofficial cloud adapter for Anthbot Genie robotic lawn mowers with telemetry, diagnostics, consumables, zones, and controls",
+            "de": "Inoffizieller Cloud-Adapter für Statusabfrage und Steuerung von Anthbot Genie",
+            "ru": "Неофициальный облачный адаптер для управления газонокосилками Anthbot Genie и опроса состояния",
+            "pt": "Adaptador de nuvem não oficial para controlar cortadores Anthbot Genie e consultar o estado",
+            "nl": "Onofficiële cloudadapter voor bediening van Anthbot Genie-maaiers en statuspolling",
+            "fr": "Adaptateur cloud non officiel pour le contrôle des tondeuses Anthbot Genie et l'interrogation de leur état",
+            "it": "Adattatore cloud non ufficiale per il controllo dei rasaerba Anthbot Genie e il polling dello stato",
+            "es": "Adaptador en la nube no oficial para controlar cortacéspedes Anthbot Genie y consultar su estado",
+            "pl": "Nieoficjalny adapter chmurowy do sterowania kosiarkami Anthbot Genie i odpytywania stanu",
+            "uk": "Неофіційний хмарний адаптер для керування косарками Anthbot Genie та опитування стану",
+            "zh-cn": "用于控制 Anthbot Genie 割草机并轮询状态的非官方云适配器"
+        },
+        "authors": [
+            "reloxx13"
+        ],
+        "licenseInformation": {
+            "license": "MIT",
+            "type": "free"
+        },
+        "icon": "anthbot-m9.png",
+        "extIcon": "https://raw.githubusercontent.com/MrHenker27/ioBroker.anthbot-m9/main/admin/anthbot-m9.png",
+        "readme": "https://github.com/MrHenker27/ioBroker.anthbot-m9/blob/main/README.md",
+        "keywords": [
+            "anthbot",
+            "anthbot-genie",
+            "robotic-lawn-mower",
+            "lawn-mower",
+            "mower",
+            "home-automation",
+            "rtk",
+            "cloud-api",
+            "iot"
+        ],
+        "platform": "Javascript/Node.js",
+        "mode": "daemon",
+        "tier": 2,
+        "type": "garden",
+        "compact": true,
+        "connectionType": "cloud",
+        "dataSource": "poll",
+        "loglevel": "info",
+        "enabled": false,
+        "adminUI": {
+            "config": "json"
+        },
+        "dependencies": [
+            {
+                "js-controller": ">=6.0.11"
+            }
+        ],
+        "globalDependencies": [
+            {
+                "admin": ">=7.7.22"
+            }
+        ]
+    },
+    "encryptedNative": [
+        "password"
+    ],
+    "protectedNative": [
+        "username",
+        "password"
+    ],
+    "native": {
+        "username": "",
+        "password": "",
+        "areaCode": "49",
+        "apiHost": "api.anthbot.com",
+        "errorDescriptionLanguage": "English",
+        "pollIntervalActive": 30,
+        "pollIntervalCharging": 60,
+        "pollIntervalIdle": 60,
+        "pollIntervalIdleLong": 180,
+        "idleLongAfterMinutes": 10,
+        "nightPollingEnabled": false,
+        "pollIntervalNight": 300,
+        "nightStartHour": 22,
+        "nightEndHour": 6,
+        "mqttEnabled": true,
+        "mqttFallbackPollInterval": 300
+    },
+    "objects": [
+        {
+            "_id": "info",
+            "type": "channel",
+            "common": {
+                "name": {
+                    "en": "Info",
+                    "de": "Info"
+                }
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.connection",
+            "type": "state",
+            "common": {
+                "name": {
+                    "en": "Cloud connection",
+                    "de": "Cloud-Verbindung"
+                },
+                "type": "boolean",
+                "role": "indicator.connected",
+                "read": true,
+                "write": false,
+                "def": false
+            },
+            "native": {}
+        }
+    ],
+    "version": "0.2.14"
 }

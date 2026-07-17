@@ -2,9 +2,12 @@
 
 /** @type {typeof import('@iobroker/adapter-core')} */
 const utils = require('@iobroker/adapter-core');
+const path = require('node:path');
 const axios = /** @type {import('axios').AxiosStatic} */ (/** @type {unknown} */ (require('axios')));
+const sharp = require('sharp');
 const { AnthbotCloudApiClient } = require('./lib/anthbot/cloud-client');
 const { AnthbotShadowApiClient } = require('./lib/anthbot/shadow-client');
+const { AnthbotMqttShadowClient } = require('./lib/anthbot/mqtt-shadow-client');
 const {
     AnthbotGenieError,
     asInteger,
@@ -18,9 +21,11 @@ const {
     getDeviceChannelDefinitions,
     getDeviceStateDefinitions,
 } = require('./lib/adapter/definitions');
-const { normalizePollIntervalSeconds } = require('./lib/adapter/config');
 const { buildDeviceStateUpdates, getControlFallbackValue } = require('./lib/adapter/state-updates');
 const { executeCommand, executeConsumableCommand, executeControl } = require('./lib/adapter/actions');
+const { resolvePollingInterval, updatePollingCategory } = require('./lib/adapter/polling');
+const { renderRtkSkyplot } = require('./lib/anthbot/rtk-skyplot');
+const { buildRtkSkyplotHtml } = require('./lib/anthbot/rtk-skyplot-html');
 
 /**
  * @typedef {object} AnthbotAdapterConfig
@@ -28,7 +33,17 @@ const { executeCommand, executeConsumableCommand, executeControl } = require('./
  * @property {string} password
  * @property {string} areaCode
  * @property {string} apiHost
- * @property {number} pollInterval
+ * @property {number} pollIntervalActive
+ * @property {number} pollIntervalCharging
+ * @property {number} pollIntervalIdle
+ * @property {number} pollIntervalIdleLong
+ * @property {number} idleLongAfterMinutes
+ * @property {boolean} nightPollingEnabled
+ * @property {number} pollIntervalNight
+ * @property {number} nightStartHour
+ * @property {number} nightEndHour
+ * @property {boolean} mqttEnabled
+ * @property {number} mqttFallbackPollInterval
  * @property {string} errorDescriptionLanguage
  */
 
@@ -46,11 +61,12 @@ class AnthbotGenieAdapter extends AdapterBase {
     constructor(options = {}) {
         super({
             ...options,
-            name: 'anthbot-genie',
+            name: 'anthbot-m9',
         });
 
         this.on('ready', this.onReady.bind(this));
         this.on('stateChange', this.onStateChange.bind(this));
+        this.on('message', this.onMessage.bind(this));
         this.on('unload', this.onUnload.bind(this));
 
         this.http = null;
@@ -63,6 +79,8 @@ class AnthbotGenieAdapter extends AdapterBase {
         this.pollTimer = null;
         this.refreshInFlight = null;
         this.unloaded = false;
+        this.httpRateLimitCount = 0;
+        this.httpBackoffUntil = 0;
     }
 
     /**
@@ -70,6 +88,53 @@ class AnthbotGenieAdapter extends AdapterBase {
      */
     get anthbotConfig() {
         return /** @type {AnthbotAdapterConfig} */ (this.config);
+    }
+
+    isGermanAdmin() {
+        return String(this.anthbotConfig.errorDescriptionLanguage || '').toLowerCase() === 'german';
+    }
+
+    localizeAdminValue(value) {
+        const text = value == null || value === '' ? '' : String(value);
+        if (!this.isGermanAdmin()) return text;
+        const direct = {
+            connected: 'verbunden',
+            disconnected: 'getrennt',
+            unknown: 'unbekannt',
+            'not transmitted': 'nicht übertragen',
+            online: 'online',
+            offline: 'offline',
+            fixed: 'Fix',
+            float: 'Float',
+            lost: 'kein Fix',
+            'disabled while MQTT connected': 'deaktiviert, solange MQTT verbunden ist',
+            'waiting for MQTT': 'warte auf MQTT',
+            true: 'Ja',
+            false: 'Nein',
+            'positioning active (code 1)': 'RTK-Positionierung aktiv (Code 1)',
+        };
+        if (direct[text] !== undefined) return direct[text];
+        if (/^unknown \((.+)\)$/.test(text)) return text.replace(/^unknown/, 'unbekannt');
+        if (/^status code (.+)$/.test(text)) return text.replace(/^status code/, 'Statuscode');
+        return text;
+    }
+
+    localizeAssessment(value) {
+        const text = value == null ? '' : String(value);
+        if (!this.isGermanAdmin()) return text;
+        const translations = {
+            'No separate GNSS quality values for Kevin were found in the current payload.': 'Im aktuellen Datenpaket wurden keine separaten GNSS-Qualitätswerte für Kevin gefunden.',
+            'Kevin reports an RTK/GNSS fix.': 'Kevin meldet einen RTK-/GNSS-Fix.',
+            'Kevin reports RTK float or reduced positioning quality.': 'Kevin meldet RTK-Float beziehungsweise eine verringerte Positionierungsqualität.',
+            'Kevin reports a weak RTK signal. The app only distinguishes state 1 from all weaker states.': 'Kevin meldet ein schwaches RTK-Signal. Die App unterscheidet lediglich Status 1 von allen schwächeren Zuständen.',
+            'Kevin has no GNSS fix, but fresh movement data suggests temporary navigation by sensors/odometry.': 'Kevin hat keinen GNSS-Fix; aktuelle Bewegungsdaten sprechen jedoch für eine vorübergehende Navigation über Sensoren beziehungsweise Odometrie.',
+            'Kevin reports no GNSS fix.': 'Kevin meldet keinen GNSS-Fix.',
+            'Kevin does not expose an unambiguous GNSS fix in this payload. Numeric RTK status codes are shown raw and are not guessed.': 'Dieses Datenpaket enthält keinen eindeutigen GNSS-Fix von Kevin. Numerische RTK-Statuscodes werden unverändert angezeigt und nicht geraten.',
+            'Kevin reports active RTK positioning (raw code 1). A separate satellite count is not transmitted in this data stream.': 'Kevin meldet eine aktive RTK-Positionierung (Rohcode 1). Eine separate Satellitenzahl von Kevin wird in diesem Datenstrom nicht übertragen.',
+            'Kevin provides only a numeric RTK status in this payload. The raw code is shown without guessing a GNSS fix.': 'Kevin überträgt in diesem Datenpaket nur einen numerischen RTK-Status. Der Rohcode wird angezeigt, ohne daraus einen GNSS-Fix zu erraten.',
+            'The RTK base reports a good state, but Kevin does not expose a confirmed GNSS fix in this payload.': 'Die RTK-Basis meldet einen guten Zustand; dieses Datenpaket enthält jedoch keinen bestätigten GNSS-Fix von Kevin.',
+        };
+        return translations[text] || text;
     }
 
     async onReady() {
@@ -93,8 +158,21 @@ class AnthbotGenieAdapter extends AdapterBase {
         this.subscribeStates('*.controls.*');
         this.subscribeStates('*.consumable.*.reset');
 
-        await this.refreshAll(true);
+        await this.bootstrap();
         this.schedulePoll();
+    }
+
+
+    async bootstrap() {
+        try {
+            await this.ensureSession(true);
+            await this.discoverDevices(true);
+            await this.ensureEventCodeCache();
+            await this.setStateAsync('info.connection', this.deviceContexts.size > 0, true);
+        } catch (error) {
+            this.log.error(`Adapter startup failed: ${error?.message || String(error)}`);
+            await this.setStateAsync('info.connection', false, true);
+        }
     }
 
     async ensureBaseObjects() {
@@ -118,6 +196,64 @@ class AnthbotGenieAdapter extends AdapterBase {
             },
             native: {},
         });
+
+        await this.extendObjectAsync('diagnostics', { type: 'channel', common: { name: t('Diagnostics') }, native: {} });
+        await this.extendObjectAsync('diagnostics.admin', { type: 'channel', common: { name: t('Admin diagnostics') }, native: {} });
+        const adminStates = /** @type {Record<string, any>} */ ({
+            device: { type: 'string', role: 'text', def: '' },
+            mqtt: { type: 'string', role: 'text', def: 'unknown' },
+            robotFix: { type: 'string', role: 'text', def: 'unknown' },
+            robotRawStatus: { type: 'string', role: 'text', def: '' },
+            robotSatellites: { type: 'string', role: 'text', def: this.isGermanAdmin() ? 'nicht übertragen' : 'not transmitted' },
+            baseState: { type: 'string', role: 'text', def: 'unknown' },
+            baseSatellites: { type: 'string', role: 'text', def: this.isGermanAdmin() ? 'nicht übertragen' : 'not transmitted' },
+            antennaMoved: { type: 'boolean', role: 'indicator', def: false },
+            assessment: { type: 'string', role: 'text', def: 'unknown' },
+            lastUpdate: { type: 'string', role: 'date', def: '' },
+            httpPolling: { type: 'string', role: 'text', def: 'waiting for MQTT' },
+            httpBackoffUntil: { type: 'string', role: 'date', def: '' },
+            skyplotHtml: { type: 'string', role: 'html', def: '' },
+        });
+        for (const [id, common] of Object.entries(adminStates)) {
+            await this.extendObjectAsync(`diagnostics.admin.${id}`, {
+                type: 'state', common: { name: id, read: true, write: false, ...common }, native: {},
+            });
+        }
+    }
+
+    async onMessage(obj) {
+        if (!obj || !obj.callback) return;
+        if (obj.command !== 'getRtkSkyplot') return;
+
+        this.log.debug(`RTK sky plot requested by ${obj.from || 'Admin'}.`);
+        try {
+            const context = this.deviceContexts.values().next().value;
+            const satellites = context?.rtkSatelliteInfo?.satellites || [];
+            const svg = renderRtkSkyplot(satellites, {
+                emptyText: this.isGermanAdmin() ? 'Keine Satellitendaten verfügbar' : 'No satellite data available',
+            });
+            const png = await sharp(Buffer.from(svg, 'utf8'), { density: 144 })
+                .png()
+                .toBuffer();
+            const dataUrl = `data:image/png;base64,${png.toString('base64')}`;
+            const title = this.isGermanAdmin() ? 'RTK-Satellitenkarte' : 'RTK satellite map';
+            const summary = this.isGermanAdmin()
+                ? `${satellites.length} Satelliten der RTK-Basis`
+                : `${satellites.length} RTK base satellites`;
+            const html = `<div style="width:100%;min-height:420px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;overflow:hidden"><div style="font-size:18px;margin:0 0 8px 0">${title}</div><img src="${dataUrl}" alt="${title}" style="display:block;width:100%;max-width:520px;height:auto;object-fit:contain"/><div style="margin-top:6px;font-size:13px;opacity:.75">${summary}</div></div>`;
+            this.log.debug(`RTK sky plot delivered to Admin (${satellites.length} satellites, ${png.length} bytes PNG, HTML response).`);
+            this.sendTo(obj.from, obj.command, html, obj.callback);
+        } catch (error) {
+            const nested = error instanceof AggregateError && Array.isArray(error.errors)
+                ? error.errors.map(item => item?.message || String(item)).filter(Boolean).join(' | ')
+                : '';
+            const detail = nested || error?.cause?.message || error?.message || String(error);
+            const message = this.isGermanAdmin()
+                ? `Satellitenkarte konnte nicht erzeugt werden: ${detail}`
+                : `Satellite map could not be generated: ${detail}`;
+            this.log.warn(`RTK sky plot request failed: ${detail}`);
+            this.sendTo(obj.from, obj.command, `<div style="padding:16px;border:1px solid #c66;border-radius:4px">${message}</div>`, obj.callback);
+        }
     }
 
     onUnload(callback) {
@@ -127,6 +263,9 @@ class AnthbotGenieAdapter extends AdapterBase {
                 this.clearTimeout(this.pollTimer);
                 this.pollTimer = null;
             }
+            for (const context of this.deviceContexts.values()) {
+                context.mqttClient?.stop().catch(() => {});
+            }
             callback();
         } catch {
             callback();
@@ -134,22 +273,41 @@ class AnthbotGenieAdapter extends AdapterBase {
     }
 
     schedulePoll() {
-        if (this.unloaded) {
-            return;
-        }
+        if (this.unloaded) return;
         if (this.pollTimer) {
             this.clearTimeout(this.pollTimer);
+            this.pollTimer = null;
         }
-        const intervalSeconds = normalizePollIntervalSeconds(this.anthbotConfig.pollInterval);
+
+        const contexts = Array.from(this.deviceContexts.values());
+        const mqttConnected = this.anthbotConfig.mqttEnabled !== false &&
+            contexts.length > 0 && contexts.every(context => context.mqttClient?.connected);
+        if (mqttConnected) {
+            this.log.debug('HTTP shadow polling disabled while MQTT is connected.');
+            this.setStateAsync('diagnostics.admin.httpPolling', { val: this.localizeAdminValue('disabled while MQTT connected'), ack: true });
+            return;
+        }
+
+        const polling = resolvePollingInterval({ contexts, config: this.anthbotConfig });
+        let intervalSeconds = polling.seconds;
+        let reason = polling.reason;
+
+        const backoffMs = Math.max(0, this.httpBackoffUntil - Date.now());
+        if (backoffMs > 0) {
+            intervalSeconds = Math.max(intervalSeconds, Math.ceil(backoffMs / 1000));
+            reason = `rate-limit-backoff/${reason}`;
+        }
+
+        this.log.debug(`Next poll in ${intervalSeconds}s (${reason}).`);
+        this.setStateAsync('diagnostics.admin.httpPolling', { val: `${intervalSeconds}s (${reason})`, ack: true });
+        this.setStateAsync('diagnostics.admin.httpBackoffUntil', {
+            val: this.httpBackoffUntil ? new Date(this.httpBackoffUntil).toISOString() : '', ack: true,
+        });
+
         this.pollTimer = this.setTimeout(async () => {
             this.pollTimer = null;
-            try {
-                await this.refreshAll();
-            } finally {
-                if (!this.unloaded) {
-                    this.schedulePoll();
-                }
-            }
+            try { await this.refreshAll(); }
+            finally { if (!this.unloaded) this.schedulePoll(); }
         }, intervalSeconds * 1000);
     }
 
@@ -178,7 +336,14 @@ class AnthbotGenieAdapter extends AdapterBase {
                     await this.refreshDevice(context);
                     successful += 1;
                 } catch (error) {
-                    this.log.warn(`Refresh failed for ${context.device.serialNumber}: ${error.message}`);
+                    if (this.isRateLimitError(error)) {
+                        this.httpRateLimitCount += 1;
+                        const minutes = Math.min(120, 15 * (2 ** Math.min(3, this.httpRateLimitCount - 1)));
+                        this.httpBackoffUntil = Date.now() + minutes * 60 * 1000;
+                        this.log.warn(`Anthbot cloud rate limit (429) for ${context.device.serialNumber}; HTTP shadow polling paused for ${minutes} minutes.`);
+                    } else {
+                        this.log.warn(`Refresh failed for ${context.device.serialNumber}: ${error?.stack || error?.message || String(error)}`);
+                    }
                 }
             }
         } catch (error) {
@@ -320,6 +485,9 @@ class AnthbotGenieAdapter extends AdapterBase {
         for (const device of devices) {
             const region = await this.resolveDeviceRegion(device);
             const existing = this.deviceContexts.get(device.serialNumber);
+            if (existing?.mqttClient) {
+                await existing.mqttClient.stop();
+            }
             const objectRoot = deviceObjectIdFromSerial(device.serialNumber, this.FORBIDDEN_CHARS);
             const context = {
                 device,
@@ -330,14 +498,53 @@ class AnthbotGenieAdapter extends AdapterBase {
                     : null,
                 iotCredentials: region.iotCredentials,
                 areaDefinition: existing?.areaDefinition || {},
+                mapData: existing?.mapData || {},
                 lastAreaTime: existing?.lastAreaTime || null,
+                lastMapSignature: existing?.lastMapSignature || null,
+                rtkSatelliteInfo: existing?.rtkSatelliteInfo || null,
+                lastRtkSatelliteKey: existing?.lastRtkSatelliteKey || null,
+                rtkSatelliteRefreshAt: existing?.rtkSatelliteRefreshAt || 0,
                 lastReported: existing?.lastReported || {},
                 lastService: existing?.lastService || {},
+                pollingCategory: existing?.pollingCategory || null,
+                pollingCategorySince: existing?.pollingCategorySince || Date.now(),
+                lastMapSvg: existing?.lastMapSvg || '',
+                dockPose: existing?.dockPose || null,
+                mapDebug: Boolean(existing?.mapDebug),
+                mapLayers: existing?.mapLayers || {
+                    showManualZones: false,
+                    showAutoZones: false,
+                    showNoGoZones: true,
+                    showPaths: true,
+                    showCurrentTrack: true,
+                    showLegend: false,
+                },
+                pathHistory: existing?.pathHistory || { taskId: null, packetPathId: null, points: [] },
+                mapExport: existing?.mapExport || {},
+                mapExportDirectory: this.getMapExportDirectory(device.serialNumber),
+                zoneSelection: existing?.zoneSelection || { selected: '', lastResult: {} },
+                mqttClient: null,
+                mqttStatus: existing?.mqttStatus || {
+                    state: 'disabled',
+                    connected: false,
+                    reconnectCount: 0,
+                    lastMessageAt: null,
+                    lastError: '',
+                },
             };
             this.deviceContexts.set(device.serialNumber, context);
             this.deviceContextsByObjectRoot.set(objectRoot, context);
             await this.ensureDeviceObjects(context);
+            await this.ensureDeviceMqtt(context);
         }
+    }
+
+    getMapExportDirectory(serialNumber) {
+        const instanceDataDirectory =
+            typeof /** @type {any} */ (this).getAbsoluteInstanceDataDir === 'function'
+                ? /** @type {any} */ (this).getAbsoluteInstanceDataDir()
+                : path.join(__dirname, 'data');
+        return path.join(instanceDataDirectory, 'map-exports', String(serialNumber));
     }
 
     async resolveDeviceRegion(device) {
@@ -402,6 +609,7 @@ class AnthbotGenieAdapter extends AdapterBase {
                 continue;
             }
             const context = this.deviceContexts.get(serial);
+            await context?.mqttClient?.stop().catch(() => {});
             this.deviceContexts.delete(serial);
             if (context?.objectRoot) {
                 this.deviceContextsByObjectRoot.delete(context.objectRoot);
@@ -450,36 +658,62 @@ class AnthbotGenieAdapter extends AdapterBase {
     }
 
     async refreshDevice(context) {
+        if (context.mqttClient?.connected) {
+            return;
+        }
+        if (this.httpBackoffUntil > Date.now()) {
+            return;
+        }
         await this.ensureDeviceIotCredentials(context);
         if (!context.shadowClient) {
             throw new AnthbotGenieError(
                 `Skipping ${context.device.serialNumber}: temporary IoT credentials are unavailable for shadow access`,
             );
         }
-        const propertyState = await context.shadowClient.getShadowReportedState();
-        let serviceState = {};
-        try {
-            serviceState = await context.shadowClient.getServiceReportedState();
-        } catch (error) {
-            this.log.debug(`Service shadow failed for ${context.device.serialNumber}: ${error.message}`);
-        }
 
-        const areaTime = typeof propertyState.area_time === 'string' ? propertyState.area_time : null;
+        const propertyState = await context.shadowClient.getShadowReportedState();
+        await this.applyPropertyState(context, propertyState, 'http');
+        this.httpRateLimitCount = 0;
+        this.httpBackoffUntil = 0;
+    }
+
+    async applyPropertyState(context, propertyState, source) {
+        const mergedPropertyState = {
+            ...(context.lastReported || {}),
+            ...(propertyState || {}),
+        };
+        const areaTime = mergedPropertyState.area_time ?? null;
+        const mapObject = mergedPropertyState.map && typeof mergedPropertyState.map === 'object' ? mergedPropertyState.map : {};
+        const mapSignature = JSON.stringify({
+            areaTime,
+            mapTime: mergedPropertyState.map_time ?? mapObject.time ?? null,
+            mapId: mergedPropertyState.map_tar_time ?? mapObject.map_id ?? null,
+            areaId: mapObject.area_id ?? null,
+            planId: mapObject.plan_id ?? null,
+            state: mapObject.state ?? null,
+        });
         const shouldRefreshArea =
             !context.areaDefinition ||
             Object.keys(context.areaDefinition).length === 0 ||
-            (areaTime && areaTime !== context.lastAreaTime);
+            !context.mapData ||
+            Object.keys(context.mapData).length === 0 ||
+            mapSignature !== context.lastMapSignature;
+
         if (shouldRefreshArea) {
             try {
-                context.areaDefinition = await this.cloudClient.getDeviceAreaDefinition(context.device.serialNumber);
+                const map = await this.cloudClient.getDeviceMap(context.device.serialNumber);
+                context.areaDefinition = map.areaDefinition;
+                context.mapData = map.mapData;
                 context.lastAreaTime = areaTime;
+                context.lastMapSignature = mapSignature;
             } catch (error) {
                 if (isLikelyAuthenticationError(error)) {
                     await this.ensureSession(true);
-                    context.areaDefinition = await this.cloudClient.getDeviceAreaDefinition(
-                        context.device.serialNumber,
-                    );
+                    const map = await this.cloudClient.getDeviceMap(context.device.serialNumber);
+                    context.areaDefinition = map.areaDefinition;
+                    context.mapData = map.mapData;
                     context.lastAreaTime = areaTime;
+                    context.lastMapSignature = mapSignature;
                 } else {
                     this.log.debug(
                         `Area definition refresh failed for ${context.device.serialNumber}: ${error.message}`,
@@ -488,15 +722,180 @@ class AnthbotGenieAdapter extends AdapterBase {
             }
         }
 
-        context.lastReported = propertyState;
-        context.lastService = serviceState;
+        await this.refreshRtkSatelliteInfo(context, mergedPropertyState);
 
-        const merged = {
-            ...propertyState,
-            _service_reported: serviceState,
+        context.lastReported = mergedPropertyState;
+        context.lastPropertySource = source;
+        updatePollingCategory(context);
+
+        await this.updateStates(context, {
+            ...mergedPropertyState,
+            _service_reported: context.lastService || {},
             _area_definition: context.areaDefinition || {},
+            _rtk_satellite_info: context.rtkSatelliteInfo || null,
+        });
+
+    }
+
+    async applyServiceState(context, serviceState, source) {
+        context.lastService = {
+            ...(context.lastService || {}),
+            ...(serviceState || {}),
         };
-        await this.updateStates(context, merged);
+        context.lastServiceSource = source;
+
+        // The official app listens for area_time on generic shadow messages,
+        // not only on the named property shadow. Some map edits therefore
+        // arrive through the service shadow. Forward only the map freshness
+        // fields into the property processing path so zones/no-go areas reload.
+        const mapObject = serviceState?.map && typeof serviceState.map === 'object' ? serviceState.map : null;
+        const hasMapFreshnessHint = Boolean(
+            serviceState && (
+                serviceState.area_time != null ||
+                serviceState.map_time != null ||
+                serviceState.map_tar_time != null ||
+                mapObject?.time != null ||
+                mapObject?.map_id != null ||
+                mapObject?.area_id != null ||
+                mapObject?.plan_id != null ||
+                mapObject?.state != null
+            )
+        );
+        if (hasMapFreshnessHint) {
+            const propertyHint = {
+                ...(serviceState.area_time != null ? { area_time: serviceState.area_time } : {}),
+                ...(serviceState.map_time != null ? { map_time: serviceState.map_time } : {}),
+                ...(serviceState.map_tar_time != null ? { map_tar_time: serviceState.map_tar_time } : {}),
+                ...(mapObject ? { map: mapObject } : {}),
+            };
+            await this.applyPropertyState(context, propertyHint, `${source}-map-hint`);
+            return;
+        }
+
+        await this.updateStates(context, {
+            ...(context.lastReported || {}),
+            _service_reported: context.lastService,
+            _area_definition: context.areaDefinition || {},
+            _rtk_satellite_info: context.rtkSatelliteInfo || null,
+        });
+    }
+
+    async refreshRtkSatelliteInfo(context, propertyState) {
+        const rtkBase = propertyState?.rtk_base && typeof propertyState.rtk_base === 'object' ? propertyState.rtk_base : {};
+        const rtkId = rtkBase.rtk_id ?? null;
+        if (!rtkId) return;
+
+        const now = Date.now();
+        const explicitSatelliteTime = propertyState?.bt_satellite_time ?? null;
+        const key = `${rtkId}:${explicitSatelliteTime ?? ''}`;
+        const lastAttemptAt = Number(context.rtkSatelliteRefreshAt || 0);
+        const cooldownMs = 300000;
+        const due = now - lastAttemptAt >= cooldownMs;
+        const keyChanged = key !== context.lastRtkSatelliteKey;
+        const rtkIdChanged = String(rtkId) !== String(context.lastRtkSatelliteRtkId ?? '');
+
+        // Ignore the frequently changing generic RTK/base timestamps here. They caused
+        // several archive downloads per minute although the satellite file had not changed.
+        if (!rtkIdChanged && !keyChanged && !due) return;
+        if (context.rtkSatelliteRefreshPromise) return context.rtkSatelliteRefreshPromise;
+
+        context.lastRtkSatelliteKey = key;
+        context.lastRtkSatelliteRtkId = rtkId;
+        context.rtkSatelliteRefreshAt = now;
+
+        context.rtkSatelliteRefreshPromise = (async () => {
+            try {
+                if (context.shadowClient) {
+                    await context.shadowClient.publishServiceCommand({ cmd: 'req_rtk_base_info', data: {} });
+                    await new Promise(resolve => setTimeout(resolve, 1200));
+                }
+                const satelliteInfo = await this.cloudClient.getRtkSatelliteInfo(context.device.serialNumber, rtkId);
+                context.rtkSatelliteInfo = satelliteInfo;
+            } catch (error) {
+                const nested = error instanceof AggregateError && Array.isArray(error.errors)
+                    ? error.errors.map(item => item?.message || String(item)).filter(Boolean).join(' | ')
+                    : '';
+                const detail = nested || error?.cause?.message || error?.message || String(error);
+                const retryAt = new Date(context.rtkSatelliteRefreshAt + cooldownMs).toISOString();
+                this.log.debug(`RTK satellite refresh failed for ${context.device.serialNumber}: ${detail}; next retry not before ${retryAt}`);
+            } finally {
+                context.rtkSatelliteRefreshPromise = null;
+            }
+        })();
+
+        return context.rtkSatelliteRefreshPromise;
+    }
+
+    async ensureDeviceMqtt(context) {
+        if (this.anthbotConfig.mqttEnabled === false) {
+            if (context.mqttClient) {
+                await context.mqttClient.stop();
+                context.mqttClient = null;
+            }
+            context.mqttStatus = { state: 'disabled', connected: false, reconnectCount: 0, lastMessageAt: null, lastError: '' };
+            return;
+        }
+        if (context.mqttClient) {
+            return;
+        }
+
+        context.mqttClient = new AnthbotMqttShadowClient({
+            serialNumber: context.device.serialNumber,
+            credentialsProvider: async () => {
+                const credentials = await this.cloudClient.getDeviceIotCredentials(context.device.serialNumber);
+                context.iotCredentials = credentials;
+                context.region = {
+                    ...context.region,
+                    regionName: credentials.regionName || context.region.regionName,
+                    iotEndpoint: credentials.endpoint || context.region.iotEndpoint,
+                    iotCredentials: credentials,
+                };
+                context.shadowClient = this.buildShadowClient(context.device, context.region, credentials);
+                return credentials;
+            },
+            onPropertyState: async state => this.applyPropertyState(context, state, 'mqtt'),
+            onServiceState: async state => this.applyServiceState(context, state, 'mqtt'),
+            onStatus: async status => {
+                const wasConnected = Boolean(context.mqttStatus?.connected);
+                context.mqttStatus = status;
+                await this.updateMqttStatusStates(context);
+                if (wasConnected !== Boolean(status.connected)) {
+                    this.schedulePoll();
+                }
+            },
+            log: (level, message) => {
+                const logger = this.log[level] || this.log.debug;
+                logger.call(this.log, message);
+            },
+        });
+        context.mqttClient.start().catch(error => {
+            this.log.debug(`MQTT start failed for ${context.device.serialNumber}: ${error.message}`);
+        });
+    }
+
+    async updateMqttStatusStates(context) {
+        const root = context.objectRoot;
+        const status = context.mqttStatus || {};
+        await this.setStateAsync(`${root}.diagnostics.mqtt.connected`, {
+            val: Boolean(status.connected),
+            ack: true,
+        });
+        await this.setStateAsync(`${root}.diagnostics.mqtt.state`, {
+            val: String(status.state || ''),
+            ack: true,
+        });
+        await this.setStateAsync(`${root}.diagnostics.mqtt.lastMessage`, {
+            val: status.lastMessageAt || '',
+            ack: true,
+        });
+        await this.setStateAsync(`${root}.diagnostics.mqtt.lastError`, {
+            val: status.lastError || '',
+            ack: true,
+        });
+        await this.setStateAsync(`${root}.diagnostics.mqtt.reconnectCount`, {
+            val: Number(status.reconnectCount) || 0,
+            ack: true,
+        });
     }
 
     async ensureDeviceIotCredentials(context) {
@@ -551,6 +950,26 @@ class AnthbotGenieAdapter extends AdapterBase {
         for (const [suffix, value] of Object.entries(updates)) {
             await this.setStateAsync(`${root}.${suffix}`, { val: value, ack: true });
         }
+
+        if (context === this.deviceContexts.values().next().value) {
+            const shown = value => value === null || value === undefined || value === '' ? 'not transmitted' : String(value);
+            const summary = {
+                device: context.device.alias || context.device.serialNumber,
+                mqtt: this.localizeAdminValue(context.mqttClient?.connected ? 'connected' : String(context.mqttStatus?.state || 'disconnected')),
+                robotFix: this.localizeAdminValue(shown(updates['diagnostics.gnss.robot.fix'])),
+                robotRawStatus: this.localizeAdminValue(shown(updates['diagnostics.gnss.robot.rawStatus'])),
+                robotSatellites: this.localizeAdminValue(shown(updates['diagnostics.gnss.robot.satellites'])),
+                baseState: this.localizeAdminValue(shown(updates['diagnostics.rtk.baseState'])),
+                baseSatellites: this.localizeAdminValue(shown(updates['diagnostics.gnss.base.satellites'])),
+                antennaMoved: Boolean(updates['diagnostics.rtk.antennaMoved']),
+                assessment: this.localizeAssessment(shown(updates['diagnostics.gnss.assessment.message'])),
+                lastUpdate: shown(updates['diagnostics.gnss.lastUpdate']),
+                skyplotHtml: buildRtkSkyplotHtml(context.rtkSatelliteInfo?.satellites || [], { german: this.isGermanAdmin() }),
+            };
+            for (const [id, value] of Object.entries(summary)) {
+                await this.setStateAsync(`diagnostics.admin.${id}`, { val: value, ack: true });
+            }
+        }
     }
 
     async onStateChange(id, state) {
@@ -571,6 +990,12 @@ class AnthbotGenieAdapter extends AdapterBase {
             return;
         }
 
+        const localOnly =
+            (section === 'controls' &&
+                (command.startsWith('map.') || command === 'zoneSelection.selected')) ||
+            (section === 'commands' &&
+                ['map.clearTrack', 'map.saveSvg', 'map.createPng'].includes(command));
+
         let commandError = null;
         try {
             if (section === 'commands') {
@@ -582,9 +1007,25 @@ class AnthbotGenieAdapter extends AdapterBase {
             }
         } catch (error) {
             commandError = error;
+            if (section === 'commands' && command === 'mowing.startSelectedZone') {
+                context.zoneSelection = context.zoneSelection || {};
+                context.zoneSelection.lastResult = {
+                    ok: false,
+                    message: error?.message || String(error),
+                    time: new Date().toISOString(),
+                };
+            }
         } finally {
             try {
-                await this.refreshDevice(context);
+                if (localOnly) {
+                    await this.updateStates(context, {
+                        ...(context.lastReported || {}),
+                        _service_reported: context.lastService || {},
+                        _area_definition: context.areaDefinition || {},
+                    });
+                } else {
+                    await this.refreshDevice(context);
+                }
             } catch (refreshError) {
                 this.log.warn(`Post-command refresh failed for ${id}: ${refreshError.message}`);
             }
@@ -617,7 +1058,7 @@ class AnthbotGenieAdapter extends AdapterBase {
     }
 
     getControlFallbackValue(context, control) {
-        return getControlFallbackValue(context.lastReported || {}, control);
+        return getControlFallbackValue(context.lastReported || {}, control, context);
     }
 
     async handleCommandState(context, command, value) {
@@ -640,8 +1081,22 @@ class AnthbotGenieAdapter extends AdapterBase {
             return;
         }
 
-        await this.ensureDeviceIotCredentials(context);
+        const localOnly = control.startsWith('map.') || control === 'zoneSelection.selected';
+        if (!localOnly) {
+            await this.ensureDeviceIotCredentials(context);
+        }
+
         await this.executeControl(context, control, value);
+
+        if (localOnly) {
+            await this.updateStates(context, {
+                ...context.lastReported,
+                _service_reported: context.lastService || {},
+                _area_definition: context.areaDefinition || {},
+            });
+            return;
+        }
+
         await context.shadowClient.requestAllProperties();
         await this.delay(1000);
     }
@@ -667,6 +1122,11 @@ class AnthbotGenieAdapter extends AdapterBase {
 
     async executeControl(context, control, value) {
         await executeControl({ context, control, value });
+    }
+
+    isRateLimitError(error) {
+        const text = `${error?.message || ''} ${error?.stack || ''}`;
+        return error?.status === 429 || error?.response?.status === 429 || /(?:\b429\b|TOO_MANY_REQUESTS)/i.test(text);
     }
 
     delay(ms) {
