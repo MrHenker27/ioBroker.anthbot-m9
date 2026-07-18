@@ -17,3 +17,14 @@ describe('RTK sky plot renderer', () => {
         assert.match(empty, /Keine Satellitendaten verfügbar/);
     });
 });
+
+describe('RTK skyplot deterministic ordering', () => {
+    it('renders identical SVG for the same satellites in a different input order', () => {
+        const satellites = [
+            { satelliteId: 22, azimuth: 210, elevation: 45, signalStrength: 38 },
+            { satelliteId: 3, azimuth: 15, elevation: 60, signalStrength: 29 },
+        ];
+
+        assert.equal(renderRtkSkyplot(satellites), renderRtkSkyplot([...satellites].reverse()));
+    });
+});

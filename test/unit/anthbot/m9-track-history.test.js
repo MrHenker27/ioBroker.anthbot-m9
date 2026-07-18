@@ -46,6 +46,22 @@ test('keeps all packets of the same mowing task even when packet ids change', ()
     );
 });
 
+
+test('ignores an identical curpath packet received repeatedly', () => {
+    const context = {};
+    const data = {
+        mode: { value: 'regionmowing' },
+        mow_task: { mow_region: { path_id: 1234, state: 1 } },
+    };
+    const repeatedPacket = packet('packet-a', 0);
+
+    updateTrackHistory(context, repeatedPacket, data);
+    updateTrackHistory(context, repeatedPacket, data);
+    updateTrackHistory(context, repeatedPacket, data);
+
+    assert.deepEqual(context.pathHistory.points.map(point => point.x), [0, 10]);
+});
+
 test('keeps the task track through standby and resets only for a new task id', () => {
     const context = {};
     const firstTask = {
@@ -83,6 +99,7 @@ test('clear command removes task id and all points', () => {
     assert.deepEqual(context.pathHistory, {
         taskId: null,
         packetPathId: null,
+        lastPacketSignature: null,
         points: [],
     });
 });

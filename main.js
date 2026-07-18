@@ -2,6 +2,7 @@
 
 /** @type {typeof import('@iobroker/adapter-core')} */
 const utils = require('@iobroker/adapter-core');
+const fs = require('node:fs/promises');
 const path = require('node:path');
 const axios = /** @type {import('axios').AxiosStatic} */ (/** @type {unknown} */ (require('axios')));
 const sharp = require('sharp');
@@ -76,6 +77,7 @@ class AnthbotGenieAdapter extends AdapterBase {
         this.deviceContextsByObjectRoot = new Map();
         this.eventCodeCache = null;
         this.eventCodeCacheInitialized = false;
+        this.stateValueCache = new Map();
         this.pollTimer = null;
         this.refreshInFlight = null;
         this.unloaded = false;
@@ -357,13 +359,26 @@ class AnthbotGenieAdapter extends AdapterBase {
         await this.setStateAsync('info.connection', successful > 0, true);
     }
 
+    getEventCodeCacheFilePath() {
+        return path.join(
+            utils.getAbsoluteDefaultDataDir(),
+            `${this.name}.${this.instance}`,
+            'event-code-cache.json',
+        );
+    }
+
     async ensureEventCodeCache() {
         if (this.eventCodeCacheInitialized) {
             return;
         }
         this.eventCodeCacheInitialized = true;
 
-        const cached = await this.readStoredEventCodeCache();
+        let cached = await this.readEventCodeCacheFile();
+        if (!cached) {
+            cached = await this.migrateLegacyEventCodeState();
+        } else {
+            await this.removeLegacyEventCodeStates();
+        }
         this.eventCodeCache = cached;
 
         let cloudVersion = null;
@@ -372,7 +387,6 @@ class AnthbotGenieAdapter extends AdapterBase {
         } catch (error) {
             if (cached) {
                 this.log.warn(`Failed to fetch event code version, using cached translations: ${error.message}`);
-                await this.writeEventCodeCacheToDevices(cached);
             } else {
                 this.log.warn(
                     `Failed to fetch event code version and no cached translations are available: ${error.message}`,
@@ -383,7 +397,6 @@ class AnthbotGenieAdapter extends AdapterBase {
 
         if (cached && asInteger(cached.version) === cloudVersion) {
             this.eventCodeCache = cached;
-            await this.writeEventCodeCacheToDevices(cached);
             return;
         }
 
@@ -394,12 +407,11 @@ class AnthbotGenieAdapter extends AdapterBase {
                 fetchedAt: new Date().toISOString(),
                 payload,
             };
-            await this.writeEventCodeCacheToDevices(this.eventCodeCache);
+            await this.writeEventCodeCacheFile(this.eventCodeCache);
         } catch (error) {
             if (cached) {
                 this.log.warn(`Failed to fetch event code translations, using cached translations: ${error.message}`);
                 this.eventCodeCache = cached;
-                await this.writeEventCodeCacheToDevices(cached);
             } else {
                 this.log.warn(
                     `Failed to fetch event code translations and no cached translations are available: ${error.message}`,
@@ -408,26 +420,73 @@ class AnthbotGenieAdapter extends AdapterBase {
         }
     }
 
-    async readStoredEventCodeCache() {
-        for (const context of this.deviceContexts.values()) {
-            const root = context.objectRoot;
-            try {
-                const state = await this.getStateAsync(`${root}.raw.shadow.event-code`);
-                const raw = typeof state?.val === 'string' ? state.val : '';
-                if (!raw) {
-                    continue;
-                }
-                const parsed = JSON.parse(raw);
-                if (this.isValidEventCodeCache(parsed)) {
-                    return parsed;
-                }
-            } catch (error) {
-                this.log.debug(
-                    `Stored event code cache could not be read for ${context.device.serialNumber}: ${error.message}`,
-                );
+    async readEventCodeCacheFile() {
+        const cacheFile = this.getEventCodeCacheFilePath();
+        try {
+            const raw = await fs.readFile(cacheFile, 'utf8');
+            const parsed = JSON.parse(raw);
+            if (this.isValidEventCodeCache(parsed)) {
+                return parsed;
+            }
+            this.log.warn(`Ignoring invalid event code cache file: ${cacheFile}`);
+        } catch (error) {
+            if (error?.code !== 'ENOENT') {
+                this.log.warn(`Event code cache file could not be read: ${error.message}`);
             }
         }
         return null;
+    }
+
+    async writeEventCodeCacheFile(cache) {
+        if (!this.isValidEventCodeCache(cache)) {
+            return;
+        }
+
+        const cacheFile = this.getEventCodeCacheFilePath();
+        const cacheDirectory = path.dirname(cacheFile);
+        const temporaryFile = `${cacheFile}.tmp`;
+        await fs.mkdir(cacheDirectory, { recursive: true });
+        await fs.writeFile(temporaryFile, `${JSON.stringify(cache)}\n`, 'utf8');
+        await fs.rename(temporaryFile, cacheFile);
+    }
+
+    async migrateLegacyEventCodeState() {
+        let migratedCache = null;
+
+        for (const context of this.deviceContexts.values()) {
+            const stateId = `${context.objectRoot}.raw.shadow.event-code`;
+            try {
+                const state = await this.getStateAsync(stateId);
+                const raw = typeof state?.val === 'string' ? state.val : '';
+                if (!migratedCache && raw) {
+                    const parsed = JSON.parse(raw);
+                    if (this.isValidEventCodeCache(parsed)) {
+                        migratedCache = parsed;
+                    }
+                }
+            } catch (error) {
+                this.log.debug(`Legacy event code state could not be read for ${context.device.serialNumber}: ${error.message}`);
+            }
+        }
+
+        if (migratedCache) {
+            await this.writeEventCodeCacheFile(migratedCache);
+            this.log.info('Migrated event code translations from ioBroker state storage to the local cache file.');
+        }
+
+        await this.removeLegacyEventCodeStates();
+        return migratedCache;
+    }
+
+    async removeLegacyEventCodeStates() {
+        for (const context of this.deviceContexts.values()) {
+            const stateId = `${context.objectRoot}.raw.shadow.event-code`;
+            try {
+                await this.delObjectAsync(stateId);
+            } catch (error) {
+                this.log.debug(`Legacy event code state could not be removed for ${context.device.serialNumber}: ${error.message}`);
+            }
+        }
     }
 
     isValidEventCodeCache(cache) {
@@ -439,16 +498,6 @@ class AnthbotGenieAdapter extends AdapterBase {
             typeof cache.payload === 'object' &&
             !Array.isArray(cache.payload),
         );
-    }
-
-    async writeEventCodeCacheToDevices(cache) {
-        if (!cache) {
-            return;
-        }
-        const value = JSON.stringify(cache);
-        for (const context of this.deviceContexts.values()) {
-            await this.setStateAsync(`${context.objectRoot}.raw.shadow.event-code`, { val: value, ack: true });
-        }
     }
 
     async ensureSession(force = false) {
@@ -876,26 +925,11 @@ class AnthbotGenieAdapter extends AdapterBase {
     async updateMqttStatusStates(context) {
         const root = context.objectRoot;
         const status = context.mqttStatus || {};
-        await this.setStateAsync(`${root}.diagnostics.mqtt.connected`, {
-            val: Boolean(status.connected),
-            ack: true,
-        });
-        await this.setStateAsync(`${root}.diagnostics.mqtt.state`, {
-            val: String(status.state || ''),
-            ack: true,
-        });
-        await this.setStateAsync(`${root}.diagnostics.mqtt.lastMessage`, {
-            val: status.lastMessageAt || '',
-            ack: true,
-        });
-        await this.setStateAsync(`${root}.diagnostics.mqtt.lastError`, {
-            val: status.lastError || '',
-            ack: true,
-        });
-        await this.setStateAsync(`${root}.diagnostics.mqtt.reconnectCount`, {
-            val: Number(status.reconnectCount) || 0,
-            ack: true,
-        });
+        await this.setStateIfChanged(`${root}.diagnostics.mqtt.connected`, Boolean(status.connected));
+        await this.setStateIfChanged(`${root}.diagnostics.mqtt.state`, String(status.state || ''));
+        await this.setStateIfChanged(`${root}.diagnostics.mqtt.lastMessage`, status.lastMessageAt || '');
+        await this.setStateIfChanged(`${root}.diagnostics.mqtt.lastError`, status.lastError || '');
+        await this.setStateIfChanged(`${root}.diagnostics.mqtt.reconnectCount`, Number(status.reconnectCount) || 0);
     }
 
     async ensureDeviceIotCredentials(context) {
@@ -937,6 +971,24 @@ class AnthbotGenieAdapter extends AdapterBase {
         });
     }
 
+    async setStateIfChanged(id, value) {
+        if (this.stateValueCache.has(id) && Object.is(this.stateValueCache.get(id), value)) {
+            return false;
+        }
+
+        if (!this.stateValueCache.has(id)) {
+            const current = await this.getStateAsync(id);
+            if (current && Object.is(current.val, value)) {
+                this.stateValueCache.set(id, value);
+                return false;
+            }
+        }
+
+        await this.setStateAsync(id, { val: value, ack: true });
+        this.stateValueCache.set(id, value);
+        return true;
+    }
+
     async updateStates(context, data) {
         const root = context.objectRoot;
         const updates = buildDeviceStateUpdates({
@@ -948,7 +1000,7 @@ class AnthbotGenieAdapter extends AdapterBase {
         });
 
         for (const [suffix, value] of Object.entries(updates)) {
-            await this.setStateAsync(`${root}.${suffix}`, { val: value, ack: true });
+            await this.setStateIfChanged(`${root}.${suffix}`, value);
         }
 
         if (context === this.deviceContexts.values().next().value) {
@@ -967,7 +1019,7 @@ class AnthbotGenieAdapter extends AdapterBase {
                 skyplotHtml: buildRtkSkyplotHtml(context.rtkSatelliteInfo?.satellites || [], { german: this.isGermanAdmin() }),
             };
             for (const [id, value] of Object.entries(summary)) {
-                await this.setStateAsync(`diagnostics.admin.${id}`, { val: value, ack: true });
+                await this.setStateIfChanged(`diagnostics.admin.${id}`, value);
             }
         }
     }

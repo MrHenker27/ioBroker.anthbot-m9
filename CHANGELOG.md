@@ -1,4 +1,28 @@
-## 0.3.0 (2026-07-17)
+## 0.3.3 (2026-07-18)
+
+## 0.3.7 (2026-07-18)
+
+- Version auf 0.3.7 angehoben; keine Quellcodeänderung.
+
+- Stabilize RTK satellite ordering so unchanged satellite data no longer rewrites the satellite list, SVG skyplot and Admin skyplot HTML.
+- Serialize the raw property shadow with deterministic object-key ordering.
+- Prevent semantically unchanged diagnostic JSON and skyplot states from growing `states.jsonl` when cloud payload order changes.
+
+## 0.3.2 (2026-07-18)
+
+- Prevent unchanged adapter states from being appended repeatedly to the JSONL state database.
+- Skip identical repeated `curpath` packets so the mowing track no longer duplicates itself on every refresh.
+- Apply change detection to large map, SVG, area-definition, GNSS skyplot and Admin diagnostic states.
+- Keep live map and path updates when their actual content changes.
+
+## 0.3.1 (2026-07-18)
+
+- Stop storing the roughly 850 KB Anthbot event-code translation table in `states.jsonl`.
+- Store event-code translations in an atomic local cache file under the ioBroker data directory.
+- Migrate an existing `raw.shadow.event-code` state once and remove the obsolete state object afterwards.
+- Prevent every device refresh from rewriting the complete translation table into the state database.
+
+## 0.2.19 (2026-07-17)
 
 - RTK skyplot is now rendered directly from `diagnostics.admin.skyplotHtml` using the supported JSONConfig `state` component with `control: html`.
 - Removed the non-triggering `textSendTo` path from the Admin layout.
