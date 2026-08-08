@@ -27,6 +27,9 @@ const { executeCommand, executeConsumableCommand, executeControl } = require('./
 const { resolvePollingInterval, updatePollingCategory } = require('./lib/adapter/polling');
 const { renderRtkSkyplot } = require('./lib/anthbot/rtk-skyplot');
 const { buildRtkSkyplotHtml } = require('./lib/anthbot/rtk-skyplot-html');
+const { generalMowerStatus, rawModeStatus } = require('./lib/anthbot/payload');
+const { selectMultiMapEntry } = require('./lib/anthbot/multi-map');
+const { findHistoryPathUrl } = require('./lib/anthbot/history-path');
 
 /**
  * @typedef {object} AnthbotAdapterConfig
@@ -56,6 +59,36 @@ const { I18n } = utils;
 
 function t(en) {
     return I18n.getTranslatedObject(en);
+}
+
+function sanitizeHistoryDebugValue(value, depth = 0) {
+    if (value == null || typeof value === 'number' || typeof value === 'boolean') return value;
+    if (typeof value === 'string') {
+        let text = value;
+        if (/^https?:\/\//i.test(text)) {
+            try {
+                const parsed = new URL(text);
+                text = `${parsed.origin}${parsed.pathname}`;
+            } catch {
+                // Keep the original text if URL parsing fails.
+            }
+        }
+        return text.length > 320 ? `${text.slice(0, 320)}…(${text.length} chars)` : text;
+    }
+    if (Buffer.isBuffer(value)) return `<Buffer ${value.length} bytes>`;
+    if (Array.isArray(value)) {
+        if (depth >= 2) return `<Array ${value.length} items>`;
+        return value.slice(0, 8).map(item => sanitizeHistoryDebugValue(item, depth + 1));
+    }
+    if (typeof value === 'object') {
+        if (depth >= 2) return '<Object>';
+        const result = {};
+        for (const [key, nested] of Object.entries(value).slice(0, 30)) {
+            result[key] = sanitizeHistoryDebugValue(nested, depth + 1);
+        }
+        return result;
+    }
+    return String(value);
 }
 
 class AnthbotGenieAdapter extends AdapterBase {
@@ -141,6 +174,7 @@ class AnthbotGenieAdapter extends AdapterBase {
 
     async onReady() {
         this.unloaded = false;
+        this.log.debug('Anthbot M9 build marker: 0.3.8-final-20260808-r5');
         const config = this.anthbotConfig;
         this.http = axios.create({
             timeout: 15000,
@@ -550,6 +584,14 @@ class AnthbotGenieAdapter extends AdapterBase {
                 mapData: existing?.mapData || {},
                 lastAreaTime: existing?.lastAreaTime || null,
                 lastMapSignature: existing?.lastMapSignature || null,
+                multiMapInfo: existing?.multiMapInfo || null,
+                historyPath: existing?.historyPath || null,
+                lastHistoryPathTime: existing?.lastHistoryPathTime || null,
+                lastHistoryPathRequestAt: existing?.lastHistoryPathRequestAt || 0,
+                lastMultiMapMd5: existing?.lastMultiMapMd5 || null,
+                multiMapRefreshPromise: null,
+                multiMapRefreshMd5: null,
+                historyPathRefreshPromise: null,
                 rtkSatelliteInfo: existing?.rtkSatelliteInfo || null,
                 lastRtkSatelliteKey: existing?.lastRtkSatelliteKey || null,
                 rtkSatelliteRefreshAt: existing?.rtkSatelliteRefreshAt || 0,
@@ -733,6 +775,7 @@ class AnthbotGenieAdapter extends AdapterBase {
         };
         const areaTime = mergedPropertyState.area_time ?? null;
         const mapObject = mergedPropertyState.map && typeof mergedPropertyState.map === 'object' ? mergedPropertyState.map : {};
+        const selectedMultiMap = selectMultiMapEntry(mergedPropertyState);
         const mapSignature = JSON.stringify({
             areaTime,
             mapTime: mergedPropertyState.map_time ?? mapObject.time ?? null,
@@ -740,6 +783,9 @@ class AnthbotGenieAdapter extends AdapterBase {
             areaId: mapObject.area_id ?? null,
             planId: mapObject.plan_id ?? null,
             state: mapObject.state ?? null,
+            multiMapFile: selectedMultiMap.fileName,
+            multiMapId: selectedMultiMap.mapId,
+            multiMapMd5: selectedMultiMap.md5,
         });
         const shouldRefreshArea =
             !context.areaDefinition ||
@@ -753,6 +799,7 @@ class AnthbotGenieAdapter extends AdapterBase {
                 const map = await this.cloudClient.getDeviceMap(context.device.serialNumber);
                 context.areaDefinition = map.areaDefinition;
                 context.mapData = map.mapData;
+                await this.refreshMultiMap(context, selectedMultiMap);
                 context.lastAreaTime = areaTime;
                 context.lastMapSignature = mapSignature;
             } catch (error) {
@@ -761,6 +808,7 @@ class AnthbotGenieAdapter extends AdapterBase {
                     const map = await this.cloudClient.getDeviceMap(context.device.serialNumber);
                     context.areaDefinition = map.areaDefinition;
                     context.mapData = map.mapData;
+                    await this.refreshMultiMap(context, selectedMultiMap);
                     context.lastAreaTime = areaTime;
                     context.lastMapSignature = mapSignature;
                 } else {
@@ -771,6 +819,7 @@ class AnthbotGenieAdapter extends AdapterBase {
             }
         }
 
+        await this.refreshHistoryPath(context, mergedPropertyState);
         await this.refreshRtkSatelliteInfo(context, mergedPropertyState);
 
         context.lastReported = mergedPropertyState;
@@ -793,6 +842,15 @@ class AnthbotGenieAdapter extends AdapterBase {
         };
         context.lastServiceSource = source;
 
+        // Service-shadow updates can carry the current mowing mode independently
+        // from the property shadow. Feed the merged live state into the history
+        // path handler as well, so an active M9 can trigger req_all_path even
+        // when no matching property update arrives at the same time.
+        await this.refreshHistoryPath(context, {
+            ...(context.lastReported || {}),
+            ...(context.lastService || {}),
+        });
+
         // The official app listens for area_time on generic shadow messages,
         // not only on the named property shadow. Some map edits therefore
         // arrive through the service shadow. Forward only the map freshness
@@ -803,6 +861,7 @@ class AnthbotGenieAdapter extends AdapterBase {
                 serviceState.area_time != null ||
                 serviceState.map_time != null ||
                 serviceState.map_tar_time != null ||
+                serviceState.multi_maps != null ||
                 mapObject?.time != null ||
                 mapObject?.map_id != null ||
                 mapObject?.area_id != null ||
@@ -815,6 +874,7 @@ class AnthbotGenieAdapter extends AdapterBase {
                 ...(serviceState.area_time != null ? { area_time: serviceState.area_time } : {}),
                 ...(serviceState.map_time != null ? { map_time: serviceState.map_time } : {}),
                 ...(serviceState.map_tar_time != null ? { map_tar_time: serviceState.map_tar_time } : {}),
+                ...(serviceState.multi_maps != null ? { multi_maps: serviceState.multi_maps } : {}),
                 ...(mapObject ? { map: mapObject } : {}),
             };
             await this.applyPropertyState(context, propertyHint, `${source}-map-hint`);
@@ -827,6 +887,138 @@ class AnthbotGenieAdapter extends AdapterBase {
             _area_definition: context.areaDefinition || {},
             _rtk_satellite_info: context.rtkSatelliteInfo || null,
         });
+    }
+
+    async refreshMultiMap(context, selectedMultiMap) {
+        if (!selectedMultiMap?.fileName) return;
+
+        const md5 = selectedMultiMap.md5 || null;
+        if (md5 && context.multiMapInfo && context.lastMultiMapMd5 === md5) {
+            this.log.debug(
+                `Multi-map unchanged for ${context.device.serialNumber}: md5=${md5}; skipping download.`,
+            );
+            return;
+        }
+
+        if (
+            context.multiMapRefreshPromise &&
+            md5 &&
+            context.multiMapRefreshMd5 === md5
+        ) {
+            this.log.debug(
+                `Multi-map refresh already in progress for ${context.device.serialNumber}: md5=${md5}; skipping duplicate.`,
+            );
+            await context.multiMapRefreshPromise;
+            return;
+        }
+
+        const refreshPromise = (async () => {
+            try {
+                const multiMap = await this.cloudClient.getDeviceMultiMap(
+                    context.device.serialNumber,
+                    selectedMultiMap.fileName,
+                );
+                context.multiMapInfo = multiMap;
+                context.lastMultiMapMd5 = md5;
+                context.mapData = context.mapData || {};
+                context.mapData.multiMap = multiMap;
+                this.log.debug(
+                    `Loaded M9 multi-map for ${context.device.serialNumber}: ` +
+                    `${multiMap.width}x${multiMap.height}, md5=${md5 || 'none'}.`,
+                );
+            } catch (error) {
+                this.log.debug(`Multi-map refresh failed for ${context.device.serialNumber}: ${error.message}`);
+            }
+        })();
+
+        context.multiMapRefreshPromise = refreshPromise;
+        context.multiMapRefreshMd5 = md5;
+        try {
+            await refreshPromise;
+        } finally {
+            if (context.multiMapRefreshPromise === refreshPromise) {
+                context.multiMapRefreshPromise = null;
+                context.multiMapRefreshMd5 = null;
+            }
+        }
+    }
+
+    async refreshHistoryPath(context, propertyState) {
+        const status = generalMowerStatus(propertyState || {});
+        const rawMode = rawModeStatus(propertyState || {});
+        const activeModes = new Set([
+            'globalmowing', 'zonemowing', 'pointmowing', 'bordermowing',
+            'regionmowing', 'nestmowing', 'wastelandmowing', 'backtodock',
+            'mapping', 'position', 'resume_point', 'remotectrl', 'gototarget',
+        ]);
+        const activeStatuses = new Set([
+            'mowing', 'returning_to_dock', 'mapping', 'positioning',
+            'resuming', 'remote_control', 'going_to_target',
+        ]);
+        // M5/M9 service updates can deliver a fresh mode while robot_sta still
+        // contains the previous state (for example robot_sta=charge with
+        // mode=zonemowing). For live path requests, an explicit active mode
+        // therefore takes precedence over the stale generic robot status.
+        const active = Boolean(rawMode && activeModes.has(rawMode)) || activeStatuses.has(status);
+        const effectiveStatus = rawMode && activeModes.has(rawMode) ? `mode:${rawMode}` : status;
+        const now = Date.now();
+        const pathTime = typeof propertyState?.path_time === 'string' && propertyState.path_time
+            ? propertyState.path_time
+            : null;
+
+        // req_all_path is an IoT publish, not HTTP polling. With MQTT online we can
+        // ask the mower for its authoritative full path without increasing 429 risk.
+        if (active && context.shadowClient) {
+            const elapsed = now - Number(context.lastHistoryPathRequestAt || 0);
+            if (elapsed >= 10000) {
+                // Reserve the throttle slot before publishing so bursts from the property
+                // and service shadows cannot send duplicate requests concurrently.
+                context.lastHistoryPathRequestAt = now;
+                this.log.debug(
+                    `History path active for ${context.device.serialNumber}: ` +
+                    `status=${effectiveStatus}, mode=${rawMode || 'unknown'}; sending req_all_path.`,
+                );
+                try {
+                    await context.shadowClient.publishServiceCommand({ cmd: 'req_all_path', data: 1 });
+                    this.log.debug(`Sent req_all_path for ${context.device.serialNumber}.`);
+                } catch (error) {
+                    this.log.debug(`Full path request failed for ${context.device.serialNumber}: ${error.message}`);
+                }
+            }
+        }
+
+        // path_time is the upload-complete signal. Do not race the cloud file before it changes.
+        if (!pathTime || pathTime === context.lastHistoryPathTime || context.historyPathRefreshPromise) return;
+
+        context.historyPathRefreshPromise = (async () => {
+            try {
+                const directUrl = findHistoryPathUrl(propertyState, context.lastService || {});
+                const historyPath = await this.cloudClient.getDeviceHistoryPath(
+                    context.device.serialNumber,
+                    directUrl,
+                );
+                context.historyPath = historyPath;
+                context.lastHistoryPathTime = pathTime;
+                if (Array.isArray(historyPath?.points) && historyPath.points.length) {
+                    const taskId = context.pathHistory?.taskId || null;
+                    context.pathHistory = {
+                        taskId,
+                        packetPathId: historyPath.pathId || null,
+                        lastPacketSignature: null,
+                        points: historyPath.points.slice(-50000),
+                    };
+                    this.log.debug(
+                        `Loaded authoritative mowing path for ${context.device.serialNumber}: ` +
+                        `${historyPath.points.length} points (${historyPath.format}).`,
+                    );
+                }
+            } catch (error) {
+                this.log.debug(`History path refresh failed for ${context.device.serialNumber}: ${error.message}`);
+            } finally {
+                context.historyPathRefreshPromise = null;
+            }
+        })();
+        return context.historyPathRefreshPromise;
     }
 
     async refreshRtkSatelliteInfo(context, propertyState) {

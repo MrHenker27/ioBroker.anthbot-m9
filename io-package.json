@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "anthbot-m9",
-    "version": "0.3.7",
+    "version": "0.3.8",
     "news": {
       "0.3.1": {
         "en": "Stop storing the large Anthbot event-code translation table in the ioBroker state database and migrate it to a local cache file.",
@@ -301,5 +301,5 @@
       "native": {}
     }
   ],
-  "version": "0.3.7"
+  "version": "0.3.8"
 }

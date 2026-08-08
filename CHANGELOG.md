@@ -1,3 +1,17 @@
+## 0.3.8
+
+- Deduplicate overlapping `curpath` fragments by matching the largest existing-track suffix against the incoming-fragment prefix.
+- Keep track point indexes globally increasing while preserving the original fragment index as `packetIndex`.
+
+## 0.3.8 (2026-08-08)
+
+- Detect M5/M9 map changes from `multi_maps.map_list`, including archive filename and MD5.
+- Decode the app-style M5/M9 navigation raster and optional `rtk_mask_map` in addition to the existing map-manager geometry.
+- Request the authoritative full mowing path with `req_all_path` while active and reload it only after `path_time` changes.
+- Decode MGS historical path protocol versions 1, 2 and 3.
+- Convert firmware `pose.yaw` from milliradians to degrees before rendering Kevin.
+- Retry temporary STS network/500/502/503/504 failures after 1s/3s while never retrying 429/auth failures aggressively.
+
 ## 0.3.3 (2026-07-18)
 
 ## 0.3.7 (2026-07-18)
