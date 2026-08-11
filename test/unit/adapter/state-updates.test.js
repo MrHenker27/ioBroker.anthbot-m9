@@ -211,6 +211,73 @@ describe("lib/adapter/state-updates", () => {
         assert.equal(updates["diagnostics.network.simPresent"], true);
     });
 
+    it("keeps current mowing area and resolves the current manual zone separately", () => {
+        const now = new Date("2026-08-08T20:00:00.000Z");
+        const context = {
+            device: { alias: "Kevin", model: "Anthbot M9" },
+            region: { regionName: "eu-central-1" },
+            shadowClient: { iotEndpoint: "a.example.iot.eu-central-1.amazonaws.com" },
+            lastReported: {},
+            lastService: {},
+            areaDefinition: {
+                custom_areas: [{
+                    id: 100,
+                    name: "Zone 1",
+                    vertexs: [[-3498, -1161], [1438, -1161], [1438, 8818], [-3498, 8818]],
+                }],
+            },
+        };
+        const data = {
+            mode: { value: "zonemowing" },
+            mowing_area_new: { value: 42.5 },
+            curpath: { value: "" },
+            pose: { x: -0.84, y: 3.39, yaw: 0 },
+            _area_definition: context.areaDefinition,
+        };
+
+        const updates = buildDeviceStateUpdates({
+            context,
+            data,
+            eventCodeCache: null,
+            errorDescriptionLanguage: "English",
+            now,
+        });
+
+        assert.equal(updates["dashboard.currentArea"], 42.5);
+        assert.equal(updates["dashboard.currentZone"], "Zone 1");
+        assert.equal(updates["dashboard.currentZoneId"], 100);
+    });
+
+    it("does not resolve the dock origin as a zone while charging", () => {
+        const now = new Date("2026-08-08T20:00:00.000Z");
+        const context = {
+            device: { alias: "Kevin", model: "Anthbot M9" },
+            region: { regionName: "eu-central-1" },
+            shadowClient: { iotEndpoint: "a.example.iot.eu-central-1.amazonaws.com" },
+            lastReported: {},
+            lastService: {},
+            areaDefinition: {
+                custom_areas: [{
+                    id: 100,
+                    name: "Zone 1",
+                    vertexs: [[-3498, -1161], [1438, -1161], [1438, 8818], [-3498, 8818]],
+                }],
+            },
+        };
+        const data = { mode: { value: "charge" } };
+
+        const updates = buildDeviceStateUpdates({
+            context,
+            data,
+            eventCodeCache: null,
+            errorDescriptionLanguage: "English",
+            now,
+        });
+
+        assert.equal(updates["dashboard.currentZone"], "");
+        assert.equal(updates["dashboard.currentZoneId"], null);
+    });
+
     it("returns the same control fallback values used for write-state resets", () => {
         const data = {
             param_set: {

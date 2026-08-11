@@ -346,3 +346,61 @@ test('keeps divergent movement after packet index reset when it is not a known r
     const filtered = removeEmbeddedKnownReplaySequences(existing,incoming);
     assert.deepEqual(filtered.map(p=>p.x), [9,1,7,8]);
 });
+
+
+test('collapses the observed adjacent replay sequence across a curpath packet boundary', () => {
+    const context = {};
+    const data = {
+        mode: { value: 'zonemowing' },
+        mow_task: { mow_zone: { path_id: 1786468858618, state: 1 } },
+    };
+    const makePoint = (x, y, index) => ({
+        index,
+        x,
+        y,
+        xMetres: x / 100,
+        yMetres: y / 100,
+        metadata: 257,
+        type: 1,
+        flags: 1,
+    });
+
+    // Real live sequence observed on 2026-08-11. The first packet ends with
+    // A-B-C-D and the next packet repeats A-B-C-D verbatim before continuing.
+    const replay = [
+        [-74, 221],
+        [-73, 218],
+        [-73, 219],
+        [-73, 218],
+    ];
+
+    updateTrackHistory(context, {
+        header: { pathId: 'packet-a' },
+        points: [
+            makePoint(-80, 250, 0),
+            makePoint(-78, 238, 1),
+            ...replay.map(([x, y], index) => makePoint(x, y, index + 2)),
+        ],
+    }, data);
+
+    updateTrackHistory(context, {
+        header: { pathId: 'packet-b' },
+        points: [
+            ...replay.map(([x, y], index) => makePoint(x, y, index)),
+            makePoint(-72, 230, 4),
+            makePoint(-71, 242, 5),
+        ],
+    }, data);
+
+    const points = context.pathHistory.points;
+    const coords = points.map(point => [point.x, point.y]);
+
+    assert.deepEqual(coords, [
+        [-80, 250],
+        [-78, 238],
+        ...replay,
+        [-72, 230],
+        [-71, 242],
+    ]);
+    assert.deepEqual(points.map(point => point.index), points.map((_, index) => index));
+});

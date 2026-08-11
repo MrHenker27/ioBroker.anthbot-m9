@@ -30,6 +30,10 @@ const { buildRtkSkyplotHtml } = require('./lib/anthbot/rtk-skyplot-html');
 const { generalMowerStatus, rawModeStatus } = require('./lib/anthbot/payload');
 const { selectMultiMapEntry } = require('./lib/anthbot/multi-map');
 const { findHistoryPathUrl } = require('./lib/anthbot/history-path');
+const {
+    prepareCloudConnection,
+    waitForCommandConfirmation,
+} = require('./lib/anthbot/command-reliability');
 
 /**
  * @typedef {object} AnthbotAdapterConfig
@@ -174,7 +178,7 @@ class AnthbotGenieAdapter extends AdapterBase {
 
     async onReady() {
         this.unloaded = false;
-        this.log.debug('Anthbot M9 build marker: 0.3.8-final-20260808-r5');
+        this.log.debug('Anthbot M9 build marker: 0.3.9-beta14-reliability7-20260811');
         const config = this.anthbotConfig;
         this.http = axios.create({
             timeout: 15000,
@@ -614,6 +618,7 @@ class AnthbotGenieAdapter extends AdapterBase {
                 mapExport: existing?.mapExport || {},
                 mapExportDirectory: this.getMapExportDirectory(device.serialNumber),
                 zoneSelection: existing?.zoneSelection || { selected: '', lastResult: {} },
+                lastCommand: existing?.lastCommand || { name: '', state: '', sentAt: '', confirmedAt: '', error: '', connection: '' },
                 mqttClient: null,
                 mqttStatus: existing?.mqttStatus || {
                     state: 'disabled',
@@ -626,6 +631,7 @@ class AnthbotGenieAdapter extends AdapterBase {
             this.deviceContexts.set(device.serialNumber, context);
             this.deviceContextsByObjectRoot.set(objectRoot, context);
             await this.ensureDeviceObjects(context);
+            await this.setLastCommandState(context, {});
             await this.ensureDeviceMqtt(context);
         }
     }
@@ -1305,6 +1311,36 @@ class AnthbotGenieAdapter extends AdapterBase {
         return getControlFallbackValue(context.lastReported || {}, control, context);
     }
 
+    async setLastCommandState(context, patch) {
+        context.lastCommand = {
+            name: '', state: '', sentAt: '', confirmedAt: '', error: '', connection: '',
+            ...(context.lastCommand || {}),
+            ...(patch || {}),
+        };
+        const root = context.objectRoot;
+        await Promise.all([
+            this.setStateIfChanged(`${root}.info.lastCommand.name`, context.lastCommand.name || ''),
+            this.setStateIfChanged(`${root}.info.lastCommand.state`, context.lastCommand.state || ''),
+            this.setStateIfChanged(`${root}.info.lastCommand.sentAt`, context.lastCommand.sentAt || ''),
+            this.setStateIfChanged(`${root}.info.lastCommand.confirmedAt`, context.lastCommand.confirmedAt || ''),
+            this.setStateIfChanged(`${root}.info.lastCommand.error`, context.lastCommand.error || ''),
+            this.setStateIfChanged(`${root}.info.lastCommand.connection`, context.lastCommand.connection || ''),
+        ]);
+    }
+
+    commandNeedsWake(command) {
+        return new Set([
+            'mowing.startFullMap',
+            'mowing.startZone',
+            'mowing.startSelectedZone',
+            'mowing.startAutoZone',
+            'mowing.startNearCharger',
+            'mowing.startEdge',
+            'mowing.startPoint',
+            'docking.startReturn',
+        ]).has(command);
+    }
+
     async handleCommandState(context, command, value) {
         const shouldRun =
             value === true || value === 1 || value === 'true' || (typeof value === 'string' && value.trim() !== '');
@@ -1312,12 +1348,58 @@ class AnthbotGenieAdapter extends AdapterBase {
             return;
         }
 
-        await this.ensureDeviceIotCredentials(context);
-        const shouldRequestProperties = await this.executeCommand(context, command, value);
-        if (shouldRequestProperties) {
-            await context.shadowClient.requestAllProperties();
+        await this.setLastCommandState(context, {
+            name: command,
+            state: 'preparing',
+            sentAt: '',
+            confirmedAt: '',
+            error: '',
+            connection: '',
+        });
+
+        try {
+            await this.ensureDeviceIotCredentials(context);
+
+            if (this.commandNeedsWake(command)) {
+                const connection = await prepareCloudConnection(context);
+                await this.setLastCommandState(context, { connection: connection.source });
+                if (!connection.ok) {
+                    throw new AnthbotGenieError('Mower did not confirm a fresh cloud/MQTT connection');
+                }
+            }
+
+            await this.setLastCommandState(context, {
+                state: 'sent',
+                sentAt: new Date().toISOString(),
+            });
+            const shouldRequestProperties = await this.executeCommand(context, command, value);
+            await this.setLastCommandState(context, { state: 'cloudAccepted' });
+
+            if (shouldRequestProperties) {
+                await context.shadowClient.requestAllProperties();
+            }
+
+            const confirmation = await waitForCommandConfirmation(context, command);
+            if (!confirmation.supported) {
+                await this.setLastCommandState(context, { state: 'cloudAccepted' });
+            } else if (confirmation.unavailable) {
+                await this.setLastCommandState(context, { state: 'confirmationUnavailable' });
+            } else if (confirmation.confirmed) {
+                await this.setLastCommandState(context, {
+                    state: 'confirmed',
+                    confirmedAt: new Date().toISOString(),
+                });
+            } else {
+                await this.setLastCommandState(context, { state: 'timeout' });
+            }
+            await this.delay(250);
+        } catch (error) {
+            await this.setLastCommandState(context, {
+                state: 'failed',
+                error: error?.message || String(error),
+            });
+            throw error;
         }
-        await this.delay(1000);
     }
 
     async handleControlState(context, control, value) {

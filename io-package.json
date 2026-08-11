@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "anthbot-m9",
-    "version": "0.3.8",
+    "version": "0.3.9",
     "news": {
+      "0.3.9": {
+        "en": "Automatically resolve the mower's current manual zone from its live map position while preserving the existing current mowing area state.",
+        "de": "Ermittelt die aktuelle manuelle Zone des Mähers automatisch aus seiner Live-Kartenposition; der bestehende State für die aktuell gemähte Fläche bleibt unverändert.",
+        "ru": "Automatically resolve the mower's current manual zone from its live map position while preserving the existing current mowing area state.",
+        "pt": "Automatically resolve the mower's current manual zone from its live map position while preserving the existing current mowing area state.",
+        "nl": "Automatically resolve the mower's current manual zone from its live map position while preserving the existing current mowing area state.",
+        "fr": "Automatically resolve the mower's current manual zone from its live map position while preserving the existing current mowing area state.",
+        "it": "Automatically resolve the mower's current manual zone from its live map position while preserving the existing current mowing area state.",
+        "es": "Automatically resolve the mower's current manual zone from its live map position while preserving the existing current mowing area state.",
+        "pl": "Automatically resolve the mower's current manual zone from its live map position while preserving the existing current mowing area state.",
+        "uk": "Automatically resolve the mower's current manual zone from its live map position while preserving the existing current mowing area state.",
+        "zh-cn": "Automatically resolve the mower's current manual zone from its live map position while preserving the existing current mowing area state."
+      },
       "0.3.1": {
         "en": "Stop storing the large Anthbot event-code translation table in the ioBroker state database and migrate it to a local cache file.",
         "de": "Große Anthbot-Eventcode-Übersetzungstabelle wird nicht mehr in der ioBroker-State-Datenbank gespeichert, sondern in eine lokale Cache-Datei migriert.",
@@ -178,17 +191,17 @@
       }
     },
     "titleLang": {
-      "en": "Anthbot Genie",
-      "de": "Anthbot Genie",
-      "ru": "Anthbot Genie",
-      "pt": "Anthbot Genie",
-      "nl": "Anthbot Genie",
-      "fr": "Anthbot Genie",
-      "it": "Anthbot Genie",
-      "es": "Anthbot Genie",
-      "pl": "Anthbot Genie",
-      "uk": "Anthbot Genie",
-      "zh-cn": "Anthbot Genie"
+      "en": "Anthbot M9",
+      "de": "Anthbot M9",
+      "ru": "Anthbot M9",
+      "pt": "Anthbot M9",
+      "nl": "Anthbot M9",
+      "fr": "Anthbot M9",
+      "it": "Anthbot M9",
+      "es": "Anthbot M9",
+      "pl": "Anthbot M9",
+      "uk": "Anthbot M9",
+      "zh-cn": "Anthbot M9"
     },
     "desc": {
       "en": "Unofficial cloud adapter for Anthbot Genie robotic lawn mowers with telemetry, diagnostics, consumables, zones, and controls",
@@ -301,5 +314,5 @@
       "native": {}
     }
   ],
-  "version": "0.3.8"
+  "version": "0.3.9"
 }

@@ -205,5 +205,15 @@
   "GNSS last update": "GNSS last update",
   "GNSS raw candidates": "GNSS raw candidates",
   "GNSS and RTK diagnostics": "GNSS and RTK diagnostics",
-  "The NetRTK satellite view in the Anthbot app primarily describes the RTK base station. Kevin has his own GNSS receiver. The adapter therefore keeps base and mower values strictly separate. Live values are available below each device at diagnostics.gnss. Missing values are shown as unknown instead of being guessed.": "The NetRTK satellite view in the Anthbot app primarily describes the RTK base station. Kevin has his own GNSS receiver. The adapter therefore keeps base and mower values strictly separate. Live values are available below each device at diagnostics.gnss. Missing values are shown as unknown instead of being guessed."
+  "The NetRTK satellite view in the Anthbot app primarily describes the RTK base station. Kevin has his own GNSS receiver. The adapter therefore keeps base and mower values strictly separate. Live values are available below each device at diagnostics.gnss. Missing values are shown as unknown instead of being guessed.": "The NetRTK satellite view in the Anthbot app primarily describes the RTK base station. Kevin has his own GNSS receiver. The adapter therefore keeps base and mower values strictly separate. Live values are available below each device at diagnostics.gnss. Missing values are shown as unknown instead of being guessed.",
+  "Current manual zone": "Current manual zone",
+  "Current manual zone ID": "Current manual zone ID",
+  "Last command": "Last command",
+  "Command name": "Command name",
+  "Command state": "Command state",
+  "Command sent at": "Command sent at",
+  "Command confirmed at": "Command confirmed at",
+  "Command error": "Command error",
+  "Command connection": "Command connection",
+  "Current manual zone source": "Current manual zone source"
 }

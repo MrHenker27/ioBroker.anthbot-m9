@@ -1,3 +1,11 @@
+## 0.3.9 (2026-08-08)
+- Collapse exact adjacent 3+ point curpath replay sequences even when the duplicate straddles two packet boundaries; rename the ioBroker adapter tile to Anthbot M9.
+- Ignore `active_area` timestamps older than five minutes and fall back to live position geometry for `dashboard.currentZone`.
+
+- Added automatic manual-zone detection from the live M9 map pose.
+- Added `dashboard.currentZone` and `dashboard.currentZoneId`; the existing numeric `dashboard.currentArea` state remains the current mowing area in m².
+- Charging/dock position 0/0 is intentionally excluded from zone detection.
+
 ## 0.3.8
 
 - Deduplicate overlapping `curpath` fragments by matching the largest existing-track suffix against the incoming-fragment prefix.

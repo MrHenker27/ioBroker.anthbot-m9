@@ -205,5 +205,15 @@
   "GNSS last update": "Letzte GNSS-Aktualisierung",
   "GNSS raw candidates": "Gefundene GNSS-Rohfelder",
   "GNSS and RTK diagnostics": "GNSS- und RTK-Diagnose",
-  "The NetRTK satellite view in the Anthbot app primarily describes the RTK base station. Kevin has his own GNSS receiver. The adapter therefore keeps base and mower values strictly separate. Live values are available below each device at diagnostics.gnss. Missing values are shown as unknown instead of being guessed.": "Die NetRTK-Satellitenansicht der Anthbot-App beschreibt in erster Linie die RTK-Basisstation. Kevin besitzt einen eigenen GNSS-Empfänger. Der Adapter trennt deshalb die Werte der Basis und des Mähers strikt. Die Live-Werte stehen unter jedem Gerät in diagnostics.gnss. Fehlende Werte werden als unbekannt angezeigt und nicht erfunden."
+  "The NetRTK satellite view in the Anthbot app primarily describes the RTK base station. Kevin has his own GNSS receiver. The adapter therefore keeps base and mower values strictly separate. Live values are available below each device at diagnostics.gnss. Missing values are shown as unknown instead of being guessed.": "Die NetRTK-Satellitenansicht der Anthbot-App beschreibt in erster Linie die RTK-Basisstation. Kevin besitzt einen eigenen GNSS-Empfänger. Der Adapter trennt deshalb die Werte der Basis und des Mähers strikt. Die Live-Werte stehen unter jedem Gerät in diagnostics.gnss. Fehlende Werte werden als unbekannt angezeigt und nicht erfunden.",
+  "Current manual zone": "Aktuelle manuelle Zone",
+  "Current manual zone ID": "ID der aktuellen manuellen Zone",
+  "Last command": "Letzter Befehl",
+  "Command name": "Befehlsname",
+  "Command state": "Befehlsstatus",
+  "Command sent at": "Befehl gesendet am",
+  "Command confirmed at": "Befehl bestätigt am",
+  "Command error": "Befehlsfehler",
+  "Command connection": "Befehlsverbindung",
+  "Current manual zone source": "Quelle der aktuellen manuellen Zone"
 }
