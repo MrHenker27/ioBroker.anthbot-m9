@@ -94,6 +94,78 @@ describe("lib/anthbot clients", () => {
         assert.equal(credentials.expiresAt > Date.now(), true);
     });
 
+    it("includes structured IoT STS 401 payloads in the diagnostic error", async () => {
+        let calls = 0;
+        const client = new AnthbotCloudApiClient({
+            http: {
+                post: async () => {
+                    calls++;
+                    return {
+                        status: 401,
+                        data: { code: 10001, message: "token expired", detail: { reason: "unauthorized" } },
+                    };
+                },
+            },
+            host: "api.anthbot.com",
+            bearerToken: "Bearer token",
+        });
+
+        await assert.rejects(
+            () => client.getDeviceIotCredentials("SERIAL123"),
+            error => {
+                assert.ok(error instanceof Error);
+                assert.match(error.message, /IoT STS failed \(401\):/);
+                assert.match(error.message, /\"code\":10001/);
+                assert.match(error.message, /\"message\":\"token expired\"/);
+                return true;
+            },
+        );
+        assert.equal(calls, 1);
+    });
+
+    it("refreshes an expired account token once and retries IoT STS immediately", async () => {
+        let stsCalls = 0;
+        let refreshCalls = 0;
+        const client = new AnthbotCloudApiClient({
+            http: {
+                post: async (_url, _body, options) => {
+                    stsCalls++;
+                    if (stsCalls === 1) {
+                        assert.equal(options.headers.Authorization, "Bearer old-token");
+                        return { status: 401, data: { msg: "Token has expired", request_id: "req-1" } };
+                    }
+                    assert.equal(options.headers.Authorization, "Bearer new-token");
+                    return {
+                        status: 200,
+                        data: {
+                            code: 0,
+                            data: {
+                                access_key_id: "ASIA123",
+                                secret_access_key: "secret",
+                                session_token: "session",
+                                region_name: "eu-central-1",
+                                endpoint: "a.example.iot.eu-central-1.amazonaws.com",
+                                expiration: 3600,
+                            },
+                        },
+                    };
+                },
+            },
+            host: "api.anthbot.com",
+            bearerToken: "Bearer old-token",
+        });
+        client.setAuthRefreshHandler(async () => {
+            refreshCalls++;
+            client.bearerToken = "Bearer new-token";
+            client.authHeaders.Authorization = client.bearerToken;
+        });
+
+        const credentials = await client.getDeviceIotCredentials("SERIAL123");
+        assert.equal(credentials.accessKeyId, "ASIA123");
+        assert.equal(refreshCalls, 1);
+        assert.equal(stsCalls, 2);
+    });
+
     it("fetches the Anthbot event code version", async () => {
         const client = new AnthbotCloudApiClient({
             http: {

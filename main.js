@@ -178,7 +178,7 @@ class AnthbotGenieAdapter extends AdapterBase {
 
     async onReady() {
         this.unloaded = false;
-        this.log.debug('Anthbot M9 build marker: 0.3.9-beta14-reliability7-20260811');
+        this.log.debug('Anthbot M9 build marker: 0.3.9-beta14-reliability10-stsrefresh1-20260920');
         const config = this.anthbotConfig;
         this.http = axios.create({
             timeout: 15000,
@@ -195,6 +195,7 @@ class AnthbotGenieAdapter extends AdapterBase {
         }
 
         this.subscribeStates('*.commands.*');
+        this.subscribeStates('*.mowing.*');
         this.subscribeStates('*.controls.*');
         this.subscribeStates('*.consumable.*.reset');
 
@@ -547,6 +548,16 @@ class AnthbotGenieAdapter extends AdapterBase {
                 bearerToken: force ? null : this.authToken,
             });
         }
+        this.cloudClient.setAuthRefreshHandler(async () => {
+            this.log.info('Anthbot cloud token expired; refreshing account session before retrying IoT STS.');
+            this.authToken = await this.cloudClient.login({
+                username: config.username,
+                password: config.password,
+                areaCode: String(config.areaCode || '49'),
+            });
+            this.log.info('Anthbot cloud session refreshed successfully.');
+            return this.authToken;
+        });
         if (!this.authToken || force) {
             this.authToken = await this.cloudClient.login({
                 username: config.username,
@@ -1234,6 +1245,10 @@ class AnthbotGenieAdapter extends AdapterBase {
 
         const [objectRoot, section, ...commandParts] = parts;
         const command = commandParts.join('.');
+        const effectiveSection = section === 'mowing' && command === 'startSelectedZone' ? 'commands' : section;
+        const effectiveCommand = section === 'mowing' && command === 'startSelectedZone'
+            ? 'mowing.startSelectedZone'
+            : command;
         const context = this.deviceContextsByObjectRoot.get(objectRoot);
         if (!context) {
             this.log.warn(`No device context for state ${id}`);
@@ -1241,23 +1256,23 @@ class AnthbotGenieAdapter extends AdapterBase {
         }
 
         const localOnly =
-            (section === 'controls' &&
-                (command.startsWith('map.') || command === 'zoneSelection.selected')) ||
-            (section === 'commands' &&
-                ['map.clearTrack', 'map.saveSvg', 'map.createPng'].includes(command));
+            (effectiveSection === 'controls' &&
+                (effectiveCommand.startsWith('map.') || effectiveCommand === 'zoneSelection.selected')) ||
+            (effectiveSection === 'commands' &&
+                ['map.clearTrack', 'map.saveSvg', 'map.createPng'].includes(effectiveCommand));
 
         let commandError = null;
         try {
-            if (section === 'commands') {
-                await this.handleCommandState(context, command, state.val);
-            } else if (section === 'controls') {
-                await this.handleControlState(context, command, state.val);
-            } else if (section === 'consumable') {
-                await this.handleConsumableState(context, command, state.val);
+            if (effectiveSection === 'commands') {
+                await this.handleCommandState(context, effectiveCommand, state.val);
+            } else if (effectiveSection === 'controls') {
+                await this.handleControlState(context, effectiveCommand, state.val);
+            } else if (effectiveSection === 'consumable') {
+                await this.handleConsumableState(context, effectiveCommand, state.val);
             }
         } catch (error) {
             commandError = error;
-            if (section === 'commands' && command === 'mowing.startSelectedZone') {
+            if (effectiveSection === 'commands' && effectiveCommand === 'mowing.startSelectedZone') {
                 context.zoneSelection = context.zoneSelection || {};
                 context.zoneSelection.lastResult = {
                     ok: false,
@@ -1279,7 +1294,7 @@ class AnthbotGenieAdapter extends AdapterBase {
             } catch (refreshError) {
                 this.log.warn(`Post-command refresh failed for ${id}: ${refreshError.message}`);
             }
-            await this.resetWriteState(id, section, command, context);
+            await this.resetWriteState(id, effectiveSection, effectiveCommand, context);
         }
 
         if (commandError) {
